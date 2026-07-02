@@ -1,0 +1,26 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { badRequest, methodNotAllowed, ok, unauthorized } from '@/lib/api-response';
+import { requireTenantAdmin } from '@/lib/auth';
+import { checkTenantStellarWallet } from '@/services/stellar-wallet-service';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const tenantSlug = String(req.query.tenantSlug || '');
+
+  try {
+    if (req.method !== 'POST') {
+      return methodNotAllowed(res);
+    }
+
+    const auth = await requireTenantAdmin(req, tenantSlug);
+
+    if (!auth) {
+      return unauthorized(res);
+    }
+
+    const wallet = await checkTenantStellarWallet(tenantSlug);
+    return ok(res, wallet);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unable to check Stellar wallet.';
+    return badRequest(res, message);
+  }
+}

@@ -2,7 +2,7 @@
 
 CivicTrust is a production-focused city services platform for LGUs, barangays, municipalities, and provincial teams. It provides a modern public portal for citizens and a structured staff workspace for operations teams.
 
-The current build focuses on usability, clean information architecture, PostgreSQL deployment readiness, and a consistent CRUD workflow before adding Stellar payment features.
+The current build focuses on usability, clean information architecture, PostgreSQL deployment readiness, consistent CRUD workflows, and a real Stellar Testnet proof-of-payment module for civic service fees.
 
 ## Core Product
 
@@ -61,7 +61,12 @@ Set a PostgreSQL database URL:
 ```env
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require"
 ADMIN_JWT_SECRET="replace-this-with-a-long-secure-random-value"
+STELLAR_WALLET_ENCRYPTION_KEY="replace-this-with-another-long-secure-random-value"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
+STELLAR_NETWORK="TESTNET"
+STELLAR_HORIZON_URL="https://horizon-testnet.stellar.org"
+STELLAR_FRIENDBOT_URL="https://friendbot.stellar.org"
+STELLAR_NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
 ```
 
 Install and prepare the database:
@@ -132,9 +137,11 @@ npm run verify
 1. Create a hosted PostgreSQL database.
 2. Set `DATABASE_URL` in Vercel.
 3. Set `ADMIN_JWT_SECRET` in Vercel.
-4. Set `NEXT_PUBLIC_APP_URL` to your deployed URL.
-5. Deploy the project.
-6. Run database setup from your local terminal or deployment workflow:
+4. Set `STELLAR_WALLET_ENCRYPTION_KEY` in Vercel.
+5. Set `NEXT_PUBLIC_APP_URL` to your deployed URL.
+6. Keep Stellar Testnet variables enabled while testing.
+7. Deploy the project.
+8. Run database setup from your local terminal or deployment workflow:
 
 ```bash
 npm run db:push
@@ -151,7 +158,7 @@ components/           Reusable UI, public, layout, and admin components
 components/ui/        Standardized buttons, cards, inputs, selects, badges, stats
 pages/api/            REST API routes
 services/             Business/data access services
-lib/                  Shared auth, db, format, request, and reference helpers
+lib/                  Shared auth, db, format, request, reference, and Stellar helpers
 prisma/               Prisma schema and starter data
 scripts/              Build/setup helper scripts
 docs/                 Product, user, admin, deployment, and roadmap docs
@@ -161,16 +168,24 @@ docs/                 Product, user, admin, deployment, and roadmap docs
 
 The platform is designed to evolve into a Stellar-powered civic trust product. The strongest Stellar direction is proof-of-payment for government services, where service payments generate permanent transaction hashes and public receipts.
 
-Planned Stellar modules:
+Implemented Stellar module:
 
 - Service fee management
-- Tenant Stellar Testnet wallet settings
+- Tenant Stellar Testnet receiving wallet management
+- Real Testnet keypair generation
+- Friendbot funding
 - Payment intent records
-- SEP-7 payment QR generation
-- Transaction verification
-- Public receipt pages
+- SEP-7 payment URI and QR generation
+- Horizon transaction verification
+- Permanent public receipt pages
 - Staff payment dashboard
-- Civic rewards and budget transparency modules
+
+Future Stellar modules:
+
+- Civic participation rewards
+- Environmental cleanup incentives
+- Municipal budget transparency
+- Digital property tax receipts
 
 ## Documentation
 
@@ -206,8 +221,13 @@ GET  /api/tenant/[tenantSlug]/payments/[referenceCode]
 GET  /api/tenant/[tenantSlug]/payments/[referenceCode]/qr
 POST /api/tenant/[tenantSlug]/payments/[referenceCode]/verify
 GET  /api/tenant/[tenantSlug]/payments/export
+GET  /api/tenant/[tenantSlug]/stellar/wallet
+PATCH /api/tenant/[tenantSlug]/stellar/wallet
+POST /api/tenant/[tenantSlug]/stellar/wallet/generate
+POST /api/tenant/[tenantSlug]/stellar/wallet/fund
+POST /api/tenant/[tenantSlug]/stellar/wallet/check
 ```
 
-Staff can manage Stellar settings under **Admin → Settings** and service fees under **Admin → Content → Services**. Staff can review payment records under **Admin → Payments**.
+Staff can generate/fund/check real Testnet tenant wallets under **Admin → Settings**, manage service fees under **Admin → Content → Services**, and review verified payment records under **Admin → Payments**.
 
 See `docs/stellar-payment-implementation.md` for the full implementation guide.

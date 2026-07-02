@@ -16,7 +16,7 @@ const tenantConfigs = [
     email: 'citizen.services@metrocity.gov.ph',
     phone: '+63 2 8842 1100',
     primaryColor: '#2563eb',
-    stellarReceivingPublicKey: 'GBPIMUEJFYS7RT23QO2ACH2JMKGXLXZI4E5ACBSQMF32RKZ5H3SVNL5F',
+    stellarReceivingPublicKey: null,
     admin: { name: 'Operations Administrator', email: 'admin@metrocity.local' },
     citizen: { name: 'Sofia Cruz', email: 'sofia.cruz@metrocity.local', phone: '+63 917 428 1934' },
     departments: [
@@ -96,7 +96,7 @@ const tenantConfigs = [
     email: 'citizen.services@lagunaprovince.gov.ph',
     phone: '+63 49 530 1000',
     primaryColor: '#2563eb',
-    stellarReceivingPublicKey: 'GBPIMUEJFYS7RT23QO2ACH2JMKGXLXZI4E5ACBSQMF32RKZ5H3SVNL5F',
+    stellarReceivingPublicKey: null,
     admin: { name: 'Provincial Operations Administrator', email: 'admin@laguna.local' },
     citizen: { name: 'Ana Reyes', email: 'ana.reyes@laguna.local', phone: '+63 918 225 7741' },
     departments: [
@@ -166,11 +166,6 @@ async function main() {
         email: config.email,
         phone: config.phone,
         primaryColor: config.primaryColor,
-        stellarReceivingPublicKey: config.stellarReceivingPublicKey,
-        stellarNetwork: 'TESTNET',
-        stellarHorizonUrl: 'https://horizon-testnet.stellar.org',
-        stellarDefaultAssetCode: 'XLM',
-        stellarDefaultAssetIssuer: null,
         isActive: true
       },
       create: {
@@ -184,10 +179,15 @@ async function main() {
         phone: config.phone,
         primaryColor: config.primaryColor,
         stellarReceivingPublicKey: config.stellarReceivingPublicKey,
+        stellarReceivingSecretEncrypted: null,
         stellarNetwork: 'TESTNET',
+        stellarNetworkPassphrase: 'Test SDF Network ; September 2015',
         stellarHorizonUrl: 'https://horizon-testnet.stellar.org',
+        stellarFriendbotUrl: 'https://friendbot.stellar.org',
         stellarDefaultAssetCode: 'XLM',
         stellarDefaultAssetIssuer: null,
+        stellarWalletStatus: 'NOT_CONFIGURED',
+        stellarWalletError: null,
         isActive: true
       }
     });

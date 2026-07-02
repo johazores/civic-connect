@@ -1,129 +1,87 @@
-# StellarX Payment Implementation
+# Stellar Payment Implementation
 
-## Positioning
+The app implements the StellarX direction as a civic proof-of-payment module, not as a generic crypto payment product.
 
-CivicTrust remains a multitenant civic services platform. Stellar is used only as a trust layer for government service payments, receipt verification, and future civic reward/transparency modules.
+## Product position
 
-This implementation aligns with **Idea #76: Proof-of-Payment for Government Services**.
+CivicTrust helps LGUs, barangays, and communities digitize services while using Stellar for verifiable payment receipts, public records, and future civic incentive programs.
 
-## What is implemented
+The current implemented Stellar scope is **Idea #76: Proof-of-Payment for Government Services**.
 
-- Service fee fields on public services
-- Tenant-level Stellar Testnet payment settings
-- Tenant receiving wallet public key
-- Payment intent records
-- SEP-7 payment URI generation
-- QR code generation for the SEP-7 URI
-- Stellar Horizon transaction verification
-- Permanent transaction hash storage
-- Public receipt pages
-- Staff payment management dashboard
-- CSV export for payment records
+## Implemented capabilities
 
-## What the app does not do
+- Tenant-specific Stellar wallet configuration
+- Real Testnet wallet generation using `@stellar/stellar-sdk`
+- Friendbot account funding for Testnet
+- Server-side encrypted tenant secret storage
+- Service fee fields on services
+- Payment intent creation
+- SEP-7 payment URI and QR code generation
+- Horizon transaction verification
+- Permanent receipt page
+- Duplicate transaction prevention
+- Payment admin dashboard
+- Payment CSV export
 
-The app does **not**:
+## Why SEP-7
 
-- Store private keys
-- Sign transactions
-- Submit transactions for the citizen
-- Act as a wallet
-- Act as a generic crypto payment platform
-- Support donations, crowdfunding, DAO/voting, escrow, or NFTs
+SEP-7 allows this app to generate a payment request that the citizen opens in their own wallet. The app does not custody citizen funds and does not handle citizen private keys.
 
-Citizens complete payments with their own Stellar-compatible wallet. The platform only creates the payment request and verifies the resulting transaction.
+## Verification flow
 
-## Data model
+1. Citizen selects a payable civic service.
+2. The app creates a payment intent with a unique reference code.
+3. The reference code is used as the Stellar memo.
+4. The app generates a SEP-7 `web+stellar:pay` URI.
+5. The citizen signs and submits the payment in their own wallet.
+6. The app verifies the transaction through Horizon.
+7. If the destination, memo, amount, asset, and transaction status match, the payment becomes verified.
+8. The transaction hash is stored as the permanent receipt identifier.
 
-### Tenant
+## Security decisions
 
-Each tenant can configure:
+- Citizen private keys are never handled.
+- Tenant secret keys are never returned by APIs.
+- Tenant secret keys are encrypted with `STELLAR_WALLET_ENCRYPTION_KEY`.
+- Public APIs do not return encrypted tenant secrets.
+- Transaction hashes are unique to prevent duplicate processing.
+- Payment verification is based on Horizon records, not client-provided claims.
 
-- `stellarReceivingPublicKey`
-- `stellarNetwork`
-- `stellarHorizonUrl`
-- `stellarDefaultAssetCode`
-- `stellarDefaultAssetIssuer`
+## Files added
 
-### Service
+```text
+lib/stellar/config.ts
+lib/stellar/keys.ts
+lib/stellar/secure-secret.ts
+lib/stellar/sep7.ts
+lib/stellar/horizon.ts
+lib/stellar/verification.ts
+services/stellar-wallet-service.ts
+pages/api/tenant/[tenantSlug]/stellar/wallet/index.ts
+pages/api/tenant/[tenantSlug]/stellar/wallet/generate.ts
+pages/api/tenant/[tenantSlug]/stellar/wallet/fund.ts
+pages/api/tenant/[tenantSlug]/stellar/wallet/check.ts
+```
 
-Each service can configure:
+## Files updated
 
-- `paymentRequired`
-- `feeAmount`
-- `feeAssetCode`
-- `feeAssetIssuer`
-- `receivingPublicKey`
+```text
+prisma/schema.prisma
+prisma/seed.ts
+services/payment-service.ts
+components/admin/admin-dashboard.tsx
+components/public/payment-checkout.tsx
+.env.example
+README.md
+```
 
-If a service does not define its own receiving wallet, it uses the tenant receiving wallet.
+## Future Stellar extensions
 
-### PaymentIntent
+The module is separated so the app can later support:
 
-Each payment request stores:
+- Civic participation rewards
+- Environmental cleanup rewards
+- Municipal budget transparency
+- Digital property tax receipts
 
-- tenant
-- citizen, when signed in
-- service
-- payer details
-- amount and asset
-- destination wallet
-- memo/reference
-- SEP-7 URI
-- transaction hash
-- payer public key
-- ledger
-- paid/verified timestamps
-- status
-
-## User flow
-
-1. Citizen opens `/[tenant]/payments`.
-2. Citizen selects a paid service.
-3. App creates a payment intent with a unique reference code and memo.
-4. Citizen scans the QR code or opens the SEP-7 URI.
-5. Citizen pays from their Stellar-compatible Testnet wallet.
-6. Citizen pastes the transaction hash.
-7. App verifies the payment through Horizon.
-8. App stores the transaction hash and ledger details.
-9. Citizen can open `/[tenant]/receipts/[referenceCode]` as a public receipt.
-
-## Staff flow
-
-1. Staff opens the admin dashboard.
-2. Staff selects the **Payments** tab.
-3. Staff can search/filter Stellar payment records.
-4. Staff can open payment pages or public receipts.
-5. Staff can export payment records to CSV.
-6. Staff can configure Stellar settings under **Settings**.
-7. Staff can configure service fees under **Content → Services**.
-
-## Testnet setup
-
-For local or Vercel testing:
-
-1. Create or choose a Stellar Testnet receiving account.
-2. Fund it using the Stellar Testnet Friendbot or Stellar Lab.
-3. Add the public key to tenant settings.
-4. Keep the network as `TESTNET`.
-5. Keep the Horizon URL as `https://horizon-testnet.stellar.org`.
-
-## Verification rules
-
-A payment verifies only when Horizon confirms:
-
-- transaction exists
-- transaction is successful
-- memo matches the payment reference
-- a payment operation exists
-- destination matches the configured receiving wallet
-- amount matches the service fee
-- asset matches the expected asset
-
-## Future-ready modules
-
-The payment module is isolated so later StellarX ideas can reuse the same tenant-aware trust infrastructure:
-
-- Civic Participation Rewards
-- Environmental Cleanup Rewards
-- Municipal Budget Transparency
-- Digital Property Tax Receipts
+These should be added as civic workflows, not generic crypto features.

@@ -36,3 +36,20 @@ npm run db:seed
 - Review service content, hotlines, news, categories, and departments.
 - Add real file storage before heavy production usage.
 - Configure observability and error reporting.
+
+## Stellar Testnet Environment Variables
+
+For real Stellar Testnet payments, set these in Vercel in addition to `DATABASE_URL` and `ADMIN_JWT_SECRET`:
+
+```env
+STELLAR_WALLET_ENCRYPTION_KEY="long-random-secret"
+STELLAR_NETWORK="TESTNET"
+STELLAR_HORIZON_URL="https://horizon-testnet.stellar.org"
+STELLAR_FRIENDBOT_URL="https://friendbot.stellar.org"
+STELLAR_NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
+NEXT_PUBLIC_APP_URL="https://your-vercel-domain.vercel.app"
+```
+
+After deploy, log in to each tenant admin portal and generate or import that tenant's receiving wallet under **Settings → Real Stellar Testnet wallet**.
+
+Do not set Mainnet values until the app has gone through policy, compliance, security, and accounting review.

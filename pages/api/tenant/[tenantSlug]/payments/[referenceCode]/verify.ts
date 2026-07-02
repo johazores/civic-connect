@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { badRequest, methodNotAllowed, ok, serverError } from '@/lib/api-response';
-import { asString, hasRequiredStrings } from '@/lib/request';
+import { badRequest, methodNotAllowed, ok } from '@/lib/api-response';
+import { asOptionalString, asString } from '@/lib/request';
 import { verifyPaymentIntent } from '@/services/payment-service';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -13,12 +13,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const body = req.body || {};
-
-    if (!hasRequiredStrings(body, ['transactionHash'])) {
-      return badRequest(res, 'Transaction hash is required.');
-    }
-
-    const paymentIntent = await verifyPaymentIntent(tenantSlug, referenceCode, asString(body.transactionHash));
+    const transactionHash = asOptionalString(body.transactionHash);
+    const mode = asString(body.mode, transactionHash ? 'hash' : 'scan') === 'hash' ? 'hash' : 'scan';
+    const paymentIntent = await verifyPaymentIntent(tenantSlug, referenceCode, transactionHash, mode);
 
     return ok(res, paymentIntent);
   } catch (error) {

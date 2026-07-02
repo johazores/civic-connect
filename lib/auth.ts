@@ -5,6 +5,33 @@ import { prisma } from '@/lib/db';
 const adminCookieName = 'civic_token';
 const citizenCookieName = 'civic_citizen_token';
 
+export const safeTenantSelect = {
+  id: true,
+  slug: true,
+  name: true,
+  cityName: true,
+  tagline: true,
+  description: true,
+  address: true,
+  email: true,
+  phone: true,
+  primaryColor: true,
+  stellarReceivingPublicKey: true,
+  stellarNetwork: true,
+  stellarNetworkPassphrase: true,
+  stellarHorizonUrl: true,
+  stellarFriendbotUrl: true,
+  stellarDefaultAssetCode: true,
+  stellarDefaultAssetIssuer: true,
+  stellarWalletStatus: true,
+  stellarWalletLastCheckedAt: true,
+  stellarWalletLastFundedAt: true,
+  stellarWalletError: true,
+  isActive: true,
+  createdAt: true,
+  updatedAt: true
+};
+
 export type AuthUser = {
   id: string;
   tenantId: string;
@@ -145,7 +172,8 @@ export async function requireTenantAdmin(req: NextApiRequest, tenantSlug: string
       id: user.tenantId,
       slug: tenantSlug,
       isActive: true
-    }
+    },
+    select: safeTenantSelect
   });
 
   if (!tenant) {
@@ -167,7 +195,8 @@ export async function requireTenantCitizen(req: NextApiRequest, tenantSlug: stri
       id: citizen.tenantId,
       slug: tenantSlug,
       isActive: true
-    }
+    },
+    select: safeTenantSelect
   });
 
   if (!tenant) {

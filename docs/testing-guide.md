@@ -79,3 +79,20 @@ For each content type, create, edit, archive, and refresh:
 1. Create or edit records in `/metro-city/admin`.
 2. Open `/laguna-province/admin`.
 3. Confirm the records are isolated by tenant.
+
+## Real Stellar Testnet Payment Test
+
+1. Start the app with a real PostgreSQL database.
+2. Log in as staff.
+3. Open **Settings**.
+4. Click **Generate Testnet Wallet**.
+5. Click **Check Horizon Status** and confirm the wallet has an XLM balance.
+6. Open **Content → Services** and confirm at least one service requires Stellar payment and has a fee.
+7. Open the public `/payments` page.
+8. Create a payment intent.
+9. Scan the QR code or open the SEP-7 URI in a Stellar wallet configured for Testnet.
+10. Submit the wallet transaction.
+11. Paste the transaction hash and verify, or click **Scan Horizon by memo**.
+12. Confirm the payment changes to `VERIFIED`.
+13. Open the receipt page and confirm the hash, ledger, amount, and memo are shown.
+14. Try using the same transaction hash on another payment intent and confirm it is blocked.

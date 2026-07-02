@@ -1,11 +1,13 @@
 import { prisma } from '@/lib/db';
+import { safeTenantSelect } from '@/lib/auth';
 
 export async function getTenantBySlug(slug: string) {
   return prisma.tenant.findFirst({
     where: {
       slug,
       isActive: true
-    }
+    },
+    select: safeTenantSelect
   });
 }
 

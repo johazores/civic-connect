@@ -1,6 +1,14 @@
 import { prisma } from '@/lib/db';
+import { safeTenantSelect } from '@/lib/auth';
 import { createPaymentReferenceCode } from '@/lib/payment-reference';
-import { buildSep7PayUri, isValidStellarPublicKey, normalizeStellarAmount, verifyStellarPayment } from '@/lib/stellar';
+import {
+  buildSep7PayUri,
+  findAndVerifyStellarPayment,
+  isValidStellarPublicKey,
+  normalizeStellarAmount,
+  resolveStellarNetworkConfig,
+  verifyStellarPaymentByHash
+} from '@/lib/stellar';
 
 export type CreatePaymentIntentInput = {
   tenantSlug: string;
@@ -22,7 +30,7 @@ export async function getPaymentIntentByReference(tenantSlug: string, referenceC
       }
     },
     include: {
-      tenant: true,
+      tenant: { select: safeTenantSelect },
       service: true,
       citizen: {
         select: { id: true, name: true, email: true, phone: true }
@@ -65,7 +73,7 @@ export async function createPaymentIntent(input: CreatePaymentIntentInput) {
   const destinationPublicKey = service.receivingPublicKey || tenant.stellarReceivingPublicKey;
 
   if (!isValidStellarPublicKey(destinationPublicKey)) {
-    throw new Error('The receiving Stellar Testnet wallet is not configured for this service.');
+    throw new Error('The receiving Stellar wallet is not configured for this service.');
   }
 
   const assetCode = service.feeAssetCode || tenant.stellarDefaultAssetCode || 'XLM';
@@ -75,6 +83,12 @@ export async function createPaymentIntent(input: CreatePaymentIntentInput) {
     throw new Error('A non-XLM Stellar asset requires a valid asset issuer public key.');
   }
 
+  const config = resolveStellarNetworkConfig({
+    network: tenant.stellarNetwork,
+    horizonUrl: tenant.stellarHorizonUrl,
+    friendbotUrl: tenant.stellarFriendbotUrl,
+    networkPassphrase: tenant.stellarNetworkPassphrase
+  });
   const referenceCode = await createUniquePaymentReferenceCode();
   const memo = referenceCode;
   const normalizedAmount = normalizeStellarAmount(amount);
@@ -89,6 +103,7 @@ export async function createPaymentIntent(input: CreatePaymentIntentInput) {
     memo,
     callbackUrl: receiptUrl,
     originDomain,
+    networkPassphrase: config.networkPassphrase,
     message: `${tenant.cityName} service fee: ${service.title} (${referenceCode})`
   });
 
@@ -110,7 +125,7 @@ export async function createPaymentIntent(input: CreatePaymentIntentInput) {
       expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24)
     },
     include: {
-      tenant: true,
+      tenant: { select: safeTenantSelect },
       service: true
     }
   });
@@ -129,7 +144,9 @@ async function createUniquePaymentReferenceCode() {
   throw new Error('Unable to generate a unique payment reference.');
 }
 
-export async function verifyPaymentIntent(tenantSlug: string, referenceCode: string, transactionHash: string) {
+type VerifyMode = 'hash' | 'scan';
+
+export async function verifyPaymentIntent(tenantSlug: string, referenceCode: string, transactionHash?: string | null, mode: VerifyMode = transactionHash ? 'hash' : 'scan') {
   const paymentIntent = await getPaymentIntentByReference(tenantSlug, referenceCode);
 
   if (!paymentIntent) {
@@ -140,30 +157,83 @@ export async function verifyPaymentIntent(tenantSlug: string, referenceCode: str
     return paymentIntent;
   }
 
-  const result = await verifyStellarPayment({
+  if (paymentIntent.expiresAt && paymentIntent.expiresAt.getTime() < Date.now()) {
+    return prisma.paymentIntent.update({
+      where: { id: paymentIntent.id },
+      data: {
+        status: 'EXPIRED',
+        failureReason: 'This payment request has expired. Create a new payment request before paying.',
+        lastVerificationAt: new Date(),
+        verificationAttempts: { increment: 1 }
+      },
+      include: paymentInclude
+    });
+  }
+
+  const cleanHash = transactionHash?.trim() || null;
+
+  if (cleanHash) {
+    const existingHash = await prisma.paymentIntent.findUnique({ where: { transactionHash: cleanHash } });
+
+    if (existingHash && existingHash.id !== paymentIntent.id) {
+      return prisma.paymentIntent.update({
+        where: { id: paymentIntent.id },
+        data: {
+          failureReason: 'This Stellar transaction hash has already been used by another payment receipt.',
+          lastSubmittedTransactionHash: cleanHash,
+          lastVerificationAt: new Date(),
+          verificationAttempts: { increment: 1 }
+        },
+        include: paymentInclude
+      });
+    }
+  }
+
+  const verificationInput = {
     horizonUrl: paymentIntent.tenant.stellarHorizonUrl,
-    transactionHash,
+    transactionHash: cleanHash,
     destinationPublicKey: paymentIntent.destinationPublicKey,
     amount: normalizeStellarAmount(String(paymentIntent.amount)),
     assetCode: paymentIntent.assetCode,
     assetIssuer: paymentIntent.assetIssuer,
     memo: paymentIntent.memo
-  });
+  };
+
+  const result = mode === 'hash'
+    ? await verifyStellarPaymentByHash(verificationInput)
+    : await findAndVerifyStellarPayment(verificationInput);
 
   if (!result.verified) {
+    const nextStatus = result.transactionFound && result.transactionSuccessful === false ? 'FAILED' : 'PENDING';
+
     return prisma.paymentIntent.update({
       where: { id: paymentIntent.id },
       data: {
-        status: 'FAILED',
-        transactionHash: transactionHash.trim() || null,
-        failureReason: result.failureReason || 'Unable to verify Stellar payment.'
+        status: nextStatus,
+        lastSubmittedTransactionHash: cleanHash,
+        failureReason: result.failureReason || 'Unable to verify Stellar payment yet.',
+        lastVerificationAt: new Date(),
+        verificationAttempts: { increment: 1 }
       },
-      include: {
-        tenant: true,
-        service: true,
-        citizen: { select: { id: true, name: true, email: true, phone: true } }
-      }
+      include: paymentInclude
     });
+  }
+
+  if (result.transactionHash) {
+    const existingHash = await prisma.paymentIntent.findUnique({ where: { transactionHash: result.transactionHash } });
+
+    if (existingHash && existingHash.id !== paymentIntent.id) {
+      return prisma.paymentIntent.update({
+        where: { id: paymentIntent.id },
+        data: {
+          failureReason: 'This Stellar transaction hash has already been used by another payment receipt.',
+          lastSubmittedTransactionHash: result.transactionHash,
+          lastVerificationAt: new Date(),
+          verificationAttempts: { increment: 1 }
+        },
+        include: paymentInclude
+      });
+    }
   }
 
   return prisma.paymentIntent.update({
@@ -171,19 +241,25 @@ export async function verifyPaymentIntent(tenantSlug: string, referenceCode: str
     data: {
       status: 'VERIFIED',
       transactionHash: result.transactionHash,
+      paymentOperationId: result.paymentOperationId,
       payerPublicKey: result.payerPublicKey,
       ledger: result.ledger,
       failureReason: null,
+      lastSubmittedTransactionHash: result.transactionHash || cleanHash,
+      lastVerificationAt: new Date(),
+      verificationAttempts: { increment: 1 },
       paidAt: result.paidAt ? new Date(result.paidAt) : new Date(),
       verifiedAt: new Date()
     },
-    include: {
-      tenant: true,
-      service: true,
-      citizen: { select: { id: true, name: true, email: true, phone: true } }
-    }
+    include: paymentInclude
   });
 }
+
+const paymentInclude = {
+  tenant: { select: safeTenantSelect },
+  service: true,
+  citizen: { select: { id: true, name: true, email: true, phone: true } }
+};
 
 export async function getPaymentStats(tenantId: string) {
   const [total, pending, verified, failed] = await Promise.all([

@@ -36,6 +36,15 @@ enum PaymentStatus {
   EXPIRED
 }
 
+enum StellarWalletStatus {
+  NOT_CONFIGURED
+  GENERATED
+  IMPORTED
+  FUNDED
+  ACTIVE
+  ERROR
+}
+
 model Tenant {
   id          String   @id @default(cuid())
   slug        String   @unique
@@ -48,10 +57,17 @@ model Tenant {
   phone       String?
   primaryColor String  @default("#1f6feb")
   stellarReceivingPublicKey String?
+  stellarReceivingSecretEncrypted String?
   stellarNetwork String @default("TESTNET")
+  stellarNetworkPassphrase String @default("Test SDF Network ; September 2015")
   stellarHorizonUrl String @default("https://horizon-testnet.stellar.org")
+  stellarFriendbotUrl String @default("https://friendbot.stellar.org")
   stellarDefaultAssetCode String @default("XLM")
   stellarDefaultAssetIssuer String?
+  stellarWalletStatus StellarWalletStatus @default(NOT_CONFIGURED)
+  stellarWalletLastCheckedAt DateTime?
+  stellarWalletLastFundedAt DateTime?
+  stellarWalletError String?
   isActive    Boolean @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -238,9 +254,13 @@ model PaymentIntent {
   sep7Uri String
   status PaymentStatus @default(PENDING)
   transactionHash String? @unique
+  paymentOperationId String? @unique
   payerPublicKey String?
   ledger Int?
   failureReason String?
+  lastSubmittedTransactionHash String?
+  verificationAttempts Int @default(0)
+  lastVerificationAt DateTime?
   paidAt DateTime?
   verifiedAt DateTime?
   expiresAt DateTime?

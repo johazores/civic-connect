@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { badRequest, methodNotAllowed, ok, serverError, unauthorized } from '@/lib/api-response';
-import { requireTenantAdmin } from '@/lib/auth';
+import { requireTenantAdmin, safeTenantSelect } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { asOptionalString, asString, hasRequiredStrings } from '@/lib/request';
 
@@ -36,12 +36,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           email: asOptionalString(body.email),
           phone: asOptionalString(body.phone),
           primaryColor: asString(body.primaryColor, auth.tenant.primaryColor),
-          stellarReceivingPublicKey: asOptionalString(body.stellarReceivingPublicKey),
-          stellarNetwork: asString(body.stellarNetwork, 'TESTNET') || 'TESTNET',
-          stellarHorizonUrl: asString(body.stellarHorizonUrl, 'https://horizon-testnet.stellar.org') || 'https://horizon-testnet.stellar.org',
           stellarDefaultAssetCode: asString(body.stellarDefaultAssetCode, 'XLM') || 'XLM',
           stellarDefaultAssetIssuer: asOptionalString(body.stellarDefaultAssetIssuer)
-        }
+        },
+        select: safeTenantSelect
       });
 
       return ok(res, tenant);

@@ -32,15 +32,15 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
   const [error, setError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
 
-  async function verifyPayment(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function verifyPayment(event?: React.FormEvent<HTMLFormElement>, mode: 'hash' | 'scan' = 'hash') {
+    event?.preventDefault();
     setError('');
     setIsVerifying(true);
 
     const response = await fetch(`/api/tenant/${tenantSlug}/payments/${payment.referenceCode}/verify`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transactionHash })
+      body: JSON.stringify(mode === 'hash' ? { transactionHash, mode } : { mode })
     });
     const payload = await response.json();
 
@@ -126,14 +126,19 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
             </a>
           </div>
         ) : (
-          <form onSubmit={verifyPayment} className="mt-6 grid gap-4 rounded-[1.5rem] bg-slate-50 p-5 ring-1 ring-slate-100">
+          <form onSubmit={(event) => verifyPayment(event, 'hash')} className="mt-6 grid gap-4 rounded-[1.5rem] bg-slate-50 p-5 ring-1 ring-slate-100">
             <div>
               <label className="text-sm font-extrabold text-slate-700">Transaction hash</label>
               <Input required value={transactionHash} onChange={(event) => setTransactionHash(event.target.value)} placeholder="Paste the Stellar transaction hash after payment" />
             </div>
             {payment.failureReason ? <p className="rounded-2xl bg-rose-50 p-4 text-sm font-bold text-rose-700 ring-1 ring-rose-200">{payment.failureReason}</p> : null}
             {error ? <p className="rounded-2xl bg-rose-50 p-4 text-sm font-bold text-rose-700 ring-1 ring-rose-200">{error}</p> : null}
-            <Button disabled={isVerifying}>{isVerifying ? 'Verifying on Horizon...' : 'Verify Stellar transaction'}</Button>
+            <div className="flex flex-wrap gap-2">
+              <Button disabled={isVerifying}>{isVerifying ? 'Verifying on Horizon...' : 'Verify by transaction hash'}</Button>
+              <button type="button" disabled={isVerifying} onClick={() => verifyPayment(undefined, 'scan')} className="rounded-2xl px-5 py-3 text-sm font-extrabold btn-secondary disabled:opacity-60">
+                Scan Horizon by memo
+              </button>
+            </div>
           </form>
         )}
       </Card>

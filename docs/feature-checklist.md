@@ -49,15 +49,17 @@
 - TypeScript checks: implemented
 - Production build: implemented
 
-## Planned Stellar Layer
+## Implemented Stellar Layer
 
-- Service fees: planned
-- Tenant Stellar wallet settings: planned
-- Payment intents: planned
-- SEP-7 payment QR: planned
-- Transaction verification: planned
-- Public receipt page: planned
-- Staff payment dashboard: planned
+- Service fees: implemented
+- Tenant Stellar wallet settings: implemented
+- Real Testnet account generation: implemented
+- Friendbot Testnet funding: implemented
+- Payment intents: implemented
+- SEP-7 payment URI and QR: implemented
+- Horizon transaction verification: implemented
+- Public receipt page: implemented
+- Staff payment dashboard: implemented
 
 ## StellarX Proof-of-Payment Coverage
 
@@ -72,3 +74,12 @@
 - [x] Admin payment dashboard
 - [x] Payment CSV export
 - [x] Architecture kept separate from reports/content modules
+
+- [x] Real Stellar Testnet account generation using Stellar SDK
+- [x] Friendbot funding for tenant Testnet wallets
+- [x] Encrypted server-side tenant secret storage
+- [x] Secret keys never returned by wallet APIs
+- [x] Payment verification by pasted transaction hash
+- [x] Payment verification by Horizon memo scan
+- [x] Duplicate transaction hash prevention
+- [x] Pending/failed/expired/verified payment handling

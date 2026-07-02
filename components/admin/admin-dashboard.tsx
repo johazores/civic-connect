@@ -30,9 +30,15 @@ type TenantSettings = {
   primaryColor: string;
   stellarReceivingPublicKey: string | null;
   stellarNetwork: string;
+  stellarNetworkPassphrase: string;
   stellarHorizonUrl: string;
+  stellarFriendbotUrl: string;
   stellarDefaultAssetCode: string;
   stellarDefaultAssetIssuer: string | null;
+  stellarWalletStatus: string;
+  stellarWalletLastCheckedAt: string | null;
+  stellarWalletLastFundedAt: string | null;
+  stellarWalletError: string | null;
 };
 
 type AdminReport = {
@@ -1029,6 +1035,174 @@ function ContentStudio({
   );
 }
 
+
+type StellarWallet = {
+  tenantId: string;
+  network: string;
+  networkPassphrase: string;
+  horizonUrl: string;
+  friendbotUrl: string | null;
+  receivingPublicKey: string | null;
+  hasStoredSecret: boolean;
+  status: string;
+  balances: Array<{ assetType: string; assetCode: string; balance: string }>;
+  lastCheckedAt: string | null;
+  lastFundedAt: string | null;
+  error: string | null;
+};
+
+function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
+  const [wallet, setWallet] = useState<StellarWallet | null>(null);
+  const [publicKey, setPublicKey] = useState('');
+  const [secretKey, setSecretKey] = useState('');
+  const [network, setNetwork] = useState('TESTNET');
+  const [horizonUrl, setHorizonUrl] = useState('https://horizon-testnet.stellar.org');
+  const [friendbotUrl, setFriendbotUrl] = useState('https://friendbot.stellar.org');
+  const [networkPassphrase, setNetworkPassphrase] = useState('Test SDF Network ; September 2015');
+  const [isBusy, setIsBusy] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  function syncWallet(nextWallet: StellarWallet) {
+    setWallet(nextWallet);
+    setPublicKey(nextWallet.receivingPublicKey || '');
+    setNetwork(nextWallet.network || 'TESTNET');
+    setHorizonUrl(nextWallet.horizonUrl || 'https://horizon-testnet.stellar.org');
+    setFriendbotUrl(nextWallet.friendbotUrl || 'https://friendbot.stellar.org');
+    setNetworkPassphrase(nextWallet.networkPassphrase || 'Test SDF Network ; September 2015');
+    setSecretKey('');
+  }
+
+  async function loadWallet() {
+    setError('');
+    const response = await fetch(`/api/tenant/${tenantSlug}/stellar/wallet`);
+    const payload = await response.json();
+
+    if (!response.ok) {
+      setError(payload.error || 'Unable to load Stellar wallet settings.');
+      return;
+    }
+
+    syncWallet(payload.data);
+  }
+
+  useEffect(() => {
+    loadWallet();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tenantSlug]);
+
+  async function walletAction(path: string, body?: Record<string, unknown>, message = 'Wallet updated.') {
+    setIsBusy(true);
+    setError('');
+    setSuccess('');
+
+    const response = await fetch(`/api/tenant/${tenantSlug}/stellar/wallet${path}`, {
+      method: path ? 'POST' : 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body || {})
+    });
+    const payload = await response.json();
+
+    if (!response.ok) {
+      setError(payload.error || 'Unable to update Stellar wallet.');
+      setIsBusy(false);
+      return;
+    }
+
+    syncWallet(payload.data);
+    setSuccess(message);
+    setIsBusy(false);
+  }
+
+  return (
+    <div className="rounded-[1.5rem] bg-blue-50/70 p-5 ring-1 ring-blue-100">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--brand)]">Real Stellar Testnet wallet</p>
+          <h3 className="mt-2 text-xl font-extrabold text-slate-950">Tenant receiving wallet</h3>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+            Generate or import a tenant wallet for real Testnet payments. Secret keys are encrypted server-side and never returned by the API.
+          </p>
+        </div>
+        <span className="rounded-full bg-white px-4 py-2 text-xs font-extrabold text-slate-700 ring-1 ring-slate-200">
+          {wallet?.status ? niceLabel(wallet.status) : 'Loading'}
+        </span>
+      </div>
+
+      {error ? <p className="mt-4 rounded-2xl bg-rose-50 p-4 text-sm font-bold text-rose-700 ring-1 ring-rose-200">{error}</p> : null}
+      {success ? <p className="mt-4 rounded-2xl bg-emerald-50 p-4 text-sm font-bold text-emerald-700 ring-1 ring-emerald-200">{success}</p> : null}
+      {wallet?.error ? <p className="mt-4 rounded-2xl bg-amber-50 p-4 text-sm font-bold text-amber-800 ring-1 ring-amber-200">{wallet.error}</p> : null}
+
+      <div className="mt-5 grid gap-4 md:grid-cols-3">
+        <InfoPanel label="Network" value={wallet?.network || network} note="Configured network" />
+        <InfoPanel label="Stored secret" value={wallet?.hasStoredSecret ? 'Encrypted' : 'Not stored'} note="Never exposed to clients" />
+        <InfoPanel label="Last checked" value={wallet?.lastCheckedAt ? formatDate(wallet.lastCheckedAt) : 'Not checked'} note={wallet?.lastFundedAt ? `Funded ${formatDate(wallet.lastFundedAt)}` : 'Friendbot available on Testnet'} />
+      </div>
+
+      {wallet?.balances?.length ? (
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          {wallet.balances.map((balance, index) => (
+            <div key={`${balance.assetCode}-${index}`} className="rounded-2xl bg-white p-4 ring-1 ring-blue-100">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">{balance.assetCode || balance.assetType}</p>
+              <p className="mt-1 text-2xl font-extrabold text-slate-950">{balance.balance}</p>
+            </div>
+          ))}
+        </div>
+      ) : null}
+
+      <div className="mt-5 grid gap-4">
+        <div>
+          <label className="text-sm font-extrabold text-slate-700">Receiving public key</label>
+          <Input value={publicKey} onChange={(event) => setPublicKey(event.target.value)} placeholder="G..." />
+        </div>
+        <div>
+          <label className="text-sm font-extrabold text-slate-700">Secret key import</label>
+          <Input type="password" value={secretKey} onChange={(event) => setSecretKey(event.target.value)} placeholder="S... only needed when importing an existing Testnet wallet" />
+          <p className="mt-2 text-xs font-semibold text-slate-500">Leave blank to keep the current encrypted secret.</p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="text-sm font-extrabold text-slate-700">Network</label>
+            <Select value={network} onChange={(event) => setNetwork(event.target.value)}>
+              <option value="TESTNET">Testnet</option>
+              <option value="MAINNET">Mainnet-ready config</option>
+            </Select>
+          </div>
+          <div>
+            <label className="text-sm font-extrabold text-slate-700">Network passphrase</label>
+            <Input value={networkPassphrase} onChange={(event) => setNetworkPassphrase(event.target.value)} />
+          </div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="text-sm font-extrabold text-slate-700">Horizon URL</label>
+            <Input value={horizonUrl} onChange={(event) => setHorizonUrl(event.target.value)} />
+          </div>
+          <div>
+            <label className="text-sm font-extrabold text-slate-700">Friendbot URL</label>
+            <Input value={friendbotUrl} onChange={(event) => setFriendbotUrl(event.target.value)} />
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-5 flex flex-wrap gap-2">
+        <button disabled={isBusy} onClick={() => walletAction('/generate', { fund: true }, 'Generated and funded a real Stellar Testnet receiving wallet.')} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-primary disabled:opacity-60">
+          Generate Testnet Wallet
+        </button>
+        <button disabled={isBusy} onClick={() => walletAction('/fund', {}, 'Friendbot funding request completed.')} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary disabled:opacity-60">
+          Fund with Friendbot
+        </button>
+        <button disabled={isBusy} onClick={() => walletAction('/check', {}, 'Wallet status checked on Horizon.')} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary disabled:opacity-60">
+          Check Horizon Status
+        </button>
+        <button disabled={isBusy} onClick={() => walletAction('', { publicKey, secretKey, network, horizonUrl, friendbotUrl, networkPassphrase }, 'Stellar wallet settings saved.')} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary disabled:opacity-60">
+          Save Wallet Config
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function TenantSettingsPanel({
   tenantSlug,
   tenant,
@@ -1092,6 +1266,10 @@ function TenantSettingsPanel({
       <h2 className="mt-2 text-2xl font-extrabold text-slate-900">Customize the public experience</h2>
       <p className="mt-2 text-sm leading-6 text-slate-600">These settings control the organization name, messaging, brand color, and public contact details.</p>
 
+      <div className="mt-6">
+        <StellarWalletPanel tenantSlug={tenantSlug} />
+      </div>
+
       <form onSubmit={saveSettings} className="mt-6 grid gap-5">
         <div className="grid gap-5 md:grid-cols-2">
           <div>
@@ -1125,26 +1303,14 @@ function TenantSettingsPanel({
             <Input value={form.primaryColor} onChange={(event) => updateForm('primaryColor', event.target.value)} />
           </div>
         </div>
-        <div className="rounded-[1.5rem] bg-blue-50/70 p-5 ring-1 ring-blue-100">
-          <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--brand)]">Stellar Testnet payments</p>
+        <div className="rounded-[1.5rem] bg-slate-50 p-5 ring-1 ring-slate-100">
+          <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--brand)]">Default payment asset</p>
           <div className="mt-4 grid gap-5 md:grid-cols-2">
-            <div>
-              <label className="text-sm font-extrabold text-slate-700">Receiving wallet public key</label>
-              <Input value={form.stellarReceivingPublicKey || ''} onChange={(event) => updateForm('stellarReceivingPublicKey', event.target.value)} placeholder="G..." />
-            </div>
-            <div>
-              <label className="text-sm font-extrabold text-slate-700">Horizon URL</label>
-              <Input value={form.stellarHorizonUrl || ''} onChange={(event) => updateForm('stellarHorizonUrl', event.target.value)} />
-            </div>
-            <div>
-              <label className="text-sm font-extrabold text-slate-700">Network</label>
-              <Input value={form.stellarNetwork || 'TESTNET'} onChange={(event) => updateForm('stellarNetwork', event.target.value)} />
-            </div>
             <div>
               <label className="text-sm font-extrabold text-slate-700">Default asset code</label>
               <Input value={form.stellarDefaultAssetCode || 'XLM'} onChange={(event) => updateForm('stellarDefaultAssetCode', event.target.value)} />
             </div>
-            <div className="md:col-span-2">
+            <div>
               <label className="text-sm font-extrabold text-slate-700">Default asset issuer</label>
               <Input value={form.stellarDefaultAssetIssuer || ''} onChange={(event) => updateForm('stellarDefaultAssetIssuer', event.target.value)} placeholder="Required only for non-XLM assets" />
             </div>
