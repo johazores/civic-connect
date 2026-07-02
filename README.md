@@ -18,7 +18,7 @@ The current build focuses on usability, clean information architecture, PostgreS
 - Services directory
 - News and announcements
 - Emergency hotlines with one-tap call links
-- Fully responsive hamburger navigation
+- Fully responsive hamburger navigation with grouped desktop submenus and mobile bottom tabs
 
 ### Staff Portal
 
@@ -217,6 +217,7 @@ Start with:
 - `docs/product-review.md`
 - `docs/stellarx-fit-review.md`
 - `docs/stellarx-implementation-plan.md`
+- `docs/ui-navigation-redesign.md`
 
 
 ## StellarX Direction Implemented
