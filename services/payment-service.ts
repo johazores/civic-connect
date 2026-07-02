@@ -8,7 +8,7 @@ import {
   normalizeStellarAmount,
   resolveStellarNetworkConfig,
   verifyStellarPaymentByHash
-} from '@/lib/stellar';
+} from '@/lib/stellar/index';
 
 export type CreatePaymentIntentInput = {
   tenantSlug: string;

@@ -8,7 +8,7 @@ import {
   isValidStellarSecretKey,
   publicKeyFromSecret,
   resolveStellarNetworkConfig
-} from '@/lib/stellar';
+} from '@/lib/stellar/index';
 
 export type PublicTenantStellarWallet = {
   tenantId: string;
