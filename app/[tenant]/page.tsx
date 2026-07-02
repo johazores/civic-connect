@@ -1,0 +1,43 @@
+import { notFound } from 'next/navigation';
+import { HeroSection } from '@/components/public/hero-section';
+import { HotlinesSection } from '@/components/public/hotlines-section';
+import { NewsGrid } from '@/components/public/news-grid';
+import { ServicesGrid } from '@/components/public/services-grid';
+import { PublicShell } from '@/components/layout/public-shell';
+import { getTenantHomeData } from '@/services/tenant-service';
+
+export default async function TenantHomePage({ params }: { params: Promise<{ tenant: string }> }) {
+  const { tenant: tenantSlug } = await params;
+  const data = await getTenantHomeData(tenantSlug);
+
+  if (!data) {
+    notFound();
+  }
+
+  return (
+    <PublicShell tenant={data.tenant}>
+      <HeroSection tenant={data.tenant} categoriesCount={data.categories.length} />
+      <section className="px-4 py-12 md:px-6">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <div>
+              <p className="section-eyebrow">Services</p>
+              <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Find city services</h2>
+            </div>
+          </div>
+          <ServicesGrid services={data.services} />
+        </div>
+      </section>
+      <HotlinesSection hotlines={data.hotlines} tenantSlug={data.tenant.slug} />
+      <section className="px-4 py-12 md:px-6">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-6">
+            <p className="section-eyebrow">News</p>
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Latest announcements</h2>
+          </div>
+          <NewsGrid posts={data.newsPosts} tenantSlug={data.tenant.slug} />
+        </div>
+      </section>
+    </PublicShell>
+  );
+}
