@@ -198,7 +198,7 @@ export function ReportForm({ tenantSlug, categories }: { tenantSlug: string; cat
           <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-[var(--brand)] ring-1 ring-blue-100">In progress</span>
         </div>
         <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-slate-100">
-          <div className="h-full rounded-full bg-gradient-to-r from-[var(--brand)] to-teal-400 transition-all" style={{ width: `${completionScore}%` }} />
+          <div className="h-full rounded-full bg-[var(--brand)] transition-all" style={{ width: `${completionScore}%` }} />
         </div>
         <div className="mt-6 grid gap-3">
           {[
@@ -266,22 +266,22 @@ export function ReportForm({ tenantSlug, categories }: { tenantSlug: string; cat
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="input-label">Your name</label>
-              <Input required value={form.reporterName} onChange={(event) => updateField('reporterName', event.target.value)} placeholder="Maria Santos" autoComplete="name" />
+              <Input required value={form.reporterName} onChange={(event) => updateField('reporterName', event.target.value)} placeholder="Enter your full name" autoComplete="name" />
             </div>
             <div>
               <label className="input-label">Email</label>
-              <Input type="email" value={form.reporterEmail} onChange={(event) => updateField('reporterEmail', event.target.value)} placeholder="maria.santos@email.com" autoComplete="email" />
+              <Input type="email" value={form.reporterEmail} onChange={(event) => updateField('reporterEmail', event.target.value)} placeholder="Enter your email address" autoComplete="email" />
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="input-label">Phone</label>
-              <Input value={form.reporterPhone} onChange={(event) => updateField('reporterPhone', event.target.value)} placeholder="+63 917 000 1234" autoComplete="tel" />
+              <Input value={form.reporterPhone} onChange={(event) => updateField('reporterPhone', event.target.value)} placeholder="Enter your mobile number" autoComplete="tel" />
             </div>
             <div>
               <label className="input-label">Report title</label>
-              <Input required value={form.title} onChange={(event) => updateField('title', event.target.value)} placeholder="Broken streetlight near the barangay hall" />
+              <Input required value={form.title} onChange={(event) => updateField('title', event.target.value)} placeholder="Summarize the concern clearly" />
             </div>
           </div>
 

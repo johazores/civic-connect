@@ -1,321 +1,185 @@
-# Civic Connect Multitenant
+# CivicTrust Multitenant Platform
 
-A simple, scalable, multitenant civic services platform for city, municipality, barangay, campus, subdivision, or community service apps.
+CivicTrust is a production-focused city services platform for LGUs, barangays, municipalities, and provincial teams. It provides a modern public portal for citizens and a structured staff workspace for operations teams.
 
-This is a working platform, not just a static clone. It includes a public citizen experience, tenant-aware APIs, issue reporting, tracking, admin report operations, content management, tenant settings, citizen accounts, staff management, and a mobile-first civic SaaS UI.
+The current build focuses on usability, clean information architecture, PostgreSQL deployment readiness, and a consistent CRUD workflow before adding Stellar payment features.
 
-## Current Status
+## Core Product
 
-Verified in this package:
+### Public Portal
 
-- `npm run lint` passes
-- `npm run typecheck` passes
-- `npm run build` passes
-- Next.js production routes compile successfully
-- APIs are tenant-scoped by `tenantSlug` / `tenantId`
-- Report photo upload works without writable server storage by storing validated data URLs
-- Citizen login/dashboard, guest reports, admin dashboard, CSV export, staff management, full hotlines page, and news detail pages are included
+- City landing page with clear service access
+- Citizen report submission
+- Photo upload for reports
+- Auto-generated tracking/reference number
+- Public request tracker
+- Citizen account registration and login
+- Citizen dashboard with report history
+- Services directory
+- News and announcements
+- Emergency hotlines with one-tap call links
+- Fully responsive hamburger navigation
 
-## Tech Stack
+### Staff Portal
+
+- Staff login
+- Operations dashboard
+- Report queue with search and filters
+- Department assignment
+- Status and priority updates
+- Public and internal notes
+- Uploaded photo review
+- CSV export
+- Services CRUD
+- Hotlines CRUD
+- News CRUD
+- Report categories CRUD
+- Departments CRUD
+- Staff user CRUD
+- Organization settings
+
+### Technical Foundation
 
 - Next.js App Router for rendered pages
-- `pages/api` for backend routes
-- React + TypeScript
+- `pages/api` for backend API routes
+- PostgreSQL with Prisma
 - Tailwind CSS
-- Prisma ORM
-- PostgreSQL for Vercel-ready deployment
-- JWT cookie auth for tenant admins and citizens
+- Tenant-scoped data model
+- Cookie-based staff and citizen sessions
+- Vercel-ready build scripts
 
-PostgreSQL is used by default so the project is ready for Vercel deployment with persistent data.
+## Local Setup
 
-## Getting Started
+Create your environment file:
 
 ```bash
 cp .env.example .env
-# update DATABASE_URL with your PostgreSQL connection string
+```
+
+Set a PostgreSQL database URL:
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require"
+ADMIN_JWT_SECRET="replace-this-with-a-long-secure-random-value"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
+
+Install and prepare the database:
+
+```bash
 npm install
 npm run db:push
 npm run db:seed
 npm run dev
 ```
 
-Open the public tenants:
+Open:
 
 ```text
-http://localhost:3000/san-pablo
+http://localhost:3000/metro-city
 http://localhost:3000/laguna-province
 ```
 
-## Local Seed Accounts
+## Starter Access
 
-Admin:
-
-```text
-San Pablo:
-Email: admin@sanpablo.local
-Password: admin12345
-
-Laguna Province:
-Email: admin@laguna.local
-Password: admin12345
-```
-
-Citizen:
+Metro City staff:
 
 ```text
-San Pablo:
-Email: maria.santos@sanpablo.local
-Password: citizen12345
-
-Laguna Province:
-Email: ana.reyes@laguna.local
-Password: citizen12345
+http://localhost:3000/metro-city/admin/login
+admin@metrocity.local
+admin12345
 ```
 
-## Build Check
+Metro City citizen:
+
+```text
+http://localhost:3000/metro-city/login
+sofia.cruz@metrocity.local
+citizen12345
+```
+
+Laguna Province staff:
+
+```text
+http://localhost:3000/laguna-province/admin/login
+admin@laguna.local
+admin12345
+```
+
+Laguna Province citizen:
+
+```text
+http://localhost:3000/laguna-province/login
+ana.reyes@laguna.local
+citizen12345
+```
+
+Replace all starter passwords before using the app with real users.
+
+## Verification
 
 ```bash
 npm run lint
 npm run typecheck
 npm run build
-
-# or run all checks
 npm run verify
 ```
 
-## Tenant Routes
+`npm run verify` runs lint, TypeScript, and production build together.
 
-```text
-/:tenant
-/:tenant/report
-/:tenant/track
-/:tenant/services
-/:tenant/hotlines
-/:tenant/news
-/:tenant/news/:postId
-/:tenant/login
-/:tenant/register
-/:tenant/dashboard
-/:tenant/admin/login
-/:tenant/admin
+## Vercel Deployment
+
+1. Create a hosted PostgreSQL database.
+2. Set `DATABASE_URL` in Vercel.
+3. Set `ADMIN_JWT_SECRET` in Vercel.
+4. Set `NEXT_PUBLIC_APP_URL` to your deployed URL.
+5. Deploy the project.
+6. Run database setup from your local terminal or deployment workflow:
+
+```bash
+npm run db:push
+npm run db:seed
 ```
 
-Example:
-
-```text
-/san-pablo
-```
-
-## Citizen Features
-
-- Modern civic SaaS landing page
-- Mobile-first sticky navigation
-- Service directory
-- News and announcements
-- Emergency hotline cards
-- Full emergency hotlines page
-- Report issue form
-- Category card selection
-- Optional photo upload
-- Auto-generated tenant-aware report reference number
-- Public report tracking
-- Progress bar and update trail
-- Public attachments shown in tracking view
-- Full news detail pages
-- Citizen registration and login
-- Citizen dashboard with owned reports
-- Guest report support
-- Logged-in reports automatically attach to the citizen account
-
-## Admin Features
-
-- Tenant admin login
-- Report command center
-- Report stats
-- Report search
-- Filter by status, category, department, and priority
-- Assign report to department
-- Update status
-- Update priority
-- Public or internal update messages
-- Report timeline
-- Report attachments preview
-- CSV report export
-- Content Studio CRUD/archive for:
-  - Services
-  - Hotlines
-  - News
-  - Report categories
-  - Departments
-  - Staff users
-- Tenant settings editor for:
-  - Tenant name
-  - City name
-  - Tagline
-  - Description
-  - Email
-  - Phone
-  - Address
-  - Primary color
-
-## API Routes
-
-```text
-POST /api/auth/login
-POST /api/auth/logout
-GET  /api/auth/me
-
-POST /api/tenant/:tenantSlug/citizens/register
-POST /api/tenant/:tenantSlug/citizens/login
-POST /api/tenant/:tenantSlug/citizens/logout
-GET  /api/tenant/:tenantSlug/citizens/me
-GET  /api/tenant/:tenantSlug/citizens/reports
-
-GET  /api/tenant/:tenantSlug
-GET  /api/tenant/:tenantSlug/reports
-POST /api/tenant/:tenantSlug/reports
-GET  /api/tenant/:tenantSlug/reports/export
-GET  /api/tenant/:tenantSlug/reports/:referenceCode
-PATCH /api/tenant/:tenantSlug/reports/:referenceCode
-
-GET  /api/tenant/:tenantSlug/services
-POST /api/tenant/:tenantSlug/services
-PATCH /api/tenant/:tenantSlug/services/:id
-DELETE /api/tenant/:tenantSlug/services/:id
-
-GET  /api/tenant/:tenantSlug/hotlines
-POST /api/tenant/:tenantSlug/hotlines
-PATCH /api/tenant/:tenantSlug/hotlines/:id
-DELETE /api/tenant/:tenantSlug/hotlines/:id
-
-GET  /api/tenant/:tenantSlug/news
-POST /api/tenant/:tenantSlug/news
-PATCH /api/tenant/:tenantSlug/news/:id
-DELETE /api/tenant/:tenantSlug/news/:id
-
-GET  /api/tenant/:tenantSlug/categories
-POST /api/tenant/:tenantSlug/categories
-PATCH /api/tenant/:tenantSlug/categories/:id
-DELETE /api/tenant/:tenantSlug/categories/:id
-
-GET  /api/tenant/:tenantSlug/departments
-POST /api/tenant/:tenantSlug/departments
-PATCH /api/tenant/:tenantSlug/departments/:id
-DELETE /api/tenant/:tenantSlug/departments/:id
-
-GET   /api/tenant/:tenantSlug/settings
-PATCH /api/tenant/:tenantSlug/settings
-
-GET    /api/tenant/:tenantSlug/users
-POST   /api/tenant/:tenantSlug/users
-PATCH  /api/tenant/:tenantSlug/users/:id
-DELETE /api/tenant/:tenantSlug/users/:id
-
-POST /api/uploads/reports
-```
+The app is PostgreSQL-first and no longer uses SQLite.
 
 ## Project Structure
 
 ```text
-app/                 App Router pages
-components/          Reusable UI and feature components
-lib/                 Helpers, auth, db, formatters, request parsing
-pages/api/           API routes
-prisma/              Prisma schema and seed data
-services/            Business/data access logic
-types/               Shared TypeScript types
-docs/                User, admin, developer, deployment, product, and marketing docs
+app/                  App Router pages
+components/           Reusable UI, public, layout, and admin components
+components/ui/        Standardized buttons, cards, inputs, selects, badges, stats
+pages/api/            REST API routes
+services/             Business/data access services
+lib/                  Shared auth, db, format, request, and reference helpers
+prisma/               Prisma schema and starter data
+scripts/              Build/setup helper scripts
+docs/                 Product, user, admin, deployment, and roadmap docs
 ```
 
-## Documentation Index
+## Product Direction
 
-Read these files for full guidance:
+The platform is designed to evolve into a Stellar-powered civic trust product. The strongest Stellar direction is proof-of-payment for government services, where service payments generate permanent transaction hashes and public receipts.
 
-| File | Purpose |
-| --- | --- |
-| `docs/user-guide.md` | How citizens use the app. |
-| `docs/admin-guide.md` | How admins/staff manage reports and content. |
-| `docs/developer-guide.md` | Setup, scripts, structure, and coding guidance. |
-| `docs/deployment-guide.md` | Vercel and production deployment notes. |
-| `docs/architecture.md` | App architecture, data flow, and multitenancy model. |
-| `docs/product-review.md` | Product review, market fit, target users, and platform verdict. |
-| `docs/stellarx-fit-review.md` | StellarX wishlist fit assessment and investor positioning. |
-| `docs/stellarx-implementation-plan.md` | Practical implementation plan for Stellar Testnet payments, rewards, and transparency. |
-| `docs/marketing-guide.md` | Positioning, pitch, pricing ideas, and product walkthrough script. |
-| `docs/testing-guide.md` | Manual QA checklist for local testing. |
-| `docs/feature-checklist.md` | Implemented features and known production enhancements. |
-| `docs/review-notes.md` | Latest code/product/UX review notes. |
-| `docs/next-steps.md` | Recommended next implementation steps. |
+Planned Stellar modules:
 
-## Upload Notes
+- Service fee management
+- Tenant Stellar Testnet wallet settings
+- Payment intent records
+- SEP-7 payment QR generation
+- Transaction verification
+- Public receipt pages
+- Staff payment dashboard
+- Civic rewards and budget transparency modules
 
-Photo uploads are intentionally simple for the platform:
+## Documentation
 
-- The browser reads the file as a data URL.
-- `/api/uploads/reports` validates the MIME type and size.
-- The report stores that value in `ReportAttachment.imageUrl`.
-- The upload API and report submission API both allow larger request bodies for the 4MB image limit.
+Start with:
 
-This works locally and on Vercel without writable public storage. For a production app, replace this with S3, Cloudflare R2, Supabase Storage, or another object storage provider.
-
-## Vercel Notes
-
-The project builds successfully with `npm run build`. The `postinstall` script safely skips Prisma generation when `DATABASE_URL` is missing, but a real database URL is still required for the app to run with data.
-
-For a real persistent Vercel deployment:
-
-1. Use PostgreSQL from Neon, Supabase, Vercel Marketplace, or another managed database.
-2. Set `DATABASE_URL` in Vercel.
-3. Set a strong `ADMIN_JWT_SECRET` in Vercel.
-4. Run the seed once after the database is ready.
-
-PostgreSQL is now the default database because this project is intended for Vercel deployment and persistent production data.
-
-
-## StellarX Direction
-
-The current platform is a working civic SaaS foundation. For a StellarX submission or investor walkthrough, it should be positioned as a Stellar-powered civic trust platform, not just a city reporting dashboard.
-
-Recommended Stellar focus:
-
-1. Proof-of-payment for government/community services.
-2. Civic participation rewards.
-3. Environmental cleanup reward proofs.
-4. Municipal transparency ledger.
-
-Read `docs/stellarx-fit-review.md` and `docs/stellarx-implementation-plan.md` before building the Stellar module.
-
-## Production Notes
-
-Before production:
-
-1. Connect a production PostgreSQL database.
-2. Replace the seeded account passwords.
-3. Set a strong `ADMIN_JWT_SECRET` for admin and citizen session signing.
-4. Replace data URL photo storage with object storage if report volume grows.
-5. Add rate limiting to report submission and login.
-6. Add audit logs for admin actions.
-7. Add email/SMS notifications.
-8. Add a super-admin tenant provisioning flow if needed.
-9. Add tenant onboarding and custom domains if this becomes SaaS.
-10. Review branding/content permissions before using real city/government assets.
-
-## Design Approach
-
-The app follows a simple structure:
-
-- App Router for rendered pages
-- `pages/api` for backend routes
-- No server actions
-- No heavy state management
-- Tenant isolation through `tenantId`
-- Kebab-case file names
-- Clean reusable components
-- Simple APIs that are easy to move to a standalone backend later
-
-
-## Latest UI / UX direction
-
-The UI has been redesigned to remove the previous harsh neon/dark direction. The current design uses a premium civic SaaS style with soft blue/cyan accents, white glass-like cards, stronger typography, accessible contrast, and a real hamburger menu on mobile. See `docs/ui-redesign-notes.md` for the design rules.
-
-The project is now PostgreSQL-first for Vercel deployment. Set `DATABASE_URL` to a hosted Postgres connection string before running `db:push` and `db:seed`.
+- `docs/user-guide.md`
+- `docs/admin-guide.md`
+- `docs/developer-guide.md`
+- `docs/deployment-guide.md`
+- `docs/product-review.md`
+- `docs/stellarx-fit-review.md`
+- `docs/stellarx-implementation-plan.md`

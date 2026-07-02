@@ -20,7 +20,7 @@ export function MobileMenu({ tenantSlug, navItems }: { tenantSlug: string; navIt
         onClick={() => setIsOpen((current) => !current)}
         aria-label={isOpen ? 'Close menu' : 'Open menu'}
         aria-expanded={isOpen}
-        className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-800 shadow-[0_10px_26px_rgba(18,32,51,0.10)] transition hover:bg-slate-50"
+        className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-800 shadow-[0_10px_24px_rgba(16,24,40,0.10)] transition hover:bg-slate-50"
       >
         <span className="relative h-4 w-5">
           <span className={`absolute left-0 top-0 h-0.5 w-5 rounded-full bg-current transition ${isOpen ? 'translate-y-[7px] rotate-45' : ''}`} />
@@ -30,8 +30,8 @@ export function MobileMenu({ tenantSlug, navItems }: { tenantSlug: string; navIt
       </button>
 
       {isOpen ? (
-        <div className="fixed inset-0 top-[4.25rem] z-50 bg-slate-950/20 px-3 pb-3 backdrop-blur-sm" onClick={() => setIsOpen(false)}>
-          <div className="mx-auto max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white p-3 shadow-[0_24px_70px_rgba(18,32,51,0.22)] animate-rise" onClick={(event) => event.stopPropagation()}>
+        <div className="fixed inset-0 top-[4.25rem] z-50 bg-slate-900/30 px-3 pb-3 backdrop-blur-md animate-fade" onClick={() => setIsOpen(false)}>
+          <div className="mx-auto max-w-md overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white p-3 shadow-[0_24px_70px_rgba(16,24,40,0.22)] animate-rise" onClick={(event) => event.stopPropagation()}>
             <nav className="grid gap-1">
               {navItems.map((item) => {
                 const isActive = pathname === item.href;
@@ -51,12 +51,12 @@ export function MobileMenu({ tenantSlug, navItems }: { tenantSlug: string; navIt
                 );
               })}
             </nav>
-            <div className="mt-3 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
+            <div className="mt-3 grid grid-cols-1 gap-2 border-t border-slate-100 pt-3 sm:grid-cols-2">
               <Link href={`/${tenantSlug}/login`} onClick={() => setIsOpen(false)} className="inline-flex min-h-11 items-center justify-center rounded-xl px-4 py-3 text-sm font-bold btn-secondary">
-                Sign in
+                Citizen sign in
               </Link>
               <Link href={`/${tenantSlug}/admin/login`} onClick={() => setIsOpen(false)} className="inline-flex min-h-11 items-center justify-center rounded-xl px-4 py-3 text-sm font-bold btn-primary">
-                Staff
+                Staff portal
               </Link>
             </div>
           </div>

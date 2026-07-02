@@ -1,12 +1,13 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'accent';
 
 const variants: Record<ButtonVariant, string> = {
   primary: 'btn-primary',
   secondary: 'btn-secondary',
   ghost: 'btn-ghost',
-  danger: 'bg-rose-600 text-white shadow-[0_14px_28px_rgba(225,29,72,0.18)] hover:bg-rose-700'
+  accent: 'btn-accent',
+  danger: 'border border-rose-600 bg-rose-600 text-white shadow-[0_12px_24px_rgba(190,18,60,0.18)] hover:bg-rose-700'
 };
 
 export function Button({
@@ -17,7 +18,7 @@ export function Button({
 }: ButtonHTMLAttributes<HTMLButtonElement> & { children: ReactNode; variant?: ButtonVariant }) {
   return (
     <button
-      className={`inline-flex min-h-11 items-center justify-center rounded-xl px-5 py-3 text-sm font-bold transition focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60 ${variants[variant]} ${className}`}
+      className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60 ${variants[variant]} ${className}`}
       {...props}
     >
       {children}

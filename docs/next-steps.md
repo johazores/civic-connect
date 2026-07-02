@@ -1,80 +1,26 @@
 # Next Steps
 
-## Completed in this version
+## Immediate Product Polish
 
-- Multitenant public tenant pages
-- Modern civic SaaS citizen UI
-- Citizen registration/login/logout
-- Citizen dashboard
-- Guest report mode
-- Logged-in report ownership
-- Citizen report form
-- Vercel-safe report photo upload using validated data URLs
-- Report tracking with progress bar
-- Report attachments in public tracking
-- Admin login/logout
-- Admin command center
-- Report search and filters
-- Department assignment
-- Priority updates
-- Public/internal report updates
-- Admin timeline view
-- CSV export
-- CRUD/archive for services
-- CRUD/archive for hotlines
-- CRUD/unpublish for news
-- CRUD/archive for report categories
-- CRUD/archive for departments
-- Staff user management
-- Tenant settings editor
-- Multi-tenant seed data
-- User/admin/developer/product/marketing/testing docs
-- Lint, typecheck, and production build passing
+- Add toast notifications.
+- Add confirmation dialogs for archive actions.
+- Add pagination for large report queues.
+- Add richer empty states.
+- Add role-based access restrictions for staff actions.
 
-## Recommended next features
+## Production Infrastructure
 
-### Highest value next
+- Add persistent file storage for report photos.
+- Add audit logs.
+- Add monitoring and error reporting.
+- Add rate limiting for public submissions.
+- Add password reset flow.
 
-- PostgreSQL migration for real Vercel persistence
-- Object storage for uploaded photos
-- Rate limiting for login/register/report/upload
-- Email confirmation for report submission
-- Email notification for public report updates
-- Audit log for admin actions
+## Stellar Roadmap
 
-### Citizen polish
-
-- Citizen profile editing
-- Barangay selector
-- Map/location picker
-- Duplicate report detection
-- Anonymous reporting toggle
-- Email/SMS report reference delivery
-
-### Admin polish
-
-- SLA due dates
-- Bulk assignment
-- Saved filters
-- Report comments separated from status updates
-- Department-specific staff permissions
-- Printable report detail page
-- Dashboard charts
-
-### SaaS / multitenant upgrades
-
-- Super-admin dashboard
-- Tenant onboarding form
-- Tenant plan/usage settings
-- Custom domain support
-- Tenant theme presets
-- Billing plans
-
-### Production hardening
-
-- Automated integration tests
-- Better session rotation
-- Password reset flow
-- Upload virus scanning
-- Database backups
-- Privacy policy and terms pages
+- Add service fee management.
+- Add tenant Stellar wallet settings.
+- Add payment intents.
+- Add SEP-7 payment QR generation.
+- Add Horizon transaction verification.
+- Add public receipt pages.

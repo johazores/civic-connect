@@ -11,7 +11,7 @@ import { formatDate } from '@/lib/format';
 
 const reportStatuses = ['SUBMITTED', 'REVIEWING', 'ASSIGNED', 'IN_PROGRESS', 'RESOLVED', 'REJECTED'];
 const reportPriorities = ['LOW', 'NORMAL', 'HIGH', 'URGENT'];
-const mainTabs = ['command-center', 'content-studio', 'tenant-settings'] as const;
+const mainTabs = ['reports', 'content', 'settings'] as const;
 const contentTabs = ['services', 'hotlines', 'news', 'categories', 'departments', 'users'] as const;
 
 type MainTab = (typeof mainTabs)[number];
@@ -207,7 +207,7 @@ function createFilterParams(filters: Record<string, string>) {
 }
 
 export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
-  const [activeTab, setActiveTab] = useState<MainTab>('command-center');
+  const [activeTab, setActiveTab] = useState<MainTab>('reports');
   const [reports, setReports] = useState<AdminReport[]>([]);
   const [stats, setStats] = useState<Stats>(emptyStats);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -349,29 +349,29 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
             <h1 className="text-xl font-extrabold text-slate-900">{tenant?.name || 'Operations Dashboard'}</h1>
           </div>
           <div className="flex flex-wrap justify-end gap-2">
-            <a href={`/${tenantSlug}`} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-extrabold text-slate-700 shadow-[0_10px_26px_rgba(18,32,51,0.05)]">
-              Public Site
+            <a href={`/${tenantSlug}`} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-extrabold text-slate-700 shadow-[0_10px_24px_rgba(16,24,40,0.05)]">
+              View public site
             </a>
-            <button onClick={handleLogout} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-primary shadow-[0_10px_26px_rgba(18,32,51,0.05)]">
-              Logout
+            <button onClick={handleLogout} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary">
+              Sign out
             </button>
           </div>
         </div>
       </header>
 
       <main className="mx-auto grid max-w-7xl gap-6 px-4 py-8 md:px-6">
-        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 text-slate-900 shadow-[0_10px_26px_rgba(18,32,51,0.05)]">
+        <section className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white p-6 text-slate-900 shadow-[0_10px_24px_rgba(16,24,40,0.05)]">
           <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
             <div>
               <p className="section-eyebrow">Operations overview</p>
               <h2 className="mt-3 text-3xl font-extrabold md:text-5xl">Resolve reports faster and keep citizens informed.</h2>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600">
-                Review incoming concerns, assign departments, publish updates, and manage public content from one command center.
+                Review incoming concerns, assign departments, publish updates, and manage public content from one organized workspace.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <p className="text-3xl font-extrabold text-blue-700">{Math.max(0, stats.total - stats.resolved)}</p>
+                <p className="text-3xl font-extrabold text-[var(--brand)]">{Math.max(0, stats.total - stats.resolved)}</p>
                 <p className="mt-1 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">Active reports</p>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -386,16 +386,16 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
           </div>
         </section>
 
-        <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_10px_26px_rgba(18,32,51,0.05)] backdrop-blur">
+        <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_10px_24px_rgba(16,24,40,0.05)] backdrop-blur">
           {mainTabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`rounded-2xl px-4 py-3 text-sm font-extrabold capitalize transition ${
-                activeTab === tab ? 'btn-primary' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700'
+              className={`rounded-2xl px-4 py-3 text-sm font-extrabold transition ${
+                activeTab === tab ? 'btn-primary' : 'text-slate-600 hover:bg-blue-50 hover:text-[var(--brand)]'
               }`}
             >
-              {niceLabel(tab)}
+              {tab === 'reports' ? 'Reports' : tab === 'content' ? 'Content' : 'Settings'}
             </button>
           ))}
         </div>
@@ -403,7 +403,7 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
         {error && <p className="rounded-2xl bg-rose-50 p-4 text-sm font-extrabold text-rose-700 ring-1 ring-rose-200">{error}</p>}
         {success && <p className="rounded-2xl bg-emerald-50 p-4 text-sm font-extrabold text-emerald-700 ring-1 ring-emerald-200">{success}</p>}
 
-        {activeTab === 'command-center' ? (
+        {activeTab === 'reports' ? (
           <section className="grid gap-6">
             <div className="grid gap-4 md:grid-cols-4">
               <StatCard label="Total Reports" value={stats.total} />
@@ -455,7 +455,7 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
               <Card className="">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-blue-700">Queue</p>
+                    <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--brand)]">Queue</p>
                     <h2 className="mt-1 text-xl font-extrabold text-slate-900">Citizen reports</h2>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -475,10 +475,10 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
                     <button
                       key={report.id}
                       onClick={() => setSelectedReportId(report.id)}
-                      className={`rounded-3xl border p-4 text-left transition ${
+                      className={`rounded-[1.5rem] border p-4 text-left transition ${
                         selectedReport?.id === report.id
-                          ? 'border-blue-500 bg-blue-50 shadow-[0_10px_26px_rgba(18,32,51,0.05)]'
-                          : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_10px_26px_rgba(18,32,51,0.05)]'
+                          ? 'border-[var(--brand)] bg-blue-50 shadow-[0_10px_24px_rgba(16,24,40,0.05)]'
+                          : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_10px_24px_rgba(16,24,40,0.05)]'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
@@ -517,22 +517,22 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
                       <InfoPanel label="Owner" value={selectedReport.department?.name || 'Unassigned'} note={`${niceLabel(selectedReport.priority)} priority`} />
                     </div>
 
-                    <p className="mt-6 rounded-3xl bg-slate-50 p-5 text-sm leading-7 text-slate-600 ring-1 ring-slate-100">{selectedReport.description}</p>
+                    <p className="mt-6 rounded-[1.5rem] bg-slate-50 p-5 text-sm leading-7 text-slate-600 ring-1 ring-slate-100">{selectedReport.description}</p>
 
                     {selectedReport.attachments.length > 0 ? (
                       <div className="mt-6 grid gap-3 sm:grid-cols-2">
                         {selectedReport.attachments.map((attachment) => (
-                          <a key={attachment.id} href={attachment.imageUrl} target="_blank" className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-100" rel="noreferrer">
+                          <a key={attachment.id} href={attachment.imageUrl} target="_blank" className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-slate-100" rel="noreferrer">
                             <img src={attachment.imageUrl} alt="Report attachment" className="h-52 w-full object-cover" />
                           </a>
                         ))}
                       </div>
                     ) : null}
 
-                    <form onSubmit={handleStatusUpdate} className="mt-8 grid gap-4 rounded-3xl bg-slate-50 p-5 ring-1 ring-slate-100">
+                    <form onSubmit={handleStatusUpdate} className="mt-8 grid gap-4 rounded-[1.5rem] bg-slate-50 p-5 ring-1 ring-slate-100">
                       <div className="flex items-center justify-between gap-4">
                         <div>
-                          <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-blue-700">Action panel</p>
+                          <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--brand)]">Action panel</p>
                           <h3 className="mt-1 font-extrabold text-slate-900">Update report progress</h3>
                         </div>
                         <label className="flex items-center gap-2 text-sm font-extrabold text-slate-700">
@@ -572,7 +572,7 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
                       <h3 className="text-lg font-extrabold text-slate-900">Timeline</h3>
                       <div className="mt-4 grid gap-3">
                         {selectedReport.updates.map((update) => (
-                          <div key={update.id} className="rounded-3xl border border-slate-200 bg-white p-4">
+                          <div key={update.id} className="rounded-[1.5rem] border border-slate-200 bg-white p-4">
                             <div className="flex flex-wrap items-center justify-between gap-2">
                               <Badge value={update.status} />
                               <span className="rounded-xl bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-500">{update.isPublic ? 'Public' : 'Internal'}</span>
@@ -592,11 +592,11 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
           </section>
         ) : null}
 
-        {activeTab === 'content-studio' ? (
+        {activeTab === 'content' ? (
           <ContentStudio tenantSlug={tenantSlug} activeTab={activeTab} setError={setError} setSuccess={setSuccess} />
         ) : null}
 
-        {activeTab === 'tenant-settings' ? (
+        {activeTab === 'settings' ? (
           <TenantSettingsPanel tenantSlug={tenantSlug} tenant={tenant} setTenant={setTenant} setError={setError} setSuccess={setSuccess} />
         ) : null}
       </main>
@@ -606,7 +606,7 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
 
 function InfoPanel({ label, value, note }: { label: string; value: string; note: string }) {
   return (
-    <div className="rounded-3xl bg-slate-50 p-4 ring-1 ring-slate-100">
+    <div className="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-100">
       <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-400">{label}</p>
       <p className="mt-1 font-extrabold text-slate-900">{value}</p>
       <p className="mt-1 text-sm text-slate-500">{note}</p>
@@ -745,7 +745,7 @@ function ContentStudio({
   return (
     <section className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
       <Card className="">
-        <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-blue-700">Content manager</p>
+        <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--brand)]">Content manager</p>
         <h2 className="mt-2 text-2xl font-extrabold text-slate-900">Manage public content</h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">Keep services, contacts, announcements, categories, departments, and staff accounts up to date.</p>
 
@@ -755,7 +755,7 @@ function ContentStudio({
               key={tab}
               onClick={() => switchContent(tab)}
               className={`rounded-2xl px-3 py-2 text-sm font-extrabold transition ${
-                activeContent === tab ? 'bg-[var(--brand)] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                activeContent === tab ? 'btn-primary' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
               {contentConfig[tab].label}
@@ -763,7 +763,7 @@ function ContentStudio({
           ))}
         </div>
 
-        <form onSubmit={saveItem} className="mt-6 grid gap-4 rounded-3xl bg-slate-50 p-5 ring-1 ring-slate-100">
+        <form onSubmit={saveItem} className="mt-6 grid gap-4 rounded-[1.5rem] bg-slate-50 p-5 ring-1 ring-slate-100">
           <h3 className="font-extrabold text-slate-900">{editingId ? 'Edit item' : 'Create item'}</h3>
           {config.fields.map((field) => (
             <div key={field.name}>
@@ -836,7 +836,7 @@ function ContentStudio({
             const isActive = item.isActive ?? item.isPublished ?? true;
 
             return (
-              <div key={item.id} className="rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_26px_rgba(18,32,51,0.05)]">
+              <div key={item.id} className="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-[0_10px_24px_rgba(16,24,40,0.05)]">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="font-extrabold text-slate-900">{title}</p>
@@ -913,12 +913,12 @@ function TenantSettingsPanel({
   }
 
   if (!form) {
-    return <Card><p className="text-sm text-slate-500">Loading tenant settings...</p></Card>;
+    return <Card><p className="text-sm text-slate-500">Loading organization settings...</p></Card>;
   }
 
   return (
     <Card className="max-w-4xl ">
-      <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-blue-700">Organization settings</p>
+      <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--brand)]">Organization settings</p>
       <h2 className="mt-2 text-2xl font-extrabold text-slate-900">Customize the public experience</h2>
       <p className="mt-2 text-sm leading-6 text-slate-600">These settings control the organization name, messaging, brand color, and public contact details.</p>
 

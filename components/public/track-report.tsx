@@ -88,7 +88,7 @@ export function TrackReport({ tenantSlug, initialReference }: { tenantSlug: stri
         <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
           <div>
             <label className="input-label">Reference number</label>
-            <Input required value={referenceCode} onChange={(event) => setReferenceCode(event.target.value)} placeholder="SPC-2026-0001" />
+            <Input required value={referenceCode} onChange={(event) => setReferenceCode(event.target.value)} placeholder="MCS-2026-0001" />
           </div>
           <Button disabled={isLoading}>{isLoading ? 'Searching...' : 'Track request'}</Button>
         </form>
@@ -115,7 +115,7 @@ export function TrackReport({ tenantSlug, initialReference }: { tenantSlug: stri
               <p className="text-sm font-extrabold text-slate-950">{progress}%</p>
             </div>
             <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
-              <div className="h-full rounded-full bg-gradient-to-r from-[var(--brand)] to-teal-400" style={{ width: `${progress}%` }} />
+              <div className="h-full rounded-full bg-[var(--brand)]" style={{ width: `${progress}%` }} />
             </div>
             <div className="mt-4 grid gap-2 sm:grid-cols-5">
               {statusSteps.map((step) => {
