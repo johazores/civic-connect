@@ -17,23 +17,23 @@ export default async function TenantHomePage({ params }: { params: Promise<{ ten
   return (
     <PublicShell tenant={data.tenant}>
       <HeroSection tenant={data.tenant} categoriesCount={data.categories.length} />
-      <section className="px-4 py-12 md:px-6">
+      <section className="page-section">
         <div className="mx-auto max-w-7xl">
           <div className="mb-6 flex items-end justify-between gap-4">
             <div>
               <p className="section-eyebrow">Services</p>
-              <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Find city services</h2>
+              <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-slate-900">Find city services</h2>
             </div>
           </div>
           <ServicesGrid services={data.services} />
         </div>
       </section>
       <HotlinesSection hotlines={data.hotlines} tenantSlug={data.tenant.slug} />
-      <section className="px-4 py-12 md:px-6">
+      <section className="page-section">
         <div className="mx-auto max-w-7xl">
           <div className="mb-6">
             <p className="section-eyebrow">News</p>
-            <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Latest announcements</h2>
+            <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-slate-900">Latest announcements</h2>
           </div>
           <NewsGrid posts={data.newsPosts} tenantSlug={data.tenant.slug} />
         </div>

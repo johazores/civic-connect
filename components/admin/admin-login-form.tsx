@@ -39,8 +39,8 @@ export function AdminLoginForm({ tenantSlug }: { tenantSlug: string }) {
   return (
     <Card className="mx-auto max-w-md shadow-md shadow-slate-900/[0.05]">
       <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50 p-5">
-        <p className="text-xs font-bold uppercase tracking-[0.14em] text-blue-700">Secure access</p>
-        <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">Admin Dashboard</h2>
+        <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">Secure access</p>
+        <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-slate-900">Admin Dashboard</h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">Use tenant staff credentials to manage reports and content.</p>
       </div>
       <form onSubmit={handleSubmit} className="grid gap-5">

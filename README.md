@@ -312,3 +312,10 @@ The app follows a simple structure:
 - Kebab-case file names
 - Clean reusable components
 - Simple APIs that are easy to move to a standalone backend later
+
+
+## Latest UI / UX direction
+
+The UI has been redesigned to remove the previous harsh neon/dark direction. The current design uses a premium civic SaaS style with soft blue/cyan accents, white glass-like cards, stronger typography, accessible contrast, and a real hamburger menu on mobile. See `docs/ui-redesign-notes.md` for the design rules.
+
+The project is now PostgreSQL-first for Vercel deployment. Set `DATABASE_URL` to a hosted Postgres connection string before running `db:push` and `db:seed`.

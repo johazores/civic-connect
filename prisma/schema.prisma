@@ -38,7 +38,7 @@ model Tenant {
   address     String?
   email       String?
   phone       String?
-  primaryColor String  @default("#0f766e")
+  primaryColor String  @default("#2563eb")
   isActive    Boolean @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

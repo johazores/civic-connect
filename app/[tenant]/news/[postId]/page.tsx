@@ -28,22 +28,22 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ ten
 
   return (
     <PublicShell tenant={tenant}>
-      <main className="px-4 py-12 md:px-6">
+      <main className="page-section">
         <article className="mx-auto max-w-4xl">
           <Link href={`/${tenant.slug}/news`} className="inline-flex rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200">
             Back to news
           </Link>
 
-          <Card className="mt-6 overflow-hidden p-0 shadow-sm shadow-slate-900/[0.04]">
+          <Card className="mt-6 overflow-hidden p-0 ">
             {post.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={post.imageUrl} alt="" className="h-64 w-full object-cover md:h-96" />
             ) : (
-              <div className="h-2 bg-blue-600" />
+              <div className="h-2 bg-[var(--brand)]" />
             )}
             <div className="p-6 md:p-10">
               <p className="section-eyebrow">{formatDate(post.publishedAt)}</p>
-              <h1 className="mt-4 text-4xl font-semibold tracking-tight text-slate-950 md:text-5xl">{post.title}</h1>
+              <h1 className="mt-4 text-4xl font-semibold tracking-[-0.03em] text-slate-900 md:text-5xl">{post.title}</h1>
               <p className="mt-5 text-lg leading-8 text-slate-600">{post.excerpt}</p>
               <div className="mt-8 whitespace-pre-line rounded-[2rem] bg-slate-50 p-6 text-base leading-8 text-slate-700 ring-1 ring-slate-100">
                 {post.content}

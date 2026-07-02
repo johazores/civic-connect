@@ -13,7 +13,7 @@ export default async function CitizenRegisterPage({ params }: { params: Promise<
 
   return (
     <PublicShell tenant={tenant}>
-      <main className="px-4 py-12 md:px-6">
+      <main className="page-section">
         <div className="mx-auto max-w-6xl">
           <CitizenAuthForm tenantSlug={tenant.slug} mode="register" />
         </div>
