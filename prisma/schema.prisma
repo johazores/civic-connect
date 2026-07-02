@@ -45,6 +45,41 @@ enum StellarWalletStatus {
   ERROR
 }
 
+
+enum CivicActionType {
+  PARTICIPATION
+  CLEANUP
+}
+
+enum CivicActionStatus {
+  SUBMITTED
+  REVIEWING
+  APPROVED
+  REJECTED
+  REWARDED
+}
+
+enum TransparencyEntryType {
+  BUDGET_ALLOCATION
+  PUBLIC_DISBURSEMENT
+  PROCUREMENT
+  GRANT
+  OPERATING_EXPENSE
+}
+
+enum TransparencyEntryStatus {
+  DRAFT
+  PUBLISHED
+  VERIFIED_ON_STELLAR
+  ARCHIVED
+}
+
+enum PropertyTaxReceiptStatus {
+  DRAFT
+  ISSUED
+  VOID
+}
+
 model Tenant {
   id          String   @id @default(cuid())
   slug        String   @unique
@@ -81,6 +116,9 @@ model Tenant {
   hotlines    Hotline[]
   newsPosts   NewsPost[]
   paymentIntents PaymentIntent[]
+  civicActions CivicAction[]
+  transparencyEntries TransparencyEntry[]
+  propertyTaxReceipts PropertyTaxReceipt[]
 }
 
 model User {
@@ -116,6 +154,8 @@ model Citizen {
   tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   reports Report[]
   paymentIntents PaymentIntent[]
+  civicActions CivicAction[]
+  propertyTaxReceipts PropertyTaxReceipt[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -275,6 +315,105 @@ model PaymentIntent {
   @@index([tenantId, status])
   @@index([tenantId, serviceId])
   @@index([tenantId, createdAt])
+}
+
+
+model CivicAction {
+  id String @id @default(cuid())
+  tenantId String
+  citizenId String?
+  type CivicActionType @default(PARTICIPATION)
+  title String
+  description String
+  locationText String
+  latitude Float?
+  longitude Float?
+  photoUrl String?
+  participantName String
+  participantEmail String?
+  participantPhone String?
+  rewardDestinationPublicKey String?
+  rewardAmount Decimal @default(0) @db.Decimal(12, 7)
+  rewardAssetCode String @default("XLM")
+  rewardAssetIssuer String?
+  rewardMemo String?
+  status CivicActionStatus @default(SUBMITTED)
+  verificationNote String?
+  rewardTransactionHash String? @unique
+  rewardOperationId String? @unique
+  rewardLedger Int?
+  rewardPaidAt DateTime?
+  reviewedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  citizen Citizen? @relation(fields: [citizenId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, type])
+  @@index([tenantId, createdAt])
+}
+
+model TransparencyEntry {
+  id String @id @default(cuid())
+  tenantId String
+  referenceCode String @unique
+  entryType TransparencyEntryType @default(PUBLIC_DISBURSEMENT)
+  status TransparencyEntryStatus @default(PUBLISHED)
+  title String
+  description String
+  department String?
+  recipientName String?
+  recipientPublicKey String?
+  amount Decimal @db.Decimal(14, 7)
+  assetCode String @default("XLM")
+  assetIssuer String?
+  memo String?
+  transactionHash String? @unique
+  paymentOperationId String? @unique
+  ledger Int?
+  occurredAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, entryType])
+  @@index([tenantId, occurredAt])
+}
+
+model PropertyTaxReceipt {
+  id String @id @default(cuid())
+  tenantId String
+  citizenId String?
+  referenceCode String @unique
+  taxpayerName String
+  taxpayerEmail String?
+  propertyIndexNumber String
+  propertyAddress String
+  taxYear Int
+  amount Decimal @db.Decimal(14, 7)
+  assetCode String @default("XLM")
+  assetIssuer String?
+  paymentIntentId String?
+  transactionHash String? @unique
+  ledger Int?
+  status PropertyTaxReceiptStatus @default(ISSUED)
+  issuedAt DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  citizen Citizen? @relation(fields: [citizenId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId])
+  @@index([tenantId, taxpayerEmail])
+  @@index([tenantId, propertyIndexNumber])
+  @@index([tenantId, taxYear])
 }
 
 model Hotline {

@@ -83,3 +83,17 @@
 - [x] Payment verification by Horizon memo scan
 - [x] Duplicate transaction hash prevention
 - [x] Pending/failed/expired/verified payment handling
+
+
+## StellarX Civic Program Coverage
+
+- [x] Idea 76: Proof-of-Payment for Government Services via SEP-7 and Horizon verification.
+- [x] Idea 228: Civic Participation Reward workflow with staff approval and Stellar payout.
+- [x] Idea 231: Environmental Cleanup Reward workflow using the civic action model with cleanup evidence.
+- [x] Idea 243: Municipal Budget Transparency records with optional real Stellar disbursement hash.
+- [x] Idea 165: Digital Property Tax Receipt records with public search and transaction hash display.
+- [x] Tenant-aware Stellar wallet configuration.
+- [x] Encrypted server-side wallet secret storage.
+- [x] Public routes for rewards, transparency, and tax receipts.
+- [x] Admin Stellar Programs workspace.
+- [x] Documentation in `docs/stellar-civic-programs.md`.

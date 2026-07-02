@@ -237,6 +237,99 @@ async function main() {
       data: config.news.map((post) => ({ tenantId: tenant.id, ...post, publishedAt: new Date(), isPublished: true }))
     });
 
+    await prisma.civicAction.deleteMany({ where: { tenantId: tenant.id } });
+    await prisma.transparencyEntry.deleteMany({ where: { tenantId: tenant.id } });
+    await prisma.propertyTaxReceipt.deleteMany({ where: { tenantId: tenant.id } });
+
+    await prisma.civicAction.createMany({
+      data: [
+        {
+          tenantId: tenant.id,
+          citizenId: citizen.id,
+          type: 'PARTICIPATION',
+          title: 'Public consultation attendance',
+          description: 'Resident attended a public consultation and submitted feedback for service improvements.',
+          locationText: `${config.cityName} Civic Hall`,
+          participantName: citizen.name,
+          participantEmail: citizen.email,
+          participantPhone: citizen.phone,
+          rewardAmount: '1.0000000',
+          rewardAssetCode: 'XLM',
+          rewardMemo: `${config.slug.slice(0, 3).toUpperCase()}-ACT-0001`,
+          status: 'APPROVED',
+          verificationNote: 'Attendance was confirmed by staff sign-in sheet.'
+        },
+        {
+          tenantId: tenant.id,
+          citizenId: citizen.id,
+          type: 'CLEANUP',
+          title: 'Community cleanup documentation',
+          description: 'Cleanup evidence submitted for staff review before reward payout.',
+          locationText: `${config.cityName} riverside walkway`,
+          participantName: citizen.name,
+          participantEmail: citizen.email,
+          participantPhone: citizen.phone,
+          rewardAmount: '2.0000000',
+          rewardAssetCode: 'XLM',
+          rewardMemo: `${config.slug.slice(0, 3).toUpperCase()}-CLN-0001`,
+          status: 'REVIEWING',
+          verificationNote: 'Pending photo and location verification.'
+        }
+      ]
+    });
+
+    await prisma.transparencyEntry.createMany({
+      data: [
+        {
+          tenantId: tenant.id,
+          referenceCode: `${config.slug.slice(0, 3).toUpperCase()}-LED-0001`,
+          entryType: 'BUDGET_ALLOCATION',
+          status: 'PUBLISHED',
+          title: 'Road maintenance allocation',
+          description: 'Published allocation for road patching, drainage clearing, and safety markings.',
+          department: config.departments[1]?.name || 'Operations',
+          recipientName: 'Public Works Program',
+          amount: '100.0000000',
+          assetCode: 'XLM',
+          memo: `${config.slug.slice(0, 3).toUpperCase()}-LED-0001`,
+          occurredAt: new Date()
+        },
+        {
+          tenantId: tenant.id,
+          referenceCode: `${config.slug.slice(0, 3).toUpperCase()}-LED-0002`,
+          entryType: 'GRANT',
+          status: 'PUBLISHED',
+          title: 'Community cleanup incentive pool',
+          description: 'Reward pool reserved for verified cleanup actions and environmental participation.',
+          department: config.departments[2]?.name || 'Environment Office',
+          recipientName: 'Civic Rewards Program',
+          amount: '50.0000000',
+          assetCode: 'XLM',
+          memo: `${config.slug.slice(0, 3).toUpperCase()}-LED-0002`,
+          occurredAt: new Date()
+        }
+      ]
+    });
+
+    await prisma.propertyTaxReceipt.createMany({
+      data: [
+        {
+          tenantId: tenant.id,
+          citizenId: citizen.id,
+          referenceCode: `${config.slug.slice(0, 3).toUpperCase()}-TAX-0001`,
+          taxpayerName: citizen.name,
+          taxpayerEmail: citizen.email,
+          propertyIndexNumber: `${config.slug.slice(0, 3).toUpperCase()}-PIN-2026-001`,
+          propertyAddress: `Sample residential property, ${config.cityName}`,
+          taxYear: 2026,
+          amount: '15.0000000',
+          assetCode: 'XLM',
+          status: 'ISSUED',
+          issuedAt: new Date()
+        }
+      ]
+    });
+
     for (const reportConfig of config.reports) {
       const category = await prisma.reportCategory.findFirstOrThrow({ where: { tenantId: tenant.id, name: reportConfig.category } });
       const department = await prisma.department.findFirstOrThrow({ where: { tenantId: tenant.id, name: reportConfig.department } });

@@ -7,11 +7,12 @@ import { Card } from '@/components/ui/card';
 import { Input, Textarea } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { StatCard } from '@/components/ui/stat-card';
+import { StellarProgramsDashboard } from '@/components/admin/stellar-programs-dashboard';
 import { formatDate } from '@/lib/format';
 
 const reportStatuses = ['SUBMITTED', 'REVIEWING', 'ASSIGNED', 'IN_PROGRESS', 'RESOLVED', 'REJECTED'];
 const reportPriorities = ['LOW', 'NORMAL', 'HIGH', 'URGENT'];
-const mainTabs = ['reports', 'payments', 'content', 'settings'] as const;
+const mainTabs = ['reports', 'payments', 'stellar-programs', 'content', 'settings'] as const;
 const contentTabs = ['services', 'hotlines', 'news', 'categories', 'departments', 'users'] as const;
 
 type MainTab = (typeof mainTabs)[number];
@@ -411,7 +412,7 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
                 activeTab === tab ? 'btn-primary' : 'text-slate-600 hover:bg-blue-50 hover:text-[var(--brand)]'
               }`}
             >
-              {tab === 'reports' ? 'Reports' : tab === 'payments' ? 'Payments' : tab === 'content' ? 'Content' : 'Settings'}
+              {tab === 'reports' ? 'Reports' : tab === 'payments' ? 'Payments' : tab === 'stellar-programs' ? 'Stellar Programs' : tab === 'content' ? 'Content' : 'Settings'}
             </button>
           ))}
         </div>
@@ -610,6 +611,10 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
 
         {activeTab === 'payments' ? (
           <PaymentDashboard tenantSlug={tenantSlug} />
+        ) : null}
+
+        {activeTab === 'stellar-programs' ? (
+          <StellarProgramsDashboard tenantSlug={tenantSlug} />
         ) : null}
 
         {activeTab === 'content' ? (

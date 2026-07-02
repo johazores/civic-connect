@@ -250,3 +250,28 @@ POST /api/tenant/[tenantSlug]/stellar/wallet/check
 Staff can generate/fund/check real Testnet tenant wallets under **Admin → Settings**, manage service fees under **Admin → Content → Services**, and review verified payment records under **Admin → Payments**.
 
 See `docs/stellar-payment-implementation.md` for the full implementation guide.
+
+## Stellar Civic Programs
+
+The platform now includes additional StellarX-aligned civic modules:
+
+- Civic Participation Rewards
+- Environmental Cleanup Rewards
+- Municipal Budget Transparency
+- Digital Property Tax Receipts
+
+Start from `docs/stellar-civic-programs.md` after configuring the tenant Testnet wallet in `Admin → Settings`. The civic platform remains the core product; Stellar is used only for verifiable payment receipts, reward payout proof, public fund records, and receipt hashes.
+
+New public routes:
+
+```text
+/[tenant]/civic-actions
+/[tenant]/transparency
+/[tenant]/tax-receipts
+```
+
+Admin route:
+
+```text
+/[tenant]/admin → Stellar Programs
+```

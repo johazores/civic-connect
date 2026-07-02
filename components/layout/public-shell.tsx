@@ -33,6 +33,9 @@ export function PublicShell({
     { href: `/${tenant.slug}/track`, label: 'Track' },
     { href: `/${tenant.slug}/services`, label: 'Services' },
     { href: `/${tenant.slug}/payments`, label: 'Payments' },
+    { href: `/${tenant.slug}/civic-actions`, label: 'Rewards' },
+    { href: `/${tenant.slug}/transparency`, label: 'Transparency' },
+    { href: `/${tenant.slug}/tax-receipts`, label: 'Tax Receipts' },
     { href: `/${tenant.slug}/hotlines`, label: 'Hotlines' },
     { href: `/${tenant.slug}/news`, label: 'News' },
     { href: `/${tenant.slug}/dashboard`, label: 'Account' }
