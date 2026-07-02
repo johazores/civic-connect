@@ -1,6 +1,40 @@
 import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
-import { MobileBottomNav, MobileMenu, type NavGroup } from '@/components/layout/mobile-menu';
+import {
+  FiAward,
+  FiBell,
+  FiCreditCard,
+  FiFileText,
+  FiFlag,
+  FiGrid,
+  FiHash,
+  FiHome,
+  FiPhoneCall,
+  FiSearch,
+  FiShield,
+  FiUser
+} from 'react-icons/fi';
+import type { IconType } from 'react-icons';
+import { MobileBottomNav, MobileMenu, type NavGroup, type NavIconKey } from '@/components/layout/mobile-menu';
+
+const iconMap: Record<NavIconKey, IconType> = {
+  home: FiHome,
+  services: FiGrid,
+  payments: FiCreditCard,
+  tax: FiFileText,
+  report: FiFlag,
+  track: FiSearch,
+  account: FiUser,
+  rewards: FiAward,
+  transparency: FiHash,
+  news: FiBell,
+  hotlines: FiPhoneCall
+};
+
+function NavIcon({ name, className }: { name?: NavIconKey; className?: string }) {
+  const Icon = name ? iconMap[name] : FiShield;
+  return <Icon aria-hidden="true" className={className || 'h-4 w-4'} />;
+}
 
 function initials(value: string) {
   return value
@@ -32,44 +66,44 @@ export function PublicShell({
       label: 'Services',
       description: 'Requests, payments, and public service access',
       items: [
-        { href: `/${tenant.slug}/services`, label: 'Service directory', description: 'Permits, forms, fees, and city services', icon: '▣' },
-        { href: `/${tenant.slug}/payments`, label: 'Service payments', description: 'Pay fees and verify Stellar receipts', icon: '◎' },
-        { href: `/${tenant.slug}/tax-receipts`, label: 'Tax receipts', description: 'Search digital property tax receipts', icon: '◇' }
+        { href: `/${tenant.slug}/services`, label: 'Service directory', description: 'Permits, forms, fees, and city services', icon: 'services' },
+        { href: `/${tenant.slug}/payments`, label: 'Service payments', description: 'Pay fees and verify Stellar receipts', icon: 'payments' },
+        { href: `/${tenant.slug}/tax-receipts`, label: 'Tax receipts', description: 'Search digital property tax receipts', icon: 'tax' }
       ]
     },
     {
       label: 'Requests',
       description: 'Submit and monitor citizen concerns',
       items: [
-        { href: `/${tenant.slug}/report`, label: 'Report an issue', description: 'Roads, waste, lights, drainage, and safety', icon: '+' },
-        { href: `/${tenant.slug}/track`, label: 'Track request', description: 'Follow status by reference number', icon: '→' },
-        { href: `/${tenant.slug}/dashboard`, label: 'My account', description: 'Your reports, updates, and receipts', icon: '◌' }
+        { href: `/${tenant.slug}/report`, label: 'Report an issue', description: 'Roads, waste, lights, drainage, and safety', icon: 'report' },
+        { href: `/${tenant.slug}/track`, label: 'Track request', description: 'Follow status by reference number', icon: 'track' },
+        { href: `/${tenant.slug}/dashboard`, label: 'My account', description: 'Your reports, updates, and receipts', icon: 'account' }
       ]
     },
     {
       label: 'Civic Trust',
       description: 'Rewards and public financial transparency',
       items: [
-        { href: `/${tenant.slug}/civic-actions`, label: 'Civic rewards', description: 'Submit verified participation actions', icon: '★' },
-        { href: `/${tenant.slug}/transparency`, label: 'Budget transparency', description: 'View public disbursements and ledger records', icon: '⌁' }
+        { href: `/${tenant.slug}/civic-actions`, label: 'Civic rewards', description: 'Submit verified participation actions', icon: 'rewards' },
+        { href: `/${tenant.slug}/transparency`, label: 'Budget transparency', description: 'View public disbursements and ledger records', icon: 'transparency' }
       ]
     },
     {
       label: 'Updates',
       description: 'Official announcements and contacts',
       items: [
-        { href: `/${tenant.slug}/news`, label: 'News', description: 'Announcements from the city office', icon: '◐' },
-        { href: `/${tenant.slug}/hotlines`, label: 'Hotlines', description: 'Emergency and support contacts', icon: '☎' }
+        { href: `/${tenant.slug}/news`, label: 'News', description: 'Announcements from the city office', icon: 'news' },
+        { href: `/${tenant.slug}/hotlines`, label: 'Hotlines', description: 'Emergency and support contacts', icon: 'hotlines' }
       ]
     }
   ];
 
   const bottomItems = [
-    { href: `/${tenant.slug}`, label: 'Home', icon: '⌂' },
-    { href: `/${tenant.slug}/report`, label: 'Report', icon: '+' },
-    { href: `/${tenant.slug}/track`, label: 'Track', icon: '→' },
-    { href: `/${tenant.slug}/payments`, label: 'Pay', icon: '◎' },
-    { href: `/${tenant.slug}/dashboard`, label: 'Me', icon: '◌' }
+    { href: `/${tenant.slug}`, label: 'Home', icon: 'home' as const },
+    { href: `/${tenant.slug}/report`, label: 'Report', icon: 'report' as const },
+    { href: `/${tenant.slug}/track`, label: 'Track', icon: 'track' as const },
+    { href: `/${tenant.slug}/payments`, label: 'Pay', icon: 'payments' as const },
+    { href: `/${tenant.slug}/dashboard`, label: 'Me', icon: 'account' as const }
   ];
 
   return (
@@ -102,10 +136,9 @@ export function PublicShell({
               <div key={group.label} className="group relative">
                 <button
                   type="button"
-                  className="inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-extrabold text-slate-700 transition hover:bg-slate-100 hover:text-[var(--tenant-primary)] group-focus-within:bg-slate-100"
+                  className="rounded-full px-4 py-2 text-sm font-extrabold text-slate-700 transition hover:bg-slate-100 hover:text-[var(--tenant-primary)] group-focus-within:bg-slate-100"
                 >
                   {group.label}
-                  <span className="text-xs text-slate-400 transition group-hover:rotate-180">⌄</span>
                 </button>
                 <div className="invisible absolute left-1/2 top-full z-50 w-[23rem] -translate-x-1/2 translate-y-3 rounded-[1.5rem] border border-slate-200/90 bg-white/96 p-2 opacity-0 shadow-[0_28px_80px_rgba(15,23,42,0.16)] backdrop-blur-2xl transition duration-150 group-hover:visible group-hover:translate-y-2 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-2 group-focus-within:opacity-100">
                   <div className="px-3 pb-2 pt-2">
@@ -115,8 +148,8 @@ export function PublicShell({
                   <div className="grid gap-1">
                     {group.items.map((item) => (
                       <Link key={item.href} href={item.href} className="group/item flex gap-3 rounded-[1.15rem] p-3 transition hover:bg-blue-50/80">
-                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sm font-black text-slate-700 transition group-hover/item:bg-white group-hover/item:text-[var(--tenant-primary)]">
-                          {item.icon}
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition group-hover/item:bg-white group-hover/item:text-[var(--tenant-primary)]">
+                          <NavIcon name={item.icon} className="h-4 w-4" />
                         </span>
                         <span>
                           <span className="block text-sm font-black text-slate-950">{item.label}</span>
@@ -134,7 +167,8 @@ export function PublicShell({
             <Link href={`/${tenant.slug}/login`} className="inline-flex min-h-10 items-center justify-center rounded-full px-4 py-2 text-sm font-extrabold btn-secondary">
               Sign in
             </Link>
-            <Link href={`/${tenant.slug}/report`} className="inline-flex min-h-10 items-center justify-center rounded-full px-5 py-2 text-sm font-extrabold btn-primary">
+            <Link href={`/${tenant.slug}/report`} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full px-5 py-2 text-sm font-extrabold btn-primary">
+              <FiFlag aria-hidden="true" className="h-4 w-4" />
               Report issue
             </Link>
           </div>
