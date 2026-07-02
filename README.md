@@ -121,6 +121,25 @@ citizen12345
 
 Replace all starter passwords before using the app with real users.
 
+
+## Stellar Testnet Setup for Beginners
+
+For normal Stellar testing, do **not** manually type values into the receiving public key or secret key fields.
+
+Use this flow:
+
+```text
+Admin → Settings → Real Stellar Testnet wallet → Generate Testnet Wallet
+```
+
+After generation, the app should display a `G...` receiving public key automatically. The `S...` secret key field is only for importing an existing Testnet wallet, so it should usually stay blank.
+
+Read these first if you are new to Stellar:
+
+- `docs/stellar-beginner-wallet-guide.md`
+- `docs/stellar-testnet-setup.md`
+- `docs/stellar-payment-implementation.md`
+
 ## Verification
 
 ```bash

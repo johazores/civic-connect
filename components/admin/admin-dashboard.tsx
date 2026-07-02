@@ -1114,6 +1114,8 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
     setIsBusy(false);
   }
 
+  const hasWallet = Boolean(wallet?.receivingPublicKey);
+
   return (
     <div className="rounded-[1.5rem] bg-blue-50/70 p-5 ring-1 ring-blue-100">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -1121,7 +1123,8 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
           <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--brand)]">Real Stellar Testnet wallet</p>
           <h3 className="mt-2 text-xl font-extrabold text-slate-950">Tenant receiving wallet</h3>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-            Generate or import a tenant wallet for real Testnet payments. Secret keys are encrypted server-side and never returned by the API.
+            This is the official payment address for the tenant. For normal setup, do not type anything in the key fields. Click
+            <span className="font-extrabold text-slate-900"> Generate Testnet Wallet</span> and the app will create and fill the receiving public key automatically.
           </p>
         </div>
         <span className="rounded-full bg-white px-4 py-2 text-xs font-extrabold text-slate-700 ring-1 ring-slate-200">
@@ -1133,10 +1136,33 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
       {success ? <p className="mt-4 rounded-2xl bg-emerald-50 p-4 text-sm font-bold text-emerald-700 ring-1 ring-emerald-200">{success}</p> : null}
       {wallet?.error ? <p className="mt-4 rounded-2xl bg-amber-50 p-4 text-sm font-bold text-amber-800 ring-1 ring-amber-200">{wallet.error}</p> : null}
 
+      {!hasWallet ? (
+        <div className="mt-5 rounded-[1.25rem] bg-white p-5 ring-1 ring-blue-100">
+          <p className="text-sm font-extrabold text-slate-950">No receiving wallet is configured yet.</p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">
+            This is why public payment requests show “The receiving Stellar wallet is not configured for this service.” Start with the button below.
+            It creates a real Testnet account, saves the public key, encrypts the secret key on the server, and requests Testnet XLM from Friendbot.
+          </p>
+          <button disabled={isBusy} onClick={() => walletAction('/generate', { fund: true }, 'Generated and funded a real Stellar Testnet receiving wallet.')} className="mt-4 rounded-xl px-5 py-3 text-sm font-extrabold btn-primary disabled:opacity-60">
+            Generate Testnet Wallet
+          </button>
+        </div>
+      ) : null}
+
       <div className="mt-5 grid gap-4 md:grid-cols-3">
-        <InfoPanel label="Network" value={wallet?.network || network} note="Configured network" />
-        <InfoPanel label="Stored secret" value={wallet?.hasStoredSecret ? 'Encrypted' : 'Not stored'} note="Never exposed to clients" />
-        <InfoPanel label="Last checked" value={wallet?.lastCheckedAt ? formatDate(wallet.lastCheckedAt) : 'Not checked'} note={wallet?.lastFundedAt ? `Funded ${formatDate(wallet.lastFundedAt)}` : 'Friendbot available on Testnet'} />
+        <InfoPanel label="Network" value={wallet?.network || network} note="Use Testnet while developing" />
+        <InfoPanel label="Stored secret" value={wallet?.hasStoredSecret ? 'Encrypted' : 'Not stored'} note="Never exposed to citizens" />
+        <InfoPanel label="Last checked" value={wallet?.lastCheckedAt ? formatDate(wallet.lastCheckedAt) : 'Not checked'} note={wallet?.lastFundedAt ? `Funded ${formatDate(wallet.lastFundedAt)}` : 'Friendbot funds Testnet accounts'} />
+      </div>
+
+      <div className="mt-4 rounded-[1.25rem] bg-white p-4 ring-1 ring-blue-100">
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Current receiving public key</p>
+        <p className="mt-2 break-all font-mono text-sm font-bold text-slate-950">
+          {wallet?.receivingPublicKey || 'Not configured yet. Click Generate Testnet Wallet.'}
+        </p>
+        <p className="mt-2 text-xs font-semibold text-slate-500">
+          This is the destination address used in SEP-7 payment QR codes. It starts with G when configured.
+        </p>
       </div>
 
       {wallet?.balances?.length ? (
@@ -1150,54 +1176,66 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
         </div>
       ) : null}
 
-      <div className="mt-5 grid gap-4">
-        <div>
-          <label className="text-sm font-extrabold text-slate-700">Receiving public key</label>
-          <Input value={publicKey} onChange={(event) => setPublicKey(event.target.value)} placeholder="G..." />
-        </div>
-        <div>
-          <label className="text-sm font-extrabold text-slate-700">Secret key import</label>
-          <Input type="password" value={secretKey} onChange={(event) => setSecretKey(event.target.value)} placeholder="S... only needed when importing an existing Testnet wallet" />
-          <p className="mt-2 text-xs font-semibold text-slate-500">Leave blank to keep the current encrypted secret.</p>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2">
+      <div className="mt-5 rounded-[1.25rem] bg-white p-5 ring-1 ring-blue-100">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <label className="text-sm font-extrabold text-slate-700">Network</label>
-            <Select value={network} onChange={(event) => setNetwork(event.target.value)}>
-              <option value="TESTNET">Testnet</option>
-              <option value="MAINNET">Mainnet-ready config</option>
-            </Select>
+            <h4 className="text-base font-extrabold text-slate-950">Advanced wallet configuration</h4>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
+              Use this only when importing an existing Testnet wallet or changing network endpoints. New users should use Generate Testnet Wallet instead.
+            </p>
           </div>
-          <div>
-            <label className="text-sm font-extrabold text-slate-700">Network passphrase</label>
-            <Input value={networkPassphrase} onChange={(event) => setNetworkPassphrase(event.target.value)} />
-          </div>
+          <button disabled={isBusy} onClick={() => walletAction('/check', {}, 'Wallet status checked on Horizon.')} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary disabled:opacity-60">
+            Check Horizon Status
+          </button>
         </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          <div>
-            <label className="text-sm font-extrabold text-slate-700">Horizon URL</label>
-            <Input value={horizonUrl} onChange={(event) => setHorizonUrl(event.target.value)} />
-          </div>
-          <div>
-            <label className="text-sm font-extrabold text-slate-700">Friendbot URL</label>
-            <Input value={friendbotUrl} onChange={(event) => setFriendbotUrl(event.target.value)} />
-          </div>
-        </div>
-      </div>
 
-      <div className="mt-5 flex flex-wrap gap-2">
-        <button disabled={isBusy} onClick={() => walletAction('/generate', { fund: true }, 'Generated and funded a real Stellar Testnet receiving wallet.')} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-primary disabled:opacity-60">
-          Generate Testnet Wallet
-        </button>
-        <button disabled={isBusy} onClick={() => walletAction('/fund', {}, 'Friendbot funding request completed.')} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary disabled:opacity-60">
-          Fund with Friendbot
-        </button>
-        <button disabled={isBusy} onClick={() => walletAction('/check', {}, 'Wallet status checked on Horizon.')} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary disabled:opacity-60">
-          Check Horizon Status
-        </button>
-        <button disabled={isBusy} onClick={() => walletAction('', { publicKey, secretKey, network, horizonUrl, friendbotUrl, networkPassphrase }, 'Stellar wallet settings saved.')} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary disabled:opacity-60">
-          Save Wallet Config
-        </button>
+        <div className="mt-5 grid gap-4">
+          <div>
+            <label className="text-sm font-extrabold text-slate-700">Existing public key import</label>
+            <Input value={publicKey} onChange={(event) => setPublicKey(event.target.value)} placeholder="Paste a G... account address only if you already created a Testnet wallet elsewhere" />
+            <p className="mt-2 text-xs font-semibold text-slate-500">Normal setup fills this automatically after generation.</p>
+          </div>
+          <div>
+            <label className="text-sm font-extrabold text-slate-700">Existing secret key import</label>
+            <Input type="password" value={secretKey} onChange={(event) => setSecretKey(event.target.value)} placeholder="Optional S... secret seed for importing an existing Testnet wallet" />
+            <p className="mt-2 text-xs font-semibold text-slate-500">Leave blank unless you are importing an existing wallet. Secret keys are encrypted server-side and never returned by the API.</p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="text-sm font-extrabold text-slate-700">Network</label>
+              <Select value={network} onChange={(event) => setNetwork(event.target.value)}>
+                <option value="TESTNET">Testnet</option>
+                <option value="MAINNET">Mainnet-ready config</option>
+              </Select>
+            </div>
+            <div>
+              <label className="text-sm font-extrabold text-slate-700">Network passphrase</label>
+              <Input value={networkPassphrase} onChange={(event) => setNetworkPassphrase(event.target.value)} />
+            </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="text-sm font-extrabold text-slate-700">Horizon URL</label>
+              <Input value={horizonUrl} onChange={(event) => setHorizonUrl(event.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-extrabold text-slate-700">Friendbot URL</label>
+              <Input value={friendbotUrl} onChange={(event) => setFriendbotUrl(event.target.value)} />
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-5 flex flex-wrap gap-2">
+          <button disabled={isBusy} onClick={() => walletAction('/generate', { fund: true }, 'Generated and funded a real Stellar Testnet receiving wallet.')} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-primary disabled:opacity-60">
+            Generate New Testnet Wallet
+          </button>
+          <button disabled={isBusy || !wallet?.receivingPublicKey} onClick={() => walletAction('/fund', {}, 'Friendbot funding request completed.')} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary disabled:opacity-60">
+            Fund with Friendbot
+          </button>
+          <button disabled={isBusy} onClick={() => walletAction('', { publicKey, secretKey, network, horizonUrl, friendbotUrl, networkPassphrase }, 'Stellar wallet settings saved.')} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary disabled:opacity-60">
+            Save Advanced Config
+          </button>
+        </div>
       </div>
     </div>
   );
