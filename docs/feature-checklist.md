@@ -58,3 +58,17 @@
 - Transaction verification: planned
 - Public receipt page: planned
 - Staff payment dashboard: planned
+
+## StellarX Proof-of-Payment Coverage
+
+- [x] Service fee management
+- [x] Tenant-specific Stellar Testnet receiving wallet
+- [x] Payment intent records
+- [x] SEP-7 payment URI generation
+- [x] QR code generation for wallet payment requests
+- [x] Horizon transaction verification
+- [x] Permanent transaction hash storage
+- [x] Public payment receipt page
+- [x] Admin payment dashboard
+- [x] Payment CSV export
+- [x] Architecture kept separate from reports/content modules

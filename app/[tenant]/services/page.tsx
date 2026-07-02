@@ -25,7 +25,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ tenan
           <h1 className="heading-display mt-4 text-4xl md:text-6xl">City services directory</h1>
           <p className="mt-4 max-w-2xl text-base font-medium leading-7 text-slate-600">Browse available public services and find the right office for your concern.</p>
           <div className="mt-8">
-            <ServicesGrid services={services} />
+            <ServicesGrid services={services.map((service: any) => ({ ...service, feeAmount: service.feeAmount ? String(service.feeAmount) : null }))} tenantSlug={tenant.slug} />
           </div>
         </div>
       </main>

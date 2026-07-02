@@ -25,7 +25,7 @@ export default async function TenantHomePage({ params }: { params: Promise<{ ten
               <h2 className="mt-3 text-3xl font-extrabold tracking-[-0.04em] text-slate-950">Find city services</h2>
             </div>
           </div>
-          <ServicesGrid services={data.services} />
+          <ServicesGrid services={data.services.map((service: any) => ({ ...service, feeAmount: service.feeAmount ? String(service.feeAmount) : null }))} tenantSlug={data.tenant.slug} />
         </div>
       </section>
       <HotlinesSection hotlines={data.hotlines} tenantSlug={data.tenant.slug} />

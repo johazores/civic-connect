@@ -28,6 +28,14 @@ enum ReportPriority {
   URGENT
 }
 
+enum PaymentStatus {
+  PENDING
+  VERIFIED
+  FAILED
+  CANCELLED
+  EXPIRED
+}
+
 model Tenant {
   id          String   @id @default(cuid())
   slug        String   @unique
@@ -39,6 +47,11 @@ model Tenant {
   email       String?
   phone       String?
   primaryColor String  @default("#1f6feb")
+  stellarReceivingPublicKey String?
+  stellarNetwork String @default("TESTNET")
+  stellarHorizonUrl String @default("https://horizon-testnet.stellar.org")
+  stellarDefaultAssetCode String @default("XLM")
+  stellarDefaultAssetIssuer String?
   isActive    Boolean @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -51,6 +64,7 @@ model Tenant {
   services    Service[]
   hotlines    Hotline[]
   newsPosts   NewsPost[]
+  paymentIntents PaymentIntent[]
 }
 
 model User {
@@ -85,6 +99,7 @@ model Citizen {
 
   tenant  Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   reports Report[]
+  paymentIntents PaymentIntent[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
@@ -190,14 +205,56 @@ model Service {
   description String
   department  String?
   linkUrl     String?
+  paymentRequired Boolean @default(false)
+  feeAmount Decimal? @db.Decimal(12, 7)
+  feeAssetCode String @default("XLM")
+  feeAssetIssuer String?
+  receivingPublicKey String?
   isActive    Boolean  @default(true)
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  paymentIntents PaymentIntent[]
 
   @@index([tenantId])
+}
+
+model PaymentIntent {
+  id String @id @default(cuid())
+  tenantId String
+  citizenId String?
+  serviceId String
+  referenceCode String @unique
+  payerName String
+  payerEmail String?
+  payerPhone String?
+  amount Decimal @db.Decimal(12, 7)
+  assetCode String @default("XLM")
+  assetIssuer String?
+  destinationPublicKey String
+  memo String
+  sep7Uri String
+  status PaymentStatus @default(PENDING)
+  transactionHash String? @unique
+  payerPublicKey String?
+  ledger Int?
+  failureReason String?
+  paidAt DateTime?
+  verifiedAt DateTime?
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  citizen Citizen? @relation(fields: [citizenId], references: [id], onDelete: SetNull)
+  service Service @relation(fields: [serviceId], references: [id])
+
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, serviceId])
+  @@index([tenantId, createdAt])
 }
 
 model Hotline {

@@ -16,6 +16,7 @@ const tenantConfigs = [
     email: 'citizen.services@metrocity.gov.ph',
     phone: '+63 2 8842 1100',
     primaryColor: '#2563eb',
+    stellarReceivingPublicKey: 'GBPIMUEJFYS7RT23QO2ACH2JMKGXLXZI4E5ACBSQMF32RKZ5H3SVNL5F',
     admin: { name: 'Operations Administrator', email: 'admin@metrocity.local' },
     citizen: { name: 'Sofia Cruz', email: 'sofia.cruz@metrocity.local', phone: '+63 917 428 1934' },
     departments: [
@@ -33,11 +34,11 @@ const tenantConfigs = [
       ['Permits and Services', 'Business permits, public documents, service counters, and request routing.']
     ],
     services: [
-      { title: 'Business Permit Assistance', description: 'Start or renew local business permit requests and find the required office checklist.', department: 'Business Permits Office', linkUrl: '', sortOrder: 1 },
-      { title: 'Real Property Tax Information', description: 'Find assessment guidance, payment instructions, and document requirements for property-related concerns.', department: 'Citizen Services Office', linkUrl: '', sortOrder: 2 },
-      { title: 'Citizen Charter and Forms', description: 'Access service standards, public forms, request requirements, and processing information.', department: 'Citizen Services Office', linkUrl: '', sortOrder: 3 },
-      { title: 'Road and Drainage Requests', description: 'Route road, drainage, sidewalk, and facility concerns to the public works team.', department: 'Public Works Department', linkUrl: '', sortOrder: 4 },
-      { title: 'Environmental Services', description: 'Request waste collection support, cleanup coordination, and sanitation-related assistance.', department: 'Environment and Sanitation Office', linkUrl: '', sortOrder: 5 }
+      { title: 'Business Permit Assistance', description: 'Start or renew local business permit requests and find the required office checklist.', department: 'Business Permits Office', linkUrl: '', sortOrder: 1, paymentRequired: true, feeAmount: '25.0000000', feeAssetCode: 'XLM' },
+      { title: 'Real Property Tax Information', description: 'Find assessment guidance, payment instructions, and document requirements for property-related concerns.', department: 'Citizen Services Office', linkUrl: '', sortOrder: 2, paymentRequired: true, feeAmount: '15.0000000', feeAssetCode: 'XLM' },
+      { title: 'Citizen Charter and Forms', description: 'Access service standards, public forms, request requirements, and processing information.', department: 'Citizen Services Office', linkUrl: '', sortOrder: 3, paymentRequired: false, feeAmount: null, feeAssetCode: 'XLM' },
+      { title: 'Road and Drainage Requests', description: 'Route road, drainage, sidewalk, and facility concerns to the public works team.', department: 'Public Works Department', linkUrl: '', sortOrder: 4, paymentRequired: false, feeAmount: null, feeAssetCode: 'XLM' },
+      { title: 'Environmental Services', description: 'Request waste collection support, cleanup coordination, and sanitation-related assistance.', department: 'Environment and Sanitation Office', linkUrl: '', sortOrder: 5, paymentRequired: false, feeAmount: null, feeAssetCode: 'XLM' }
     ],
     hotlines: [
       { name: 'Emergency Response', description: 'Immediate emergency assistance and response coordination.', phone: '911', isEmergency: true, sortOrder: 1 },
@@ -95,6 +96,7 @@ const tenantConfigs = [
     email: 'citizen.services@lagunaprovince.gov.ph',
     phone: '+63 49 530 1000',
     primaryColor: '#2563eb',
+    stellarReceivingPublicKey: 'GBPIMUEJFYS7RT23QO2ACH2JMKGXLXZI4E5ACBSQMF32RKZ5H3SVNL5F',
     admin: { name: 'Provincial Operations Administrator', email: 'admin@laguna.local' },
     citizen: { name: 'Ana Reyes', email: 'ana.reyes@laguna.local', phone: '+63 918 225 7741' },
     departments: [
@@ -108,9 +110,9 @@ const tenantConfigs = [
       ['Safety Concern', 'Public safety issues that need staff review.']
     ],
     services: [
-      { title: 'Provincial Helpdesk Requests', description: 'Route general citizen concerns to the provincial helpdesk team for coordination.', department: 'Provincial Helpdesk', linkUrl: '', sortOrder: 1 },
-      { title: 'Engineering Coordination', description: 'Coordinate road, sidewalk, drainage, lighting, and public facility concerns.', department: 'Engineering Coordination Office', linkUrl: '', sortOrder: 2 },
-      { title: 'Public Documents and Forms', description: 'Publish forms, advisories, and public information links for residents.', department: 'Provincial Helpdesk', linkUrl: '', sortOrder: 3 }
+      { title: 'Provincial Helpdesk Requests', description: 'Route general citizen concerns to the provincial helpdesk team for coordination.', department: 'Provincial Helpdesk', linkUrl: '', sortOrder: 1, paymentRequired: false, feeAmount: null, feeAssetCode: 'XLM' },
+      { title: 'Engineering Coordination', description: 'Coordinate road, sidewalk, drainage, lighting, and public facility concerns.', department: 'Engineering Coordination Office', linkUrl: '', sortOrder: 2, paymentRequired: true, feeAmount: '10.0000000', feeAssetCode: 'XLM' },
+      { title: 'Public Documents and Forms', description: 'Publish forms, advisories, and public information links for residents.', department: 'Provincial Helpdesk', linkUrl: '', sortOrder: 3, paymentRequired: true, feeAmount: '5.0000000', feeAssetCode: 'XLM' }
     ],
     hotlines: [
       { name: 'Emergency Response', description: 'Urgent emergency assistance and response coordination.', phone: '911', isEmergency: true, sortOrder: 1 },
@@ -164,6 +166,11 @@ async function main() {
         email: config.email,
         phone: config.phone,
         primaryColor: config.primaryColor,
+        stellarReceivingPublicKey: config.stellarReceivingPublicKey,
+        stellarNetwork: 'TESTNET',
+        stellarHorizonUrl: 'https://horizon-testnet.stellar.org',
+        stellarDefaultAssetCode: 'XLM',
+        stellarDefaultAssetIssuer: null,
         isActive: true
       },
       create: {
@@ -176,6 +183,11 @@ async function main() {
         email: config.email,
         phone: config.phone,
         primaryColor: config.primaryColor,
+        stellarReceivingPublicKey: config.stellarReceivingPublicKey,
+        stellarNetwork: 'TESTNET',
+        stellarHorizonUrl: 'https://horizon-testnet.stellar.org',
+        stellarDefaultAssetCode: 'XLM',
+        stellarDefaultAssetIssuer: null,
         isActive: true
       }
     });
@@ -208,12 +220,13 @@ async function main() {
       });
     }
 
+    await prisma.paymentIntent.deleteMany({ where: { tenantId: tenant.id } });
     await prisma.service.deleteMany({ where: { tenantId: tenant.id } });
     await prisma.hotline.deleteMany({ where: { tenantId: tenant.id } });
     await prisma.newsPost.deleteMany({ where: { tenantId: tenant.id } });
 
     await prisma.service.createMany({
-      data: config.services.map((service) => ({ tenantId: tenant.id, ...service, isActive: true }))
+      data: config.services.map((service) => ({ tenantId: tenant.id, ...service, isActive: true, feeAssetIssuer: null, receivingPublicKey: null }))
     });
 
     await prisma.hotline.createMany({

@@ -32,6 +32,7 @@ export function PublicShell({
     { href: `/${tenant.slug}/report`, label: 'Report' },
     { href: `/${tenant.slug}/track`, label: 'Track' },
     { href: `/${tenant.slug}/services`, label: 'Services' },
+    { href: `/${tenant.slug}/payments`, label: 'Payments' },
     { href: `/${tenant.slug}/hotlines`, label: 'Hotlines' },
     { href: `/${tenant.slug}/news`, label: 'News' },
     { href: `/${tenant.slug}/dashboard`, label: 'Account' }

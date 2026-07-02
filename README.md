@@ -183,3 +183,31 @@ Start with:
 - `docs/product-review.md`
 - `docs/stellarx-fit-review.md`
 - `docs/stellarx-implementation-plan.md`
+
+
+## StellarX Direction Implemented
+
+The project now includes the first StellarX-aligned module: **Proof-of-Payment for Government Services**.
+
+Implemented payment routes:
+
+```text
+/[tenant]/payments
+/[tenant]/payments/[referenceCode]
+/[tenant]/receipts/[referenceCode]
+```
+
+Implemented payment APIs:
+
+```text
+POST /api/tenant/[tenantSlug]/payments
+GET  /api/tenant/[tenantSlug]/payments
+GET  /api/tenant/[tenantSlug]/payments/[referenceCode]
+GET  /api/tenant/[tenantSlug]/payments/[referenceCode]/qr
+POST /api/tenant/[tenantSlug]/payments/[referenceCode]/verify
+GET  /api/tenant/[tenantSlug]/payments/export
+```
+
+Staff can manage Stellar settings under **Admin → Settings** and service fees under **Admin → Content → Services**. Staff can review payment records under **Admin → Payments**.
+
+See `docs/stellar-payment-implementation.md` for the full implementation guide.

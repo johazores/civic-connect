@@ -35,7 +35,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           address: asOptionalString(body.address),
           email: asOptionalString(body.email),
           phone: asOptionalString(body.phone),
-          primaryColor: asString(body.primaryColor, auth.tenant.primaryColor)
+          primaryColor: asString(body.primaryColor, auth.tenant.primaryColor),
+          stellarReceivingPublicKey: asOptionalString(body.stellarReceivingPublicKey),
+          stellarNetwork: asString(body.stellarNetwork, 'TESTNET') || 'TESTNET',
+          stellarHorizonUrl: asString(body.stellarHorizonUrl, 'https://horizon-testnet.stellar.org') || 'https://horizon-testnet.stellar.org',
+          stellarDefaultAssetCode: asString(body.stellarDefaultAssetCode, 'XLM') || 'XLM',
+          stellarDefaultAssetIssuer: asOptionalString(body.stellarDefaultAssetIssuer)
         }
       });
 

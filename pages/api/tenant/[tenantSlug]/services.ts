@@ -52,6 +52,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           department: asOptionalString(body.department),
           linkUrl: asOptionalString(body.linkUrl),
           sortOrder: asNumber(body.sortOrder, 0),
+          paymentRequired: asBoolean(body.paymentRequired, false),
+          feeAmount: asNumber(body.feeAmount, 0) > 0 ? asNumber(body.feeAmount, 0).toFixed(7) : null,
+          feeAssetCode: asString(body.feeAssetCode, 'XLM') || 'XLM',
+          feeAssetIssuer: asOptionalString(body.feeAssetIssuer),
+          receivingPublicKey: asOptionalString(body.receivingPublicKey),
           isActive: asBoolean(body.isActive, true)
         }
       });

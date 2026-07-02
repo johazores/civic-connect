@@ -11,7 +11,7 @@ import { formatDate } from '@/lib/format';
 
 const reportStatuses = ['SUBMITTED', 'REVIEWING', 'ASSIGNED', 'IN_PROGRESS', 'RESOLVED', 'REJECTED'];
 const reportPriorities = ['LOW', 'NORMAL', 'HIGH', 'URGENT'];
-const mainTabs = ['reports', 'content', 'settings'] as const;
+const mainTabs = ['reports', 'payments', 'content', 'settings'] as const;
 const contentTabs = ['services', 'hotlines', 'news', 'categories', 'departments', 'users'] as const;
 
 type MainTab = (typeof mainTabs)[number];
@@ -28,6 +28,11 @@ type TenantSettings = {
   email: string | null;
   phone: string | null;
   primaryColor: string;
+  stellarReceivingPublicKey: string | null;
+  stellarNetwork: string;
+  stellarHorizonUrl: string;
+  stellarDefaultAssetCode: string;
+  stellarDefaultAssetIssuer: string | null;
 };
 
 type AdminReport = {
@@ -112,9 +117,14 @@ const contentConfig: Record<ContentTab, { label: string; endpoint: string; listU
       { name: 'department', label: 'Department label' },
       { name: 'linkUrl', label: 'Link URL' },
       { name: 'sortOrder', label: 'Sort order', type: 'number' },
+      { name: 'paymentRequired', label: 'Require Stellar payment', type: 'checkbox' },
+      { name: 'feeAmount', label: 'Service fee amount', type: 'number' },
+      { name: 'feeAssetCode', label: 'Fee asset code' },
+      { name: 'feeAssetIssuer', label: 'Asset issuer public key' },
+      { name: 'receivingPublicKey', label: 'Service receiving wallet' },
       { name: 'isActive', label: 'Active', type: 'checkbox' }
     ],
-    empty: { id: '', title: '', description: '', department: '', linkUrl: '', sortOrder: 0, isActive: true }
+    empty: { id: '', title: '', description: '', department: '', linkUrl: '', sortOrder: 0, paymentRequired: false, feeAmount: 0, feeAssetCode: 'XLM', feeAssetIssuer: '', receivingPublicKey: '', isActive: true }
   },
   hotlines: {
     label: 'Hotlines',
@@ -395,7 +405,7 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
                 activeTab === tab ? 'btn-primary' : 'text-slate-600 hover:bg-blue-50 hover:text-[var(--brand)]'
               }`}
             >
-              {tab === 'reports' ? 'Reports' : tab === 'content' ? 'Content' : 'Settings'}
+              {tab === 'reports' ? 'Reports' : tab === 'payments' ? 'Payments' : tab === 'content' ? 'Content' : 'Settings'}
             </button>
           ))}
         </div>
@@ -592,6 +602,10 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
           </section>
         ) : null}
 
+        {activeTab === 'payments' ? (
+          <PaymentDashboard tenantSlug={tenantSlug} />
+        ) : null}
+
         {activeTab === 'content' ? (
           <ContentStudio tenantSlug={tenantSlug} activeTab={activeTab} setError={setError} setSuccess={setSuccess} />
         ) : null}
@@ -611,6 +625,162 @@ function InfoPanel({ label, value, note }: { label: string; value: string; note:
       <p className="mt-1 font-extrabold text-slate-900">{value}</p>
       <p className="mt-1 text-sm text-slate-500">{note}</p>
     </div>
+  );
+}
+
+
+type AdminPayment = {
+  id: string;
+  referenceCode: string;
+  payerName: string;
+  payerEmail: string | null;
+  amount: string;
+  assetCode: string;
+  status: string;
+  transactionHash: string | null;
+  ledger: number | null;
+  createdAt: string;
+  verifiedAt: string | null;
+  service: { id: string; title: string };
+  citizen: { id: string; name: string; email: string } | null;
+};
+
+type PaymentStats = {
+  total: number;
+  pending: number;
+  verified: number;
+  failed: number;
+  totalVerifiedAmount: number;
+};
+
+function PaymentDashboard({ tenantSlug }: { tenantSlug: string }) {
+  const [payments, setPayments] = useState<AdminPayment[]>([]);
+  const [services, setServices] = useState<Array<{ id: string; title: string }>>([]);
+  const [stats, setStats] = useState<PaymentStats>({ total: 0, pending: 0, verified: 0, failed: 0, totalVerifiedAmount: 0 });
+  const [filters, setFilters] = useState({ search: '', status: 'ALL', serviceId: 'ALL' });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  async function loadPayments(nextFilters = filters) {
+    setIsLoading(true);
+    setError('');
+    const params = createFilterParams(nextFilters);
+    const response = await fetch(`/api/tenant/${tenantSlug}/payments?${params.toString()}`);
+    const payload = await response.json();
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        window.location.href = `/${tenantSlug}/admin/login`;
+        return;
+      }
+
+      setError(payload.error || 'Unable to load Stellar payments.');
+      setIsLoading(false);
+      return;
+    }
+
+    setPayments(payload.data.payments);
+    setServices(payload.data.services);
+    setStats(payload.data.stats);
+    setIsLoading(false);
+  }
+
+  useEffect(() => {
+    loadPayments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function updateFilters(name: string, value: string) {
+    setFilters((current) => ({ ...current, [name]: value }));
+  }
+
+  async function applyFilters(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await loadPayments(filters);
+  }
+
+  function exportPayments() {
+    const params = createFilterParams(filters);
+    window.location.href = `/api/tenant/${tenantSlug}/payments/export?${params.toString()}`;
+  }
+
+  return (
+    <section className="grid gap-6">
+      <div className="grid gap-4 md:grid-cols-4">
+        <StatCard label="Total Payments" value={stats.total} />
+        <StatCard label="Pending" value={stats.pending} />
+        <StatCard label="Verified" value={stats.verified} />
+        <StatCard label="Verified XLM" value={stats.totalVerifiedAmount.toFixed(2)} />
+      </div>
+
+      <Card>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <p className="section-eyebrow">Stellar payments</p>
+            <h2 className="mt-2 text-2xl font-extrabold tracking-[-0.03em] text-slate-950">Proof-of-payment workspace</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-7 text-slate-600">
+              Review service fee intents, verify receipt status, and export payment records without turning the platform into a generic crypto app.
+            </p>
+          </div>
+          <button onClick={exportPayments} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-primary">Export CSV</button>
+        </div>
+
+        <form onSubmit={applyFilters} className="mt-6 grid gap-4 lg:grid-cols-[1.2fr_0.7fr_0.8fr_auto] lg:items-end">
+          <div>
+            <label className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Search</label>
+            <Input value={filters.search} onChange={(event) => updateFilters('search', event.target.value)} placeholder="Reference, payer, email, transaction hash" />
+          </div>
+          <div>
+            <label className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Status</label>
+            <Select value={filters.status} onChange={(event) => updateFilters('status', event.target.value)}>
+              <option value="ALL">All</option>
+              {['PENDING', 'VERIFIED', 'FAILED', 'CANCELLED', 'EXPIRED'].map((item) => <option key={item} value={item}>{niceLabel(item)}</option>)}
+            </Select>
+          </div>
+          <div>
+            <label className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Service</label>
+            <Select value={filters.serviceId} onChange={(event) => updateFilters('serviceId', event.target.value)}>
+              <option value="ALL">All</option>
+              {services.map((service) => <option key={service.id} value={service.id}>{service.title}</option>)}
+            </Select>
+          </div>
+          <Button disabled={isLoading}>{isLoading ? 'Loading...' : 'Apply'}</Button>
+        </form>
+      </Card>
+
+      {error ? <p className="rounded-2xl bg-rose-50 p-4 text-sm font-extrabold text-rose-700 ring-1 ring-rose-200">{error}</p> : null}
+
+      <div className="grid gap-4">
+        {isLoading ? <Card><p className="text-sm text-slate-500">Loading payments...</p></Card> : null}
+        {!isLoading && payments.length === 0 ? <Card><p className="text-sm text-slate-500">No payment records match the current filters.</p></Card> : null}
+        {payments.map((payment) => (
+          <Card key={payment.id} className="card-hover">
+            <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-start">
+              <div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-400">{payment.referenceCode}</p>
+                  <span className={`rounded-full px-3 py-1 text-xs font-extrabold ${payment.status === 'VERIFIED' ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : payment.status === 'FAILED' ? 'bg-rose-50 text-rose-700 ring-1 ring-rose-200' : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'}`}>
+                    {niceLabel(payment.status)}
+                  </span>
+                </div>
+                <h3 className="mt-2 text-xl font-extrabold text-slate-950">{payment.service.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{payment.payerName} {payment.payerEmail ? `· ${payment.payerEmail}` : ''}</p>
+                <div className="mt-4 grid gap-3 md:grid-cols-3">
+                  <InfoPanel label="Amount" value={`${payment.amount} ${payment.assetCode}`} note="Service fee" />
+                  <InfoPanel label="Ledger" value={payment.ledger ? String(payment.ledger) : 'Pending'} note="Horizon verification" />
+                  <InfoPanel label="Created" value={formatDate(payment.createdAt)} note={payment.verifiedAt ? `Verified ${formatDate(payment.verifiedAt)}` : 'Awaiting payment'} />
+                </div>
+                {payment.transactionHash ? <p className="mt-4 break-all rounded-2xl bg-slate-50 p-4 font-mono text-xs font-bold text-slate-600 ring-1 ring-slate-100">{payment.transactionHash}</p> : null}
+              </div>
+              <div className="flex flex-wrap gap-2 lg:justify-end">
+                <a href={`/${tenantSlug}/payments/${payment.referenceCode}`} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary">Payment page</a>
+                <a href={`/${tenantSlug}/receipts/${payment.referenceCode}`} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-primary">Receipt</a>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -953,6 +1123,31 @@ function TenantSettingsPanel({
           <div>
             <label className="text-sm font-extrabold text-slate-700">Primary color</label>
             <Input value={form.primaryColor} onChange={(event) => updateForm('primaryColor', event.target.value)} />
+          </div>
+        </div>
+        <div className="rounded-[1.5rem] bg-blue-50/70 p-5 ring-1 ring-blue-100">
+          <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--brand)]">Stellar Testnet payments</p>
+          <div className="mt-4 grid gap-5 md:grid-cols-2">
+            <div>
+              <label className="text-sm font-extrabold text-slate-700">Receiving wallet public key</label>
+              <Input value={form.stellarReceivingPublicKey || ''} onChange={(event) => updateForm('stellarReceivingPublicKey', event.target.value)} placeholder="G..." />
+            </div>
+            <div>
+              <label className="text-sm font-extrabold text-slate-700">Horizon URL</label>
+              <Input value={form.stellarHorizonUrl || ''} onChange={(event) => updateForm('stellarHorizonUrl', event.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-extrabold text-slate-700">Network</label>
+              <Input value={form.stellarNetwork || 'TESTNET'} onChange={(event) => updateForm('stellarNetwork', event.target.value)} />
+            </div>
+            <div>
+              <label className="text-sm font-extrabold text-slate-700">Default asset code</label>
+              <Input value={form.stellarDefaultAssetCode || 'XLM'} onChange={(event) => updateForm('stellarDefaultAssetCode', event.target.value)} />
+            </div>
+            <div className="md:col-span-2">
+              <label className="text-sm font-extrabold text-slate-700">Default asset issuer</label>
+              <Input value={form.stellarDefaultAssetIssuer || ''} onChange={(event) => updateForm('stellarDefaultAssetIssuer', event.target.value)} placeholder="Required only for non-XLM assets" />
+            </div>
           </div>
         </div>
         <div>
