@@ -50,7 +50,7 @@ Check these routes:
 Repeat basic checks for:
 
 ```text
-/demo-city
+/laguna-province
 ```
 
 ## Citizen test
@@ -59,7 +59,7 @@ Repeat basic checks for:
 2. Use:
 
 ```text
-citizen@sanpablo.local
+maria.santos@sanpablo.local
 citizen12345
 ```
 
@@ -160,9 +160,9 @@ After changing public content, open the public pages and confirm updates are vis
 1. Login as San Pablo admin.
 2. Check San Pablo reports.
 3. Logout.
-4. Login as Demo City admin.
-5. Check Demo City reports.
-6. Confirm San Pablo reports are not visible in Demo City.
+4. Login as Laguna Province admin.
+5. Check Laguna Province reports.
+6. Confirm San Pablo reports are not visible in Laguna Province.
 7. Repeat the same check for citizen accounts.
 
 ## Mobile responsiveness test

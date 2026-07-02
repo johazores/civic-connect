@@ -8,8 +8,8 @@ import { Input } from '@/components/ui/input';
 
 export function AdminLoginForm({ tenantSlug }: { tenantSlug: string }) {
   const router = useRouter();
-  const [email, setEmail] = useState('admin@sanpablo.local');
-  const [password, setPassword] = useState('admin12345');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -27,7 +27,7 @@ export function AdminLoginForm({ tenantSlug }: { tenantSlug: string }) {
     const payload = await response.json();
 
     if (!response.ok) {
-      setError(payload.error || 'Unable to login.');
+      setError(payload.error || 'Unable to sign in.');
       setIsLoading(false);
       return;
     }
@@ -37,23 +37,23 @@ export function AdminLoginForm({ tenantSlug }: { tenantSlug: string }) {
   }
 
   return (
-    <Card className="mx-auto max-w-md shadow-md shadow-slate-900/[0.05]">
+    <Card className="mx-auto max-w-md">
       <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50 p-5">
-        <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">Secure access</p>
-        <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-slate-900">Admin Dashboard</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">Use tenant staff credentials to manage reports and content.</p>
+        <p className="text-xs font-bold uppercase tracking-[0.14em] text-blue-700">Staff access</p>
+        <h2 className="mt-2 text-2xl font-extrabold tracking-[-0.03em] text-slate-950">Operations dashboard</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-600">Sign in with staff credentials to manage reports, content, and tenant settings.</p>
       </div>
       <form onSubmit={handleSubmit} className="grid gap-5">
         <div>
-          <label className="text-sm font-semibold text-slate-700">Email</label>
-          <Input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} />
+          <label className="input-label">Email</label>
+          <Input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" />
         </div>
         <div>
-          <label className="text-sm font-semibold text-slate-700">Password</label>
-          <Input type="password" required value={password} onChange={(event) => setPassword(event.target.value)} />
+          <label className="input-label">Password</label>
+          <Input type="password" required value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" />
         </div>
         {error ? <p className="rounded-xl bg-rose-50 p-4 text-sm font-semibold text-rose-700 ring-1 ring-rose-200">{error}</p> : null}
-        <Button disabled={isLoading}>{isLoading ? 'Logging in...' : 'Login'}</Button>
+        <Button disabled={isLoading}>{isLoading ? 'Signing in...' : 'Sign in'}</Button>
       </form>
     </Card>
   );

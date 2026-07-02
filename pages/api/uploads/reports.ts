@@ -43,8 +43,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return badRequest(res, 'Photo must be 4MB or smaller.');
     }
 
-    // Store the image as a data URL so uploads work locally and on Vercel
-    // without needing writable public storage. Swap this with S3/R2 later.
     return created(res, {
       imageUrl: dataUrl
     });

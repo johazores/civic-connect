@@ -70,7 +70,7 @@ Start with customers who need the workflow but have less procurement friction:
 
 ## Suggested pricing ideas
 
-These are starter ideas only and should be adjusted after pilot feedback.
+These are pricing ideas only and should be adjusted after pilot feedback.
 
 ### Setup + monthly
 
@@ -89,7 +89,7 @@ Good for organizations with yearly budgets.
 
 - Custom quote for larger tenants needing custom domain, SMS, audit logs, integrations, or formal reports.
 
-## Demo script
+## Product walkthrough script
 
 1. “This is the public city app. It works well on mobile.”
 2. “A citizen can report an issue in less than a minute.”
@@ -117,7 +117,7 @@ A white-label civic service platform for local governments and community teams. 
 CTA:
 
 ```text
-Request a Demo
+Request a Walkthrough
 ```
 
 ## Objections and answers
@@ -140,4 +140,4 @@ Yes. Each tenant has its own name, city name, tagline, description, contact deta
 
 ## Best next marketing step
 
-Use this MVP to record a short demo video and pitch one small organization for feedback. The goal is not to sell a huge government contract immediately. The goal is to validate whether the reporting and tracking workflow solves a real pain.
+Use this platform to record a short walkthrough video and pitch one small organization for feedback. The goal is not to sell a huge government contract immediately. The goal is to validate whether the reporting and tracking workflow solves a real pain.

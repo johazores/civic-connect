@@ -52,7 +52,7 @@ This checklist tracks the features identified during the rebuild review and what
 - Tenant-scoped APIs: implemented through `/api/tenant/:tenantSlug/...`
 - Tenant-specific admins: implemented
 - Tenant-specific citizens: implemented
-- Second demo tenant seed: implemented as `/demo-city`
+- Second walkthrough tenant seed: implemented as `/laguna-province`
 - Tenant public content isolation: implemented
 - Tenant report isolation: implemented
 
@@ -72,7 +72,7 @@ This checklist tracks the features identified during the rebuild review and what
 
 ## Not Included Yet By Design
 
-These are production enhancements, not required for the current working MVP:
+These are production enhancements, not required for the current working platform:
 
 - Citizen profile editing
 - Email/SMS notifications

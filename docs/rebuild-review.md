@@ -20,7 +20,7 @@ Each tenant can have its own:
 - Report tracking
 - Admin dashboard
 
-## MVP Modules
+## platform Modules
 
 ### Public Citizen App
 
@@ -42,7 +42,7 @@ Each tenant can have its own:
 
 ## Multitenant Strategy
 
-Current MVP uses tenant slug routing:
+Current platform uses tenant slug routing:
 
 ```text
 /san-pablo

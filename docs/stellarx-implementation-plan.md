@@ -6,7 +6,7 @@ This is the practical implementation plan for turning Civic Connect into a Stell
 
 Add enough Stellar functionality so the app is no longer just a civic SaaS dashboard. It should clearly demonstrate why Stellar is useful.
 
-The first target is a working Testnet demo for:
+The first target is a working Testnet workflow for:
 
 > Proof-of-payment for government or community services.
 
@@ -97,12 +97,12 @@ Add:
 
 ### Validation rules
 
-For the MVP:
+For the platform:
 
 - Use Testnet only by default.
 - Do not store private keys.
 - The app should only store public keys, payment intents, and transaction hashes.
-- The citizen signs/pays using their own wallet or a demo wallet.
+- The citizen signs/pays using their own wallet or a test wallet.
 - Verification should confirm destination, amount, memo/reference, and transaction success.
 
 ## Phase 2: Civic Rewards
@@ -130,7 +130,7 @@ model CivicReward {
 }
 ```
 
-### MVP reward triggers
+### platform reward triggers
 
 Start with admin-approved rewards only:
 
@@ -176,7 +176,7 @@ model TransparencyEntry {
 /:tenant/admin/transparency
 ```
 
-### Demo flow
+### Walkthrough flow
 
 1. Admin creates a public disbursement record.
 2. Admin attaches a Stellar transaction hash.
@@ -194,11 +194,11 @@ Possible features:
 - Business/employer credential.
 - Tax clearance credential.
 
-Keep credentials as demo/Testnet proof until there is a real issuing partner.
+Keep credentials as Testnet proof until there is a real issuing partner.
 
-## What To Demo To Investors
+## What To Walkthrough To Investors
 
-Best short demo:
+Best short walkthrough:
 
 1. Open `/san-pablo`.
 2. Submit a road/streetlight report.
@@ -208,7 +208,7 @@ Best short demo:
 6. Verify payment through Testnet.
 7. Show citizen receipt page.
 8. Show public transparency ledger.
-9. Show dashboard proving the app is multitenant with `/demo-city`.
+9. Show dashboard proving the app is multitenant with `/laguna-province`.
 
 ## What Not To Claim
 

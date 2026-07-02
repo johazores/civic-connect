@@ -345,14 +345,14 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
       <header className="border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-6">
           <div>
-            <p className="section-eyebrow">Civic Admin</p>
-            <h1 className="text-xl font-black text-slate-900">{tenant?.name || 'Admin Dashboard'}</h1>
+            <p className="section-eyebrow">Operations portal</p>
+            <h1 className="text-xl font-extrabold text-slate-900">{tenant?.name || 'Operations Dashboard'}</h1>
           </div>
           <div className="flex flex-wrap justify-end gap-2">
-            <a href={`/${tenantSlug}`} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-black text-slate-700 shadow-sm">
+            <a href={`/${tenantSlug}`} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-extrabold text-slate-700 shadow-[0_10px_26px_rgba(18,32,51,0.05)]">
               Public Site
             </a>
-            <button onClick={handleLogout} className="rounded-xl bg-[var(--brand)] px-4 py-2 text-sm font-black text-white shadow-sm">
+            <button onClick={handleLogout} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-primary shadow-[0_10px_26px_rgba(18,32,51,0.05)]">
               Logout
             </button>
           </div>
@@ -360,39 +360,39 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
       </header>
 
       <main className="mx-auto grid max-w-7xl gap-6 px-4 py-8 md:px-6">
-        <section className="overflow-hidden rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-slate-50 p-6 text-slate-900 shadow-sm">
+        <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 text-slate-900 shadow-[0_10px_26px_rgba(18,32,51,0.05)]">
           <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
             <div>
               <p className="section-eyebrow">Operations overview</p>
-              <h2 className="mt-3 text-3xl font-black md:text-5xl">Resolve reports faster, keep citizens updated.</h2>
+              <h2 className="mt-3 text-3xl font-extrabold md:text-5xl">Resolve reports faster and keep citizens informed.</h2>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600">
-                Review incoming concerns, assign them to departments, publish updates, and manage the public content of this tenant.
+                Review incoming concerns, assign departments, publish updates, and manage public content from one command center.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <p className="text-3xl font-black text-blue-700">{Math.max(0, stats.total - stats.resolved)}</p>
-                <p className="mt-1 text-xs font-black uppercase tracking-[0.12em] text-slate-500">Active reports</p>
+                <p className="text-3xl font-extrabold text-blue-700">{Math.max(0, stats.total - stats.resolved)}</p>
+                <p className="mt-1 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">Active reports</p>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <p className="text-3xl font-black text-amber-600">{stats.urgent}</p>
-                <p className="mt-1 text-xs font-black uppercase tracking-[0.12em] text-slate-500">Urgent flags</p>
+                <p className="text-3xl font-extrabold text-amber-600">{stats.urgent}</p>
+                <p className="mt-1 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">Urgent flags</p>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <p className="text-3xl font-black text-emerald-600">{stats.resolved}</p>
-                <p className="mt-1 text-xs font-black uppercase tracking-[0.12em] text-slate-500">Completed</p>
+                <p className="text-3xl font-extrabold text-emerald-600">{stats.resolved}</p>
+                <p className="mt-1 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">Completed</p>
               </div>
             </div>
           </div>
         </section>
 
-        <div className="flex flex-wrap gap-2 rounded-[1.5rem] border border-slate-200 bg-white p-2 shadow-sm backdrop-blur">
+        <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_10px_26px_rgba(18,32,51,0.05)] backdrop-blur">
           {mainTabs.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`rounded-2xl px-4 py-3 text-sm font-black capitalize transition ${
-                activeTab === tab ? 'bg-[var(--brand)] text-white shadow-sm' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700'
+              className={`rounded-2xl px-4 py-3 text-sm font-extrabold capitalize transition ${
+                activeTab === tab ? 'btn-primary' : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700'
               }`}
             >
               {niceLabel(tab)}
@@ -400,8 +400,8 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
           ))}
         </div>
 
-        {error && <p className="rounded-2xl bg-rose-50 p-4 text-sm font-black text-rose-700 ring-1 ring-rose-200">{error}</p>}
-        {success && <p className="rounded-2xl bg-emerald-50 p-4 text-sm font-black text-emerald-700 ring-1 ring-emerald-200">{success}</p>}
+        {error && <p className="rounded-2xl bg-rose-50 p-4 text-sm font-extrabold text-rose-700 ring-1 ring-rose-200">{error}</p>}
+        {success && <p className="rounded-2xl bg-emerald-50 p-4 text-sm font-extrabold text-emerald-700 ring-1 ring-emerald-200">{success}</p>}
 
         {activeTab === 'command-center' ? (
           <section className="grid gap-6">
@@ -412,28 +412,28 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
               <StatCard label="Unassigned" value={stats.unassigned} />
             </div>
 
-            <Card className="bg-white shadow-sm">
+            <Card className="">
               <form onSubmit={applyFilters} className="grid gap-4 lg:grid-cols-[1.3fr_0.8fr_0.8fr_0.8fr_0.8fr_auto] lg:items-end">
                 <div>
-                  <label className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Search</label>
+                  <label className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Search</label>
                   <Input value={filters.search} onChange={(event) => updateFilters('search', event.target.value)} placeholder="Reference, name, issue, location" />
                 </div>
                 <div>
-                  <label className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Status</label>
+                  <label className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Status</label>
                   <Select value={filters.status} onChange={(event) => updateFilters('status', event.target.value)}>
                     <option value="ALL">All</option>
                     {reportStatuses.map((item) => <option key={item} value={item}>{niceLabel(item)}</option>)}
                   </Select>
                 </div>
                 <div>
-                  <label className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Category</label>
+                  <label className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Category</label>
                   <Select value={filters.categoryId} onChange={(event) => updateFilters('categoryId', event.target.value)}>
                     <option value="ALL">All</option>
                     {categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
                   </Select>
                 </div>
                 <div>
-                  <label className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Department</label>
+                  <label className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Department</label>
                   <Select value={filters.departmentId} onChange={(event) => updateFilters('departmentId', event.target.value)}>
                     <option value="ALL">All</option>
                     <option value="UNASSIGNED">Unassigned</option>
@@ -441,7 +441,7 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
                   </Select>
                 </div>
                 <div>
-                  <label className="text-xs font-black uppercase tracking-[0.2em] text-slate-500">Priority</label>
+                  <label className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Priority</label>
                   <Select value={filters.priority} onChange={(event) => updateFilters('priority', event.target.value)}>
                     <option value="ALL">All</option>
                     {reportPriorities.map((item) => <option key={item} value={item}>{niceLabel(item)}</option>)}
@@ -452,17 +452,17 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
             </Card>
 
             <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-              <Card className="bg-white shadow-sm">
+              <Card className="">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-[0.2em] text-blue-700">Queue</p>
-                    <h2 className="mt-1 text-xl font-black text-slate-900">Citizen reports</h2>
+                    <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-blue-700">Queue</p>
+                    <h2 className="mt-1 text-xl font-extrabold text-slate-900">Citizen reports</h2>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <button onClick={exportReports} className="rounded-xl bg-[var(--brand)] px-4 py-2 text-sm font-black text-white">
+                    <button onClick={exportReports} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-primary">
                       Export CSV
                     </button>
-                    <button onClick={() => loadReports(filters)} className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-black text-slate-700">
+                    <button onClick={() => loadReports(filters)} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary">
                       Refresh
                     </button>
                   </div>
@@ -477,21 +477,21 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
                       onClick={() => setSelectedReportId(report.id)}
                       className={`rounded-3xl border p-4 text-left transition ${
                         selectedReport?.id === report.id
-                          ? 'border-blue-500 bg-blue-50 shadow-sm'
-                          : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm'
+                          ? 'border-blue-500 bg-blue-50 shadow-[0_10px_26px_rgba(18,32,51,0.05)]'
+                          : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_10px_26px_rgba(18,32,51,0.05)]'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Report #{index + 1} · {report.referenceCode}</p>
-                          <p className="mt-2 font-black text-slate-900">{report.title}</p>
+                          <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-400">Report #{index + 1} · {report.referenceCode}</p>
+                          <p className="mt-2 font-extrabold text-slate-900">{report.title}</p>
                         </div>
                         <Badge value={report.status} />
                       </div>
                       <div className="mt-3 flex flex-wrap gap-2">
-                        <span className="rounded-xl bg-slate-100 px-3 py-1 text-xs font-black text-slate-600">{report.category.name}</span>
-                        <span className="rounded-xl bg-amber-50 px-3 py-1 text-xs font-black text-amber-700">{niceLabel(report.priority)}</span>
-                        <span className="rounded-xl bg-indigo-50 px-3 py-1 text-xs font-black text-indigo-700">{report.department?.name || 'Unassigned'}</span>
+                        <span className="rounded-xl bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-600">{report.category.name}</span>
+                        <span className="rounded-xl bg-amber-50 px-3 py-1 text-xs font-extrabold text-amber-700">{niceLabel(report.priority)}</span>
+                        <span className="rounded-xl bg-indigo-50 px-3 py-1 text-xs font-extrabold text-indigo-700">{report.department?.name || 'Unassigned'}</span>
                       </div>
                       <p className="mt-3 text-sm text-slate-500">{report.locationText}</p>
                     </button>
@@ -499,13 +499,13 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
                 </div>
               </Card>
 
-              <Card className="bg-white shadow-sm">
+              <Card className="">
                 {selectedReport ? (
                   <div>
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
-                        <p className="text-xs font-black uppercase tracking-[0.25em] text-slate-400">{selectedReport.referenceCode}</p>
-                        <h2 className="mt-2 text-2xl font-black text-slate-900">{selectedReport.title}</h2>
+                        <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-400">{selectedReport.referenceCode}</p>
+                        <h2 className="mt-2 text-2xl font-extrabold text-slate-900">{selectedReport.title}</h2>
                         <p className="mt-2 text-sm text-slate-500">Submitted {formatDate(selectedReport.submittedAt)}</p>
                       </div>
                       <Badge value={selectedReport.status} />
@@ -523,39 +523,38 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
                       <div className="mt-6 grid gap-3 sm:grid-cols-2">
                         {selectedReport.attachments.map((attachment) => (
                           <a key={attachment.id} href={attachment.imageUrl} target="_blank" className="overflow-hidden rounded-3xl border border-slate-200 bg-slate-100" rel="noreferrer">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={attachment.imageUrl} alt="Report attachment" className="h-52 w-full object-cover" />
                           </a>
                         ))}
                       </div>
                     ) : null}
 
-                    <form onSubmit={handleStatusUpdate} className="mt-8 grid gap-4 rounded-[2rem] bg-slate-50 p-5 ring-1 ring-slate-100">
+                    <form onSubmit={handleStatusUpdate} className="mt-8 grid gap-4 rounded-3xl bg-slate-50 p-5 ring-1 ring-slate-100">
                       <div className="flex items-center justify-between gap-4">
                         <div>
-                          <p className="text-xs font-black uppercase tracking-[0.2em] text-blue-700">Action panel</p>
-                          <h3 className="mt-1 font-black text-slate-900">Update report progress</h3>
+                          <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-blue-700">Action panel</p>
+                          <h3 className="mt-1 font-extrabold text-slate-900">Update report progress</h3>
                         </div>
-                        <label className="flex items-center gap-2 text-sm font-black text-slate-700">
+                        <label className="flex items-center gap-2 text-sm font-extrabold text-slate-700">
                           <input type="checkbox" checked={isPublic} onChange={(event) => setIsPublic(event.target.checked)} />
                           Public update
                         </label>
                       </div>
                       <div className="grid gap-4 md:grid-cols-3">
                         <div>
-                          <label className="text-sm font-black text-slate-700">Status</label>
+                          <label className="text-sm font-extrabold text-slate-700">Status</label>
                           <Select value={status} onChange={(event) => setStatus(event.target.value)}>
                             {reportStatuses.map((item) => <option key={item} value={item}>{niceLabel(item)}</option>)}
                           </Select>
                         </div>
                         <div>
-                          <label className="text-sm font-black text-slate-700">Priority</label>
+                          <label className="text-sm font-extrabold text-slate-700">Priority</label>
                           <Select value={priority} onChange={(event) => setPriority(event.target.value)}>
                             {reportPriorities.map((item) => <option key={item} value={item}>{niceLabel(item)}</option>)}
                           </Select>
                         </div>
                         <div>
-                          <label className="text-sm font-black text-slate-700">Department</label>
+                          <label className="text-sm font-extrabold text-slate-700">Department</label>
                           <Select value={departmentId} onChange={(event) => setDepartmentId(event.target.value)}>
                             <option value="">Unassigned</option>
                             {departments.filter((item) => item.isActive).map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
@@ -563,20 +562,20 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
                         </div>
                       </div>
                       <div>
-                        <label className="text-sm font-black text-slate-700">Update message</label>
+                        <label className="text-sm font-extrabold text-slate-700">Update message</label>
                         <Textarea value={message} onChange={(event) => setMessage(event.target.value)} placeholder="Write a clear update for the citizen or internal team" />
                       </div>
                       <Button disabled={isSaving}>{isSaving ? 'Saving...' : 'Save Update'}</Button>
                     </form>
 
                     <div className="mt-8">
-                      <h3 className="text-lg font-black text-slate-900">Timeline</h3>
+                      <h3 className="text-lg font-extrabold text-slate-900">Timeline</h3>
                       <div className="mt-4 grid gap-3">
                         {selectedReport.updates.map((update) => (
                           <div key={update.id} className="rounded-3xl border border-slate-200 bg-white p-4">
                             <div className="flex flex-wrap items-center justify-between gap-2">
                               <Badge value={update.status} />
-                              <span className="rounded-xl bg-slate-100 px-3 py-1 text-xs font-black text-slate-500">{update.isPublic ? 'Public' : 'Internal'}</span>
+                              <span className="rounded-xl bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-500">{update.isPublic ? 'Public' : 'Internal'}</span>
                             </div>
                             <p className="mt-3 text-sm leading-6 text-slate-600">{update.message}</p>
                             <p className="mt-2 text-xs font-semibold text-slate-400">{formatDate(update.createdAt)}</p>
@@ -608,8 +607,8 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
 function InfoPanel({ label, value, note }: { label: string; value: string; note: string }) {
   return (
     <div className="rounded-3xl bg-slate-50 p-4 ring-1 ring-slate-100">
-      <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">{label}</p>
-      <p className="mt-1 font-black text-slate-900">{value}</p>
+      <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-400">{label}</p>
+      <p className="mt-1 font-extrabold text-slate-900">{value}</p>
       <p className="mt-1 text-sm text-slate-500">{note}</p>
     </div>
   );
@@ -745,17 +744,17 @@ function ContentStudio({
 
   return (
     <section className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-      <Card className="bg-white shadow-sm">
-        <p className="text-xs font-black uppercase tracking-[0.25em] text-blue-700">Content studio</p>
-        <h2 className="mt-2 text-2xl font-black text-slate-900">Manage tenant content</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">Update the public app without touching code.</p>
+      <Card className="">
+        <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-blue-700">Content manager</p>
+        <h2 className="mt-2 text-2xl font-extrabold text-slate-900">Manage public content</h2>
+        <p className="mt-2 text-sm leading-6 text-slate-600">Keep services, contacts, announcements, categories, departments, and staff accounts up to date.</p>
 
         <div className="mt-6 flex flex-wrap gap-2">
           {contentTabs.map((tab) => (
             <button
               key={tab}
               onClick={() => switchContent(tab)}
-              className={`rounded-2xl px-3 py-2 text-sm font-black transition ${
+              className={`rounded-2xl px-3 py-2 text-sm font-extrabold transition ${
                 activeContent === tab ? 'bg-[var(--brand)] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
               }`}
             >
@@ -764,12 +763,12 @@ function ContentStudio({
           ))}
         </div>
 
-        <form onSubmit={saveItem} className="mt-6 grid gap-4 rounded-[2rem] bg-slate-50 p-5 ring-1 ring-slate-100">
-          <h3 className="font-black text-slate-900">{editingId ? 'Edit item' : 'Create item'}</h3>
+        <form onSubmit={saveItem} className="mt-6 grid gap-4 rounded-3xl bg-slate-50 p-5 ring-1 ring-slate-100">
+          <h3 className="font-extrabold text-slate-900">{editingId ? 'Edit item' : 'Create item'}</h3>
           {config.fields.map((field) => (
             <div key={field.name}>
               {field.type === 'checkbox' ? (
-                <label className="flex items-center gap-3 text-sm font-black text-slate-700">
+                <label className="flex items-center gap-3 text-sm font-extrabold text-slate-700">
                   <input
                     type="checkbox"
                     checked={Boolean(form[field.name])}
@@ -779,7 +778,7 @@ function ContentStudio({
                 </label>
               ) : (
                 <>
-                  <label className="text-sm font-black text-slate-700">{field.label}{activeContent === 'users' && field.name === 'password' ? (editingId ? ' (leave blank to keep current)' : ' (required for new user)') : ''}</label>
+                  <label className="text-sm font-extrabold text-slate-700">{field.label}{activeContent === 'users' && field.name === 'password' ? (editingId ? ' (leave blank to keep current)' : ' (required for new user)') : ''}</label>
                   {field.type === 'textarea' ? (
                     <Textarea
                       required={field.required}
@@ -811,7 +810,7 @@ function ContentStudio({
           <div className="flex flex-wrap gap-2">
             <Button disabled={isSaving}>{isSaving ? 'Saving...' : editingId ? 'Save Changes' : 'Create'}</Button>
             {editingId ? (
-              <button type="button" onClick={resetForm} className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-black text-slate-700">
+              <button type="button" onClick={resetForm} className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-extrabold text-slate-700">
                 Cancel
               </button>
             ) : null}
@@ -819,13 +818,13 @@ function ContentStudio({
         </form>
       </Card>
 
-      <Card className="bg-white shadow-sm">
+      <Card className="">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.25em] text-slate-400">Library</p>
-            <h2 className="mt-1 text-xl font-black text-slate-900">{config.label}</h2>
+            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-400">Library</p>
+            <h2 className="mt-1 text-xl font-extrabold text-slate-900">{config.label}</h2>
           </div>
-          <button onClick={() => loadItems()} className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-black text-slate-700">Refresh</button>
+          <button onClick={() => loadItems()} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary">Refresh</button>
         </div>
 
         <div className="mt-5 grid gap-3">
@@ -837,19 +836,19 @@ function ContentStudio({
             const isActive = item.isActive ?? item.isPublished ?? true;
 
             return (
-              <div key={item.id} className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+              <div key={item.id} className="rounded-3xl border border-slate-200 bg-white p-4 shadow-[0_10px_26px_rgba(18,32,51,0.05)]">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="font-black text-slate-900">{title}</p>
+                    <p className="font-extrabold text-slate-900">{title}</p>
                     <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-500">{description}</p>
                   </div>
-                  <span className={`rounded-xl px-3 py-1 text-xs font-black ${isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                  <span className={`rounded-xl px-3 py-1 text-xs font-extrabold ${isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
                     {isActive ? 'Live' : 'Archived'}
                   </span>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  <button onClick={() => startEdit(item)} className="rounded-xl bg-[var(--brand)] px-4 py-2 text-sm font-black text-white">Edit</button>
-                  <button onClick={() => archiveItem(item)} className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-black text-slate-700">Archive</button>
+                  <button onClick={() => startEdit(item)} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-primary">Edit</button>
+                  <button onClick={() => archiveItem(item)} className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-extrabold text-slate-700">Archive</button>
                 </div>
               </div>
             );
@@ -909,7 +908,7 @@ function TenantSettingsPanel({
     }
 
     setTenant(payload.data);
-    setSuccess('Tenant settings saved.');
+    setSuccess('Organization settings saved.');
     setIsSaving(false);
   }
 
@@ -918,46 +917,46 @@ function TenantSettingsPanel({
   }
 
   return (
-    <Card className="max-w-4xl bg-white shadow-sm">
-      <p className="text-xs font-black uppercase tracking-[0.25em] text-blue-700">Tenant settings</p>
-      <h2 className="mt-2 text-2xl font-black text-slate-900">Customize public experience</h2>
-      <p className="mt-2 text-sm leading-6 text-slate-600">These settings control the name, copy, and contact details shown on the tenant site.</p>
+    <Card className="max-w-4xl ">
+      <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-blue-700">Organization settings</p>
+      <h2 className="mt-2 text-2xl font-extrabold text-slate-900">Customize the public experience</h2>
+      <p className="mt-2 text-sm leading-6 text-slate-600">These settings control the organization name, messaging, brand color, and public contact details.</p>
 
       <form onSubmit={saveSettings} className="mt-6 grid gap-5">
         <div className="grid gap-5 md:grid-cols-2">
           <div>
-            <label className="text-sm font-black text-slate-700">Tenant name</label>
+            <label className="text-sm font-extrabold text-slate-700">Tenant name</label>
             <Input required value={form.name} onChange={(event) => updateForm('name', event.target.value)} />
           </div>
           <div>
-            <label className="text-sm font-black text-slate-700">City name</label>
+            <label className="text-sm font-extrabold text-slate-700">City name</label>
             <Input required value={form.cityName} onChange={(event) => updateForm('cityName', event.target.value)} />
           </div>
         </div>
         <div>
-          <label className="text-sm font-black text-slate-700">Tagline</label>
+          <label className="text-sm font-extrabold text-slate-700">Tagline</label>
           <Input required value={form.tagline} onChange={(event) => updateForm('tagline', event.target.value)} />
         </div>
         <div>
-          <label className="text-sm font-black text-slate-700">Description</label>
+          <label className="text-sm font-extrabold text-slate-700">Description</label>
           <Textarea required value={form.description} onChange={(event) => updateForm('description', event.target.value)} />
         </div>
         <div className="grid gap-5 md:grid-cols-3">
           <div>
-            <label className="text-sm font-black text-slate-700">Email</label>
+            <label className="text-sm font-extrabold text-slate-700">Email</label>
             <Input value={form.email || ''} onChange={(event) => updateForm('email', event.target.value)} />
           </div>
           <div>
-            <label className="text-sm font-black text-slate-700">Phone</label>
+            <label className="text-sm font-extrabold text-slate-700">Phone</label>
             <Input value={form.phone || ''} onChange={(event) => updateForm('phone', event.target.value)} />
           </div>
           <div>
-            <label className="text-sm font-black text-slate-700">Primary color</label>
+            <label className="text-sm font-extrabold text-slate-700">Primary color</label>
             <Input value={form.primaryColor} onChange={(event) => updateForm('primaryColor', event.target.value)} />
           </div>
         </div>
         <div>
-          <label className="text-sm font-black text-slate-700">Address</label>
+          <label className="text-sm font-extrabold text-slate-700">Address</label>
           <Input value={form.address || ''} onChange={(event) => updateForm('address', event.target.value)} />
         </div>
         <Button disabled={isSaving}>{isSaving ? 'Saving...' : 'Save Settings'}</Button>

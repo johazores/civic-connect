@@ -2,7 +2,7 @@
 
 ## Latest review summary
 
-The app has a coherent and usable MVP flow:
+The app has a coherent and usable platform flow:
 
 - Public tenant site
 - Citizen registration/login
@@ -63,7 +63,7 @@ The revised civic SaaS design keeps the experience professional and easier to tr
 
 ## Remaining production gaps
 
-These are not blockers for local testing or MVP demo, but they should be added before production sales:
+These are not blockers for local testing or pilot walkthrough, but they should be added before production sales:
 
 - PostgreSQL migration
 - Object storage for uploads
@@ -84,11 +84,11 @@ The app makes sense because it is not just CRUD. It covers a real operational lo
 Citizen concern -> reference number -> staff queue -> department assignment -> public status updates -> citizen tracking
 ```
 
-This is strong enough for a product demo and pilot discussion.
+This is strong enough for a product walkthrough and pilot discussion.
 
 The best market entry is smaller organizations first, such as barangays, subdivisions, campuses, and local community teams. These groups can validate the workflow faster than a large city procurement process.
 
 
 ## UI correction pass
 
-The public UI was revised to remove the harsh neon/dark direction. The current direction uses a calmer civic SaaS palette: white surfaces, soft blue accents, slate text, lighter shadows, rounded but not exaggerated cards, clearer spacing, and mobile-first navigation. The goal is to feel trustworthy for government/community users while still looking modern enough for a product demo.
+The public UI was revised to remove the harsh neon/dark direction. The current direction uses a calmer civic SaaS palette: white surfaces, soft blue accents, slate text, lighter shadows, rounded but not exaggerated cards, clearer spacing, and mobile-first navigation. The goal is to feel trustworthy for government/community users while still looking modern enough for a product walkthrough.

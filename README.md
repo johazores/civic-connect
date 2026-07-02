@@ -1,8 +1,8 @@
 # Civic Connect Multitenant
 
-A simple, scalable, multitenant civic services starter for city, municipality, barangay, campus, subdivision, or community service apps.
+A simple, scalable, multitenant civic services platform for city, municipality, barangay, campus, subdivision, or community service apps.
 
-This is a working MVP, not just a static clone. It includes a public citizen experience, tenant-aware APIs, issue reporting, tracking, admin report operations, content management, tenant settings, citizen accounts, staff management, and a mobile-first civic SaaS UI.
+This is a working platform, not just a static clone. It includes a public citizen experience, tenant-aware APIs, issue reporting, tracking, admin report operations, content management, tenant settings, citizen accounts, staff management, and a mobile-first civic SaaS UI.
 
 ## Current Status
 
@@ -43,10 +43,10 @@ Open the public tenants:
 
 ```text
 http://localhost:3000/san-pablo
-http://localhost:3000/demo-city
+http://localhost:3000/laguna-province
 ```
 
-## Demo Accounts
+## Local Seed Accounts
 
 Admin:
 
@@ -55,8 +55,8 @@ San Pablo:
 Email: admin@sanpablo.local
 Password: admin12345
 
-Demo City:
-Email: admin@demo-city.local
+Laguna Province:
+Email: admin@laguna.local
 Password: admin12345
 ```
 
@@ -64,11 +64,11 @@ Citizen:
 
 ```text
 San Pablo:
-Email: citizen@sanpablo.local
+Email: maria.santos@sanpablo.local
 Password: citizen12345
 
-Demo City:
-Email: citizen@demo-city.local
+Laguna Province:
+Email: ana.reyes@laguna.local
 Password: citizen12345
 ```
 
@@ -238,10 +238,10 @@ Read these files for full guidance:
 | `docs/developer-guide.md` | Setup, scripts, structure, and coding guidance. |
 | `docs/deployment-guide.md` | Vercel and production deployment notes. |
 | `docs/architecture.md` | App architecture, data flow, and multitenancy model. |
-| `docs/product-review.md` | Product review, market fit, target users, and MVP verdict. |
+| `docs/product-review.md` | Product review, market fit, target users, and platform verdict. |
 | `docs/stellarx-fit-review.md` | StellarX wishlist fit assessment and investor positioning. |
 | `docs/stellarx-implementation-plan.md` | Practical implementation plan for Stellar Testnet payments, rewards, and transparency. |
-| `docs/marketing-guide.md` | Positioning, pitch, pricing ideas, and demo script. |
+| `docs/marketing-guide.md` | Positioning, pitch, pricing ideas, and product walkthrough script. |
 | `docs/testing-guide.md` | Manual QA checklist for local testing. |
 | `docs/feature-checklist.md` | Implemented features and known production enhancements. |
 | `docs/review-notes.md` | Latest code/product/UX review notes. |
@@ -249,7 +249,7 @@ Read these files for full guidance:
 
 ## Upload Notes
 
-Photo uploads are intentionally simple for the MVP:
+Photo uploads are intentionally simple for the platform:
 
 - The browser reads the file as a data URL.
 - `/api/uploads/reports` validates the MIME type and size.
@@ -274,7 +274,7 @@ PostgreSQL is now the default database because this project is intended for Verc
 
 ## StellarX Direction
 
-The current MVP is a working civic SaaS foundation. For a StellarX submission or investor demo, it should be positioned as a Stellar-powered civic trust platform, not just a city reporting dashboard.
+The current platform is a working civic SaaS foundation. For a StellarX submission or investor walkthrough, it should be positioned as a Stellar-powered civic trust platform, not just a city reporting dashboard.
 
 Recommended Stellar focus:
 
@@ -290,7 +290,7 @@ Read `docs/stellarx-fit-review.md` and `docs/stellarx-implementation-plan.md` be
 Before production:
 
 1. Connect a production PostgreSQL database.
-2. Replace the demo admin and citizen passwords.
+2. Replace the seeded account passwords.
 3. Set a strong `ADMIN_JWT_SECRET` for admin and citizen session signing.
 4. Replace data URL photo storage with object storage if report volume grows.
 5. Add rate limiting to report submission and login.

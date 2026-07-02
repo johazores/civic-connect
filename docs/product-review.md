@@ -72,7 +72,7 @@ Best initial customers:
 
 The easiest first market is not necessarily a large city government. Smaller organizations may move faster and need the same workflow with less procurement complexity.
 
-## Strong MVP positioning
+## Strong platform positioning
 
 Suggested positioning:
 
@@ -82,9 +82,9 @@ Alternative positioning:
 
 > A white-label issue reporting and request tracking app for cities, barangays, and community teams.
 
-## Why the current MVP is marketable
+## Why the current platform is marketable
 
-The MVP is marketable because it already covers the full minimum service loop:
+The platform is marketable because it already covers the full minimum service loop:
 
 - Public landing page
 - Citizen report submission
@@ -97,11 +97,11 @@ The MVP is marketable because it already covers the full minimum service loop:
 - Tenant settings
 - Multi-tenant structure
 
-This means a demo can show an end-to-end use case instead of just a dashboard mockup.
+This means a walkthrough can show an end-to-end use case instead of just a dashboard mockup.
 
-## Main demo story
+## Main walkthrough story
 
-A good sales demo should follow this story:
+A good sales walkthrough should follow this story:
 
 1. Open the public city app on mobile.
 2. Submit a road concern as a citizen.
@@ -112,11 +112,11 @@ A good sales demo should follow this story:
 7. Publish a public update.
 8. Return to the citizen tracker and show the update.
 9. Show services, hotlines, news, and tenant settings.
-10. Switch to `/demo-city` to prove multitenancy.
+10. Switch to `/laguna-province` to prove multitenancy.
 
 ## What still needs improvement before real clients
 
-The MVP is good for demo and validation, but before selling to real paying clients, add:
+The platform is good for pilot validation, but before selling to real paying clients, add:
 
 - PostgreSQL production database
 - Object storage for uploaded photos
@@ -152,4 +152,4 @@ Avoid overbuilding before getting a pilot user.
 
 The app makes sense as a real product direction.
 
-It is usable as a demo now, and the feature set is coherent. The next best step is to test it locally, polish copy/branding, then use it to pitch one small organization for feedback.
+It is usable as a pilot review now, and the feature set is coherent. The next best step is to test it locally, polish copy/branding, then use it to pitch one small organization for feedback.

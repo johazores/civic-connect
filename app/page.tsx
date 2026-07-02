@@ -3,18 +3,18 @@ import Link from 'next/link';
 export default function RootPage() {
   return (
     <main className="min-h-screen px-4 py-16 text-slate-900 md:px-6">
-      <section className="mx-auto max-w-4xl rounded-[2.25rem] p-6 text-center md:p-10 premium-card">
+      <section className="mx-auto max-w-5xl overflow-hidden rounded-3xl p-6 text-center md:p-10 premium-card">
         <p className="section-eyebrow mx-auto">Civic Connect</p>
-        <h1 className="heading-display mt-6 text-5xl md:text-7xl">Multitenant civic services platform.</h1>
+        <h1 className="heading-display mx-auto mt-6 max-w-3xl text-5xl md:text-7xl">Premium citizen services for modern communities.</h1>
         <p className="mx-auto mt-5 max-w-2xl text-base font-medium leading-8 text-slate-600">
-          A simple, scalable starter for city issue reporting, request tracking, public services, hotlines, news, and tenant admin management.
+          A multitenant platform for issue reporting, request tracking, public services, urgent contacts, news, and staff operations.
         </p>
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-          <Link href="/san-pablo" className="inline-flex min-h-12 items-center justify-center rounded-2xl px-6 py-3 text-sm font-extrabold btn-primary">
-            Open San Pablo Demo
+          <Link href="/san-pablo" className="inline-flex min-h-12 items-center justify-center rounded-xl px-6 py-3 text-sm font-bold btn-primary">
+            Open San Pablo
           </Link>
-          <Link href="/demo-city" className="inline-flex min-h-12 items-center justify-center rounded-2xl px-6 py-3 text-sm font-extrabold btn-secondary">
-            Open Demo City
+          <Link href="/laguna-province" className="inline-flex min-h-12 items-center justify-center rounded-xl px-6 py-3 text-sm font-bold btn-secondary">
+            Open Laguna Province
           </Link>
         </div>
       </section>

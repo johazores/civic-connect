@@ -101,7 +101,7 @@ Included now:
 - Citizen accounts
 - Report workflow
 - Public content management
-- Local/demo upload handling
+- Local/walkthrough upload handling
 
 Not included yet:
 

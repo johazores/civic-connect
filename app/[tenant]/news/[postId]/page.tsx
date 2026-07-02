@@ -36,7 +36,6 @@ export default async function NewsDetailPage({ params }: { params: Promise<{ ten
 
           <Card className="mt-6 overflow-hidden p-0 ">
             {post.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
               <img src={post.imageUrl} alt="" className="h-64 w-full object-cover md:h-96" />
             ) : (
               <div className="h-2 bg-[var(--brand)]" />

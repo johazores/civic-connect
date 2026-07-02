@@ -1,8 +1,9 @@
-export function StatCard({ label, value }: { label: string; value: number | string }) {
+export function StatCard({ label, value, note }: { label: string; value: string | number; note?: string }) {
   return (
-    <div className="rounded-[1.5rem] border border-slate-200/80 bg-white/90 p-5 shadow-[0_12px_32px_rgba(16,32,51,0.06)]">
-      <p className="text-sm font-black text-slate-500">{label}</p>
-      <p className="mt-2 text-3xl font-black tracking-[-0.03em] text-slate-900">{value}</p>
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_26px_rgba(18,32,51,0.05)]">
+      <p className="text-3xl font-extrabold tracking-[-0.03em] text-slate-950">{value}</p>
+      <p className="mt-1 text-xs font-bold uppercase tracking-[0.12em] text-slate-500">{label}</p>
+      {note ? <p className="mt-2 text-xs leading-5 text-slate-500">{note}</p> : null}
     </div>
   );
 }

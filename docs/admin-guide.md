@@ -13,18 +13,18 @@ Local examples:
 
 ```text
 http://localhost:3000/san-pablo/admin/login
-http://localhost:3000/demo-city/admin/login
+http://localhost:3000/laguna-province/admin/login
 ```
 
-## Demo admin login
+## Local staff login
 
 ```text
 San Pablo:
 Email: admin@sanpablo.local
 Password: admin12345
 
-Demo City:
-Email: admin@demo-city.local
+Laguna Province:
+Email: admin@laguna.local
 Password: admin12345
 ```
 

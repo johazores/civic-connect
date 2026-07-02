@@ -65,13 +65,13 @@ For a real production app with existing users, use Prisma migrations instead of 
 
 ## Upload storage
 
-Current MVP upload behavior:
+Current platform upload behavior:
 
 - Browser reads image as data URL.
 - Upload API validates MIME type and size.
 - Report stores the data URL in the database.
 
-This is useful for a demo and Vercel compatibility, but not ideal for high-volume production.
+This is useful for a walkthrough and Vercel compatibility, but not ideal for high-volume production.
 
 Recommended production storage:
 
@@ -85,7 +85,7 @@ Recommended production storage:
 
 Before selling or deploying to real government/business users:
 
-- Replace all demo passwords.
+- Replace all seed account passwords.
 - Set a strong `ADMIN_JWT_SECRET`.
 - Add rate limiting for login, register, report submission, and upload APIs.
 - Add CAPTCHA or abuse protection for guest reports.
@@ -107,4 +107,4 @@ Before selling or deploying to real government/business users:
 5. Deploy.
 6. Run database setup once.
 7. Login with seeded admin.
-8. Replace seeded demo data.
+8. Replace seeded seed data.

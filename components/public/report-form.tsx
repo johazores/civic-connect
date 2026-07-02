@@ -181,36 +181,36 @@ export function ReportForm({ tenantSlug, categories }: { tenantSlug: string; cat
   if (categories.length === 0) {
     return (
       <Card>
-        <p className="text-sm font-black text-slate-600">Reporting is not available yet because no report categories are active.</p>
+        <p className="text-sm font-semibold text-slate-600">Reporting is not available because no report categories are active.</p>
       </Card>
     );
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
+    <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
       <Card className="lg:sticky lg:top-28">
-        <p className="section-eyebrow">Report checklist</p>
+        <p className="section-eyebrow">Report progress</p>
         <div className="mt-6 flex items-end justify-between gap-3">
           <div>
-            <p className="text-4xl font-black tracking-[-0.03em] text-slate-900">{completionScore}%</p>
-            <p className="mt-1 text-sm font-black text-slate-500">Completion</p>
+            <p className="text-4xl font-extrabold tracking-[-0.03em] text-slate-950">{completionScore}%</p>
+            <p className="mt-1 text-sm font-bold text-slate-500">Form completion</p>
           </div>
-          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-extrabold text-[var(--brand)] ring-1 ring-blue-100">Draft</span>
+          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-[var(--brand)] ring-1 ring-blue-100">In progress</span>
         </div>
-        <div className="mt-5 h-3 overflow-hidden rounded-full bg-slate-100">
-          <div className="h-full rounded-full bg-gradient-to-r from-[var(--brand)] to-cyan-500 transition-all" style={{ width: `${completionScore}%` }} />
+        <div className="mt-5 h-2.5 overflow-hidden rounded-full bg-slate-100">
+          <div className="h-full rounded-full bg-gradient-to-r from-[var(--brand)] to-teal-400 transition-all" style={{ width: `${completionScore}%` }} />
         </div>
         <div className="mt-6 grid gap-3">
           {[
-            ['1', 'Choose category', selectedCategory?.name || 'Pending'],
-            ['2', 'Describe issue', form.title || 'Pending'],
-            ['3', 'Add location', form.locationText || 'Pending'],
-            ['4', 'Submit and track', 'A reference number is created after submission']
-          ].map(([number, title, text]) => (
-            <div key={number} className="rounded-[1.4rem] border border-slate-200 bg-white/72 p-4 shadow-[0_10px_26px_rgba(16,32,51,0.04)]">
-              <p className="text-xs font-extrabold uppercase tracking-[0.12em] text-slate-400">Step {number}</p>
-              <p className="mt-1 font-black text-slate-900">{title}</p>
-              <p className="mt-1 line-clamp-1 text-sm font-medium text-slate-500">{text}</p>
+            ['Category', selectedCategory?.name || 'Select a category'],
+            ['Issue details', form.title || 'Add a short title'],
+            ['Location', form.locationText || 'Add the street or landmark'],
+            ['Reference number', 'Created after submission']
+          ].map(([title, text], index) => (
+            <div key={title} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_10px_26px_rgba(18,32,51,0.04)]">
+              <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">Step {index + 1}</p>
+              <p className="mt-1 font-extrabold text-slate-950">{title}</p>
+              <p className="mt-1 line-clamp-1 text-sm font-medium text-slate-600">{text}</p>
             </div>
           ))}
         </div>
@@ -218,17 +218,17 @@ export function ReportForm({ tenantSlug, categories }: { tenantSlug: string; cat
 
       <Card>
         {createdReport ? (
-          <div className="mb-6 rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-5">
-            <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-emerald-800">Submitted</p>
-            <h2 className="mt-2 text-2xl font-black text-emerald-950">Your report was received.</h2>
-            <p className="mt-2 text-sm font-medium leading-6 text-emerald-800">Save this reference number to track your request. Signed-in reports also appear in your citizen dashboard.</p>
-            <p className="mt-4 rounded-2xl bg-white p-4 text-xl font-black tracking-[-0.03em] text-emerald-950 shadow-sm">{createdReport.referenceCode}</p>
+          <div className="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-emerald-800">Submitted</p>
+            <h2 className="mt-2 text-2xl font-extrabold text-emerald-950">Your report was received.</h2>
+            <p className="mt-2 text-sm font-medium leading-6 text-emerald-800">Save this reference number to track your request.</p>
+            <p className="mt-4 rounded-xl bg-white p-4 text-xl font-extrabold tracking-[-0.03em] text-emerald-950 shadow-sm">{createdReport.referenceCode}</p>
             <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-              <Link href={`/${tenantSlug}/track?reference=${encodeURIComponent(createdReport.referenceCode)}`} className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-emerald-700 px-5 py-3 text-sm font-extrabold text-white">
+              <Link href={`/${tenantSlug}/track?reference=${encodeURIComponent(createdReport.referenceCode)}`} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-5 py-3 text-sm font-bold text-white">
                 Track this report
               </Link>
               {citizen ? (
-                <Link href={`/${tenantSlug}/dashboard`} className="inline-flex min-h-11 items-center justify-center rounded-2xl border border-emerald-200 bg-white px-5 py-3 text-sm font-extrabold text-emerald-800">
+                <Link href={`/${tenantSlug}/dashboard`} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-emerald-200 bg-white px-5 py-3 text-sm font-bold text-emerald-800">
                   View dashboard
                 </Link>
               ) : null}
@@ -236,35 +236,28 @@ export function ReportForm({ tenantSlug, categories }: { tenantSlug: string; cat
           </div>
         ) : null}
 
-        {citizen ? (
-          <div className="mb-5 rounded-[1.5rem] border border-blue-100 bg-blue-50 p-4">
-            <p className="text-sm font-black text-slate-900">Signed in as {citizen.name}</p>
-            <p className="mt-1 text-sm font-medium text-slate-600">This report will be saved to your citizen dashboard.</p>
-          </div>
-        ) : (
-          <div className="mb-5 rounded-[1.5rem] border border-amber-200 bg-amber-50 p-4">
-            <p className="text-sm font-black text-amber-950">Guest report mode</p>
-            <p className="mt-1 text-sm font-medium text-amber-800">You can still submit a report, but creating an account makes tracking easier.</p>
-          </div>
-        )}
+        <div className={`mb-5 rounded-2xl border p-4 ${citizen ? 'border-blue-100 bg-blue-50' : 'border-amber-200 bg-amber-50'}`}>
+          <p className={`text-sm font-bold ${citizen ? 'text-slate-950' : 'text-amber-950'}`}>{citizen ? `Signed in as ${citizen.name}` : 'Submitting without an account'}</p>
+          <p className={`mt-1 text-sm font-medium ${citizen ? 'text-slate-600' : 'text-amber-800'}`}>{citizen ? 'This report will be saved to your dashboard.' : 'You can still track the request using the reference number after submission.'}</p>
+        </div>
 
         <form onSubmit={handleSubmit} className="grid gap-5">
           <div>
-            <label className="text-sm font-extrabold text-slate-700">Report category</label>
+            <label className="input-label">Report category</label>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               {categories.map((category) => (
                 <button
                   key={category.id}
                   type="button"
                   onClick={() => setSelectedCategoryId(category.id)}
-                  className={`rounded-[1.4rem] border p-4 text-left transition ${
+                  className={`rounded-2xl border p-4 text-left transition ${
                     selectedCategoryId === category.id
                       ? 'border-[var(--brand)] bg-blue-50 ring-4 ring-blue-100'
-                      : 'border-slate-200 bg-white/86 hover:border-slate-300 hover:bg-white'
+                      : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
                   }`}
                 >
-                  <p className="font-black text-slate-900">{category.name}</p>
-                  <p className="mt-1 text-sm font-medium leading-6 text-slate-500">{category.description || 'Submit this type of city concern.'}</p>
+                  <p className="font-extrabold text-slate-950">{category.name}</p>
+                  <p className="mt-1 text-sm font-medium leading-6 text-slate-600">{category.description || 'Submit this type of city concern.'}</p>
                 </button>
               ))}
             </div>
@@ -272,51 +265,50 @@ export function ReportForm({ tenantSlug, categories }: { tenantSlug: string; cat
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="text-sm font-extrabold text-slate-700">Your name</label>
-              <Input required value={form.reporterName} onChange={(event) => updateField('reporterName', event.target.value)} placeholder="Full name" />
+              <label className="input-label">Your name</label>
+              <Input required value={form.reporterName} onChange={(event) => updateField('reporterName', event.target.value)} placeholder="Maria Santos" autoComplete="name" />
             </div>
             <div>
-              <label className="text-sm font-extrabold text-slate-700">Email</label>
-              <Input type="email" value={form.reporterEmail} onChange={(event) => updateField('reporterEmail', event.target.value)} placeholder="email@example.com" />
+              <label className="input-label">Email</label>
+              <Input type="email" value={form.reporterEmail} onChange={(event) => updateField('reporterEmail', event.target.value)} placeholder="maria.santos@email.com" autoComplete="email" />
             </div>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <label className="text-sm font-extrabold text-slate-700">Phone</label>
-              <Input value={form.reporterPhone} onChange={(event) => updateField('reporterPhone', event.target.value)} placeholder="Optional phone number" />
+              <label className="input-label">Phone</label>
+              <Input value={form.reporterPhone} onChange={(event) => updateField('reporterPhone', event.target.value)} placeholder="+63 917 000 1234" autoComplete="tel" />
             </div>
             <div>
-              <label className="text-sm font-extrabold text-slate-700">Report title</label>
-              <Input required value={form.title} onChange={(event) => updateField('title', event.target.value)} placeholder="Example: Broken streetlight" />
+              <label className="input-label">Report title</label>
+              <Input required value={form.title} onChange={(event) => updateField('title', event.target.value)} placeholder="Broken streetlight near the barangay hall" />
             </div>
           </div>
 
           <div>
-            <label className="text-sm font-extrabold text-slate-700">Description</label>
-            <Textarea required value={form.description} onChange={(event) => updateField('description', event.target.value)} placeholder="Describe the concern clearly." />
+            <label className="input-label">Description</label>
+            <Textarea required value={form.description} onChange={(event) => updateField('description', event.target.value)} placeholder="Describe what happened, when you noticed it, and any safety concerns." />
           </div>
 
           <div>
-            <label className="text-sm font-extrabold text-slate-700">Location</label>
+            <label className="input-label">Location</label>
             <Input required value={form.locationText} onChange={(event) => updateField('locationText', event.target.value)} placeholder="Street, landmark, barangay, or area" />
           </div>
 
-          <div className="rounded-[1.5rem] border border-dashed border-slate-300 bg-white/70 p-5">
-            <label className="text-sm font-extrabold text-slate-700">Optional photo</label>
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5">
+            <label className="input-label">Optional photo</label>
             <Input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={handlePhotoChange} className="mt-3 bg-white" />
             <p className="mt-2 text-xs font-medium text-slate-500">JPG, PNG, WEBP, or GIF. Max 4MB.</p>
             {photo ? (
-              <div className="mt-4 overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+              <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white">
                 <img src={photo.previewUrl} alt="Selected report photo" className="h-56 w-full object-cover" />
               </div>
             ) : null}
           </div>
 
-          {error ? <p className="rounded-2xl bg-rose-50 p-4 text-sm font-extrabold text-rose-800 ring-1 ring-rose-200">{error}</p> : null}
+          {error ? <p className="rounded-2xl bg-rose-50 p-4 text-sm font-bold text-rose-800 ring-1 ring-rose-200">{error}</p> : null}
 
-          <Button disabled={isLoading}>{isLoading ? 'Submitting...' : 'Submit Report'}</Button>
+          <Button disabled={isLoading}>{isLoading ? 'Submitting...' : 'Submit report'}</Button>
         </form>
       </Card>
     </div>

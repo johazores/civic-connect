@@ -27,7 +27,7 @@
 - CRUD/archive for departments
 - Staff user management
 - Tenant settings editor
-- Multi-tenant demo data
+- Multi-tenant seed data
 - User/admin/developer/product/marketing/testing docs
 - Lint, typecheck, and production build passing
 

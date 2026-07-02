@@ -4,7 +4,7 @@ This document reviews whether Civic Connect Multitenant makes sense for the Stel
 
 ## Verdict
 
-Civic Connect is a strong base application, but the current MVP is not yet a Stellar-native product.
+Civic Connect is a strong base application, but the current platform is not yet a Stellar-native product.
 
 Right now, the app is mainly a multitenant civic services platform:
 
@@ -44,7 +44,7 @@ Missing Stellar feature:
 
 - A citizen should be able to open a government service, generate a Stellar payment request, pay on Testnet, and receive a permanent transaction hash as proof of payment.
 
-Recommended MVP feature:
+Recommended platform feature:
 
 - Add service fees.
 - Add tenant Stellar receiving wallet.
@@ -71,7 +71,7 @@ Missing Stellar feature:
 
 - Verified civic participation should trigger a small Testnet USDC/XLM reward or points-backed wallet record.
 
-Recommended MVP feature:
+Recommended platform feature:
 
 - Add civic actions such as report validated, assembly attended, volunteer activity completed, survey submitted, cleanup joined.
 - Admin verifies the action.
@@ -79,7 +79,7 @@ Recommended MVP feature:
 
 Important caution:
 
-- Keep this as a demo/Testnet flow first.
+- Keep this as a Testnet flow first.
 - Do not make financial claims or real cash promises until compliance is reviewed.
 
 ### Strong fit: Idea 231 — Environmental Cleanup Reward
@@ -95,7 +95,7 @@ Missing Stellar feature:
 
 - Cleanup proof should include GPS/photo evidence and an on-chain reward or proof record.
 
-Recommended MVP feature:
+Recommended platform feature:
 
 - Add a special report type: Cleanup Proof.
 - Citizen uploads photo, location, estimated kilos collected.
@@ -104,7 +104,7 @@ Recommended MVP feature:
 
 Why this is attractive:
 
-- Very demo-friendly.
+- Very walkthrough-friendly.
 - Easy to explain visually.
 - Strong local/social impact story.
 
@@ -120,7 +120,7 @@ Missing Stellar feature:
 
 - Public disbursement records should be linked to Stellar transactions.
 
-Recommended MVP feature:
+Recommended platform feature:
 
 - Add a Transparency Ledger page.
 - Admin records public budget items and disbursements.
@@ -137,7 +137,7 @@ Recommended later feature:
 
 - Add digital tax clearance receipts as verifiable credentials or tokenized receipts.
 
-This should come after the payment receipt MVP because tax/property workflows can become complex quickly.
+This should come after the payment receipt platform because tax/property workflows can become complex quickly.
 
 ### Secondary fit: Idea 176 / 287 — Barangay ID / Proof of Residency
 
@@ -146,11 +146,11 @@ This is powerful but should not be the first feature.
 Reason:
 
 - Identity credentials involve privacy, verification, and legal trust.
-- It is harder to demo safely without making claims that the app cannot legally support yet.
+- It is harder to walkthrough safely without making claims that the app cannot legally support yet.
 
 Recommended later feature:
 
-- Issue non-sensitive demo credentials on Testnet only.
+- Issue non-sensitive walkthrough credentials on Testnet only.
 - Let staff verify residency and attach a signed credential reference to a citizen profile.
 
 ### Secondary fit: Idea 238 / 229 / 299 — Disaster Funds and Climate Adaptation Funds
@@ -191,7 +191,7 @@ The app becomes a practical city platform where Stellar powers:
 
 This gives us a strong reason to use Stellar without making the app too complex.
 
-## Recommended MVP Scope for StellarX
+## Recommended platform Scope for StellarX
 
 ### Phase 1 — Stellar Testnet Payment Receipts
 
@@ -205,7 +205,7 @@ Add:
 - Public receipt page with transaction hash.
 - Admin payment receipt list.
 
-Demo story:
+Walkthrough story:
 
 1. Citizen opens a city service.
 2. Citizen sees fee and QR code.
@@ -225,7 +225,7 @@ Add:
 - Testnet reward send or reward proof log.
 - Citizen achievement dashboard.
 
-Demo story:
+Walkthrough story:
 
 1. Citizen submits an issue or cleanup proof.
 2. Admin verifies it.
@@ -242,7 +242,7 @@ Add:
 - Department/category filters.
 - Exportable audit view.
 
-Demo story:
+Walkthrough story:
 
 1. City publishes public spending items.
 2. Citizens can search expenses.
@@ -292,7 +292,7 @@ The app can look like a normal reporting dashboard if Stellar is not visible eno
 Mitigation:
 
 - Add a clear Stellar Receipts module.
-- Add demo transaction hashes.
+- Add test transaction hashes.
 - Add receipt and transparency pages that are visible in the public UI.
 
 ### Compliance risk
@@ -301,7 +301,7 @@ Government payments and real-money rewards can require approval and compliance.
 
 Mitigation:
 
-- Use Stellar Testnet for the demo.
+- Use Stellar Testnet for the walkthrough.
 - Present real-money support as future production integration after legal review.
 - Avoid promising official acceptance until an LGU/payment partner approves it.
 

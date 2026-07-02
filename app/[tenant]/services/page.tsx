@@ -23,7 +23,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ tenan
         <div className="mx-auto max-w-7xl">
           <p className="section-eyebrow">Services</p>
           <h1 className="heading-display mt-4 text-4xl md:text-6xl">City services directory</h1>
-          <p className="mt-4 max-w-2xl text-base font-medium leading-7 text-slate-600">Browse available city services and find the right department for your concern.</p>
+          <p className="mt-4 max-w-2xl text-base font-medium leading-7 text-slate-600">Browse available public services and find the right office for your concern.</p>
           <div className="mt-8">
             <ServicesGrid services={services} />
           </div>

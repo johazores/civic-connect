@@ -113,7 +113,7 @@ There are two separate session cookies:
 
 Both are signed with `ADMIN_JWT_SECRET`.
 
-For production, rename the environment variable later if preferred, but the current single secret is enough for the MVP.
+For production, rename the environment variable later if preferred, but the current single secret is enough for the platform.
 
 ## Important services
 

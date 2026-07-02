@@ -8,14 +8,14 @@ Each tenant has its own route:
 
 ```text
 /san-pablo
-/demo-city
+/laguna-province
 ```
 
 For local testing:
 
 ```text
 http://localhost:3000/san-pablo
-http://localhost:3000/demo-city
+http://localhost:3000/laguna-province
 ```
 
 ## Main citizen pages
@@ -33,15 +33,15 @@ http://localhost:3000/demo-city
 | `/:tenant/login` | Login as a citizen. |
 | `/:tenant/dashboard` | View citizen-owned reports and latest updates. |
 
-## Demo citizen login
+## Local citizen login
 
 ```text
 San Pablo:
-Email: citizen@sanpablo.local
+Email: maria.santos@sanpablo.local
 Password: citizen12345
 
-Demo City:
-Email: citizen@demo-city.local
+Laguna Province:
+Email: ana.reyes@laguna.local
 Password: citizen12345
 ```
 

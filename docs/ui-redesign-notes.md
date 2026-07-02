@@ -4,7 +4,7 @@ This pass replaces the previous harsh/neon visual direction with a cleaner premi
 
 ## Design direction
 
-The product should feel trustworthy, modern, mobile-first, and polished enough for a customer or investor demo.
+The product should feel trustworthy, modern, mobile-first, and polished enough for a customer or investor walkthrough.
 
 The updated visual system uses:
 
