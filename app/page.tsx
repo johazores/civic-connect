@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FiChevronRight, FiFlag, FiShield } from 'react-icons/fi';
+import { FiArrowRight, FiChevronRight, FiFlag, FiShield } from 'react-icons/fi';
 
 const tenantLinks = [
   {
@@ -74,6 +74,17 @@ export default function RootPage() {
               </Link>
             ))}
           </div>
+
+          <Link href="/about" className="app-tile-card mt-3 flex items-center gap-3">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[16px] bg-[color-mix(in_srgb,var(--navy)_10%,var(--surface))] text-[var(--navy)]">
+              <FiShield className="h-5 w-5" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-base font-bold tracking-[-0.02em] text-[var(--ink)]">How it works</span>
+              <span className="mt-0.5 block truncate text-[13px] font-medium text-[var(--muted)]">Why Stellar powers verifiable civic services</span>
+            </span>
+            <FiArrowRight className="h-4 w-4 shrink-0 text-[var(--ember)]" />
+          </Link>
         </div>
       </div>
     </main>

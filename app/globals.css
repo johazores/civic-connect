@@ -551,19 +551,20 @@ h3,
   box-shadow: var(--shadow-sm);
 }
 
-.app-tile-card,
-.app-feed-card,
-.app-info-card {
-  display: block;
-  padding: 16px;
-}
-
-/* Default card padding lives in the components layer so Tailwind p-* utilities
-   (and the <Card> component's conditional padding) always win over it. This
-   makes raw `className="card"` elements padded without breaking p-0/p-6 callers. */
+/* Card display + default padding live in the components layer so Tailwind
+   utilities (flex, p-0, p-6, grid, …) always win over them. This makes raw
+   `className="card"` padded and lets cards opt into flex/grid layouts without
+   an unlayered `display:block`/`padding` overriding the utility. */
 @layer components {
   .card {
     padding: 20px;
+  }
+
+  .app-tile-card,
+  .app-feed-card,
+  .app-info-card {
+    display: block;
+    padding: 16px;
   }
 }
 
@@ -680,20 +681,55 @@ h3,
 .textarea,
 .select {
   width: 100%;
-  min-height: 54px;
   border: 1.6px solid transparent;
   border-radius: 16px;
   background: var(--surface-2);
   color: var(--ink);
-  padding: 14px 16px;
   font-size: 15px;
   font-weight: 500;
+  line-height: 1.35;
   outline: none;
-  transition: border-color .25s, background .25s, box-shadow .25s;
+  transition: border-color .2s var(--ease), background .2s var(--ease), box-shadow .2s var(--ease);
+}
+
+/* Single-line controls: fixed 54px with horizontal padding only so the
+   browser vertically centers the text identically everywhere. */
+.input,
+.select {
+  height: 54px;
+  padding: 0 16px;
+}
+
+/* When .input is used as a flex wrapper (icon + inner input), center the row. */
+.input:has(> input),
+.input:has(> svg) {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.input > input {
+  min-width: 0;
+  flex: 1;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: var(--ink);
+  outline: none;
+}
+
+.input > svg {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  color: var(--muted);
 }
 
 .textarea {
   min-height: 128px;
+  padding: 14px 16px;
   resize: vertical;
 }
 
@@ -1377,6 +1413,160 @@ h3,
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--muted) 42%, transparent), transparent);
 }
 
+/* =========================================================================
+   18. ABOUT / HOW-IT-WORKS SHOWCASE
+   ========================================================================= */
+/* Content is visible by default; the hidden/animated state only applies once JS
+   marks the document reveal-ready, so a hydration delay never blanks the page. */
+.reveal {
+  opacity: 1;
+  transform: none;
+  transition: opacity .6s var(--ease), transform .6s var(--ease);
+}
+
+.reveal-ready .reveal {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+.reveal-ready .reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+.about-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: color-mix(in srgb, var(--navy) 9%, var(--surface));
+  color: var(--navy);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.about-section-title {
+  color: var(--ink);
+  font-family: var(--font-d);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+}
+
+.about-lead {
+  margin-top: 10px;
+  color: var(--ink-2);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+/* Vertical journey timeline */
+.timeline {
+  position: relative;
+}
+
+.tl-item {
+  display: flex;
+  gap: 14px;
+}
+
+.tl-rail {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.tl-node {
+  position: relative;
+  z-index: 1;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(150deg, var(--navy), var(--navy-900));
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(26, 73, 123, .3);
+}
+
+.tl-node.ember {
+  background: linear-gradient(150deg, var(--ember), #ff6f84);
+  box-shadow: 0 10px 22px rgba(239, 58, 82, .34);
+}
+
+.tl-node.teal {
+  background: linear-gradient(150deg, #16a78b, #0f806d);
+  box-shadow: 0 10px 22px rgba(22, 167, 139, .3);
+}
+
+.tl-line {
+  flex: 1 1 auto;
+  width: 2px;
+  min-height: 20px;
+  margin: 4px 0;
+  background: linear-gradient(180deg, var(--line-strong), color-mix(in srgb, var(--line-strong) 30%, transparent));
+}
+
+.tl-item:last-child .tl-line {
+  display: none;
+}
+
+.tl-body {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 22px;
+}
+
+.tl-item:last-child .tl-body {
+  padding-bottom: 0;
+}
+
+/* Stellar vs traditional comparison */
+.vs-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.vs-col {
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.vs-col.old {
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.vs-col.new {
+  border: 1px solid color-mix(in srgb, var(--navy) 22%, transparent);
+  background: color-mix(in srgb, var(--navy) 6%, var(--surface));
+}
+
+.vs-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 7px 0;
+  font-size: 13.5px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+.vs-row svg {
+  flex: 0 0 auto;
+  width: 17px;
+  height: 17px;
+  margin-top: 1px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1385,5 +1575,11 @@ h3,
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
     transition-duration: .08ms !important;
+  }
+
+  .reveal,
+  .reveal-ready .reveal {
+    opacity: 1;
+    transform: none;
   }
 }

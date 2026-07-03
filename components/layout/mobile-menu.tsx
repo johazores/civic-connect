@@ -187,6 +187,11 @@ export function MobileMenu({
                   <nav aria-label="App navigation">
                     <div className="menu-group">
                       <MenuLink item={homeItem} active={pathname === homeItem.href} onNavigate={close} />
+                      <MenuLink
+                        item={{ href: '/about', label: 'How it works', description: 'What CivicTrust is & how Stellar powers it', icon: 'transparency' }}
+                        active={pathname === '/about'}
+                        onNavigate={close}
+                      />
                     </div>
 
                     {navGroups.map((group) => (
