@@ -26,7 +26,7 @@ export default async function ServicesPage({ params }: { params: Promise<{ tenan
     >
       <main className="page-section">
         <ServicesGrid
-          services={services.map((service) => ({ ...service, feeAmount: service.feeAmount ? String(service.feeAmount) : null }))}
+          services={services.map((service: any) => ({ ...service, feeAmount: service.feeAmount ? String(service.feeAmount) : null }))}
           tenantSlug={tenant.slug}
         />
       </main>
