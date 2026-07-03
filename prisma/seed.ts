@@ -320,7 +320,7 @@ async function main() {
           taxpayerName: citizen.name,
           taxpayerEmail: citizen.email,
           propertyIndexNumber: `${config.slug.slice(0, 3).toUpperCase()}-PIN-2026-001`,
-          propertyAddress: `Sample residential property, ${config.cityName}`,
+          propertyAddress: `Block 12 Lot 8 Civic Heights, ${config.cityName}`,
           taxYear: 2026,
           amount: '15.0000000',
           assetCode: 'XLM',

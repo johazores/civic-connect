@@ -77,23 +77,29 @@ export function MobileMenu({ tenantSlug, navGroups }: { tenantSlug: string; navG
         onClick={() => setIsOpen((current) => !current)}
         aria-label={isOpen ? 'Close menu' : 'Open menu'}
         aria-expanded={isOpen}
-        className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-900 shadow-[0_10px_24px_rgba(16,24,40,0.10)] transition hover:bg-slate-50"
+        className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-black text-slate-900 shadow-[0_10px_24px_rgba(18,32,51,0.10)] transition hover:bg-slate-50"
       >
         {isOpen ? <FiX aria-hidden="true" className="h-5 w-5" /> : <FiMenu aria-hidden="true" className="h-5 w-5" />}
+        Menu
       </button>
 
       {isOpen ? (
-        <div className="fixed inset-x-0 bottom-0 top-[4.25rem] z-[70] overflow-y-auto bg-slate-950/30 px-3 pb-[calc(7rem+env(safe-area-inset-bottom))] backdrop-blur-md animate-fade" onClick={() => setIsOpen(false)}>
-          <div className="mx-auto max-w-md rounded-[2rem] border border-white/80 bg-white p-3 shadow-[0_28px_90px_rgba(15,23,42,0.28)] animate-rise" onClick={(event) => event.stopPropagation()}>
-            <div className="rounded-[1.5rem] bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-4 ring-1 ring-blue-100">
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-700">Citizen app menu</p>
-              <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">Choose what you need now. The bottom tabs stay available for quick mobile actions.</p>
+        <div className="fixed inset-x-0 bottom-0 top-[4.25rem] z-[70] overflow-y-auto bg-slate-950/35 px-3 pb-[calc(8.5rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-md animate-fade" onClick={() => setIsOpen(false)}>
+          <div className="mx-auto max-w-md rounded-[2rem] border border-white/80 bg-white p-3 shadow-[0_28px_90px_rgba(15,23,42,0.30)] animate-scale" onClick={(event) => event.stopPropagation()}>
+            <div className="brand-panel rounded-[1.65rem] p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-700">Action hub</p>
+                  <h2 className="mt-2 text-xl font-black tracking-[-0.04em] text-slate-950">What do you need today?</h2>
+                </div>
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-emerald-700 ring-1 ring-emerald-100">Live</span>
+              </div>
               <div className="mt-4 grid grid-cols-2 gap-2">
-                <Link href={`/${tenantSlug}/report`} onClick={() => setIsOpen(false)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-black btn-primary">
+                <Link href={`/${tenantSlug}/report`} onClick={() => setIsOpen(false)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-black btn-primary">
                   <FiFlag aria-hidden="true" className="h-4 w-4" />
                   Report issue
                 </Link>
-                <Link href={`/${tenantSlug}/track`} onClick={() => setIsOpen(false)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-black btn-secondary">
+                <Link href={`/${tenantSlug}/track`} onClick={() => setIsOpen(false)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-black btn-secondary">
                   <FiSearch aria-hidden="true" className="h-4 w-4" />
                   Track status
                 </Link>
@@ -102,7 +108,7 @@ export function MobileMenu({ tenantSlug, navGroups }: { tenantSlug: string; navG
 
             <nav className="mt-3 grid gap-3" aria-label="Mobile navigation">
               {navGroups.map((group) => (
-                <section key={group.label} className="rounded-[1.5rem] border border-slate-200 bg-white p-2">
+                <section key={group.label} className="rounded-[1.65rem] border border-slate-200 bg-white p-2 shadow-sm">
                   <div className="px-2 py-2">
                     <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">{group.label}</p>
                     <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{group.description}</p>
@@ -116,7 +122,7 @@ export function MobileMenu({ tenantSlug, navGroups }: { tenantSlug: string; navG
                           key={item.href}
                           href={item.href}
                           onClick={() => setIsOpen(false)}
-                          className={`flex min-h-14 items-center gap-3 rounded-[1.15rem] px-3 py-3 text-sm font-black transition ${
+                          className={`flex min-h-14 items-center gap-3 rounded-[1.25rem] px-3 py-3 text-sm font-black transition ${
                             isActive ? 'bg-blue-50 text-[var(--brand)] ring-1 ring-blue-100' : 'text-slate-800 hover:bg-slate-50'
                           }`}
                         >
@@ -136,11 +142,11 @@ export function MobileMenu({ tenantSlug, navGroups }: { tenantSlug: string; navG
             </nav>
 
             <div className="mt-3 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
-              <Link href={`/${tenantSlug}/login`} onClick={() => setIsOpen(false)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-black btn-secondary">
+              <Link href={`/${tenantSlug}/login`} onClick={() => setIsOpen(false)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-black btn-secondary">
                 <FiUser aria-hidden="true" className="h-4 w-4" />
                 Citizen sign in
               </Link>
-              <Link href={`/${tenantSlug}/admin/login`} onClick={() => setIsOpen(false)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-black btn-primary">
+              <Link href={`/${tenantSlug}/admin/login`} onClick={() => setIsOpen(false)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-black btn-primary">
                 <FiShield aria-hidden="true" className="h-4 w-4" />
                 Staff portal
               </Link>
@@ -156,7 +162,7 @@ export function MobileBottomNav({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/80 bg-white/92 px-2 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-2 shadow-[0_-18px_50px_rgba(15,23,42,0.12)] backdrop-blur-2xl lg:hidden" aria-label="Quick mobile navigation">
+    <nav className="fixed inset-x-3 bottom-3 z-40 rounded-[1.5rem] border border-white/80 bg-white/94 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 shadow-[0_-10px_40px_rgba(18,32,51,0.18)] backdrop-blur-2xl lg:hidden" aria-label="Quick mobile navigation">
       <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
         {items.map((item) => {
           const isActive = pathname === item.href;
@@ -165,7 +171,7 @@ export function MobileBottomNav({ items }: { items: NavItem[] }) {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-2xl text-[0.72rem] font-black transition ${
+              className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-[1.15rem] text-[0.70rem] font-black transition ${
                 isActive ? 'bg-blue-50 text-[var(--brand)] ring-1 ring-blue-100' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
               }`}
             >

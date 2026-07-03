@@ -224,7 +224,7 @@ export function ReportForm({ tenantSlug, categories }: { tenantSlug: string; cat
             <p className="mt-2 text-sm font-medium leading-6 text-emerald-800">Save this reference number to track your request.</p>
             <p className="mt-4 rounded-xl bg-white p-4 text-xl font-extrabold tracking-[-0.03em] text-emerald-950 shadow-sm">{createdReport.referenceCode}</p>
             <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-              <Link href={`/${tenantSlug}/track?reference=${encodeURIComponent(createdReport.referenceCode)}`} className="inline-flex min-h-11 items-center justify-center rounded-xl bg-emerald-700 px-5 py-3 text-sm font-bold text-white">
+              <Link href={`/${tenantSlug}/track?reference=${encodeURIComponent(createdReport.referenceCode)}`} className="inline-flex min-h-11 items-center justify-center rounded-2xl px-5 py-3 text-sm font-black transition btn-primary">
                 Track this report
               </Link>
               {citizen ? (

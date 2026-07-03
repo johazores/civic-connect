@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { FiPhoneCall, FiShield } from 'react-icons/fi';
 import { Card } from '@/components/ui/card';
 
 type Hotline = {
@@ -34,13 +35,13 @@ export function HotlinesSection({ hotlines, tenantSlug }: { hotlines: Hotline[];
                 <div className="p-5">
                   <div className="flex items-center justify-between gap-3">
                     <div className={`flex h-12 w-12 items-center justify-center rounded-2xl text-sm font-black ring-1 ${hotline.isEmergency ? 'bg-rose-50 text-rose-700 ring-rose-100' : 'bg-blue-50 text-[var(--brand)] ring-blue-100'}`}>
-                      {hotline.isEmergency ? '911' : '☎'}
+                      {hotline.isEmergency ? <FiShield aria-hidden="true" className="h-5 w-5" /> : <FiPhoneCall aria-hidden="true" className="h-5 w-5" />}
                     </div>
                     {hotline.isEmergency ? <span className="rounded-full bg-rose-50 px-3 py-1 text-xs font-black text-rose-800 ring-1 ring-rose-100">Emergency</span> : <span className="rounded-full bg-slate-50 px-3 py-1 text-xs font-black text-slate-500 ring-1 ring-slate-100">Support</span>}
                   </div>
                   <h3 className="mt-4 text-lg font-black text-slate-950">{hotline.name}</h3>
                   <p className="mt-2 min-h-12 text-sm font-semibold leading-6 text-slate-600">{hotline.description || 'City contact line.'}</p>
-                  <a href={`tel:${hotline.phone}`} className="mt-5 inline-flex w-full justify-center rounded-full px-4 py-3 text-sm font-black transition btn-primary">
+                  <a href={`tel:${hotline.phone}`} className="mt-5 inline-flex w-full justify-center rounded-2xl px-4 py-3 text-sm font-black transition btn-primary">
                     Call {hotline.phone}
                   </a>
                 </div>

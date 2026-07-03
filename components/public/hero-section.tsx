@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FiAward, FiCheckCircle, FiCreditCard, FiFlag, FiHash, FiHeart, FiSearch, FiShare2, FiShield, FiUsers } from 'react-icons/fi';
+import { FiAward, FiCheckCircle, FiCreditCard, FiFlag, FiHash, FiHeart, FiMapPin, FiMessageCircle, FiSearch, FiShield, FiShare2, FiUsers } from 'react-icons/fi';
 import type { IconType } from 'react-icons';
 
 export function HeroSection({
@@ -22,37 +22,37 @@ export function HeroSection({
   ];
 
   const feed = [
-    { title: 'Streetlight request assigned', meta: 'Public works • 18 min ago', status: 'In progress' },
-    { title: 'Service payment verified', meta: 'Treasury • Stellar receipt', status: 'Verified' },
-    { title: 'Cleanup reward under review', meta: 'Environment office • Today', status: 'Reviewing' }
+    { title: 'Streetlight request assigned', meta: 'Public Works • 18 min ago', status: 'In progress', Icon: FiMapPin },
+    { title: 'Service payment verified', meta: 'Treasury • Stellar receipt', status: 'Verified', Icon: FiCreditCard },
+    { title: 'Cleanup reward under review', meta: 'Environment Office • Today', status: 'Reviewing', Icon: FiAward }
   ];
 
   return (
     <section className="relative overflow-hidden px-4 pb-8 pt-6 md:px-6 md:pb-14 md:pt-10">
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute left-[-12rem] top-[-10rem] h-[28rem] w-[28rem] rounded-full bg-blue-100/70 blur-3xl" />
-        <div className="absolute right-[-10rem] top-8 h-[26rem] w-[26rem] rounded-full bg-cyan-100/70 blur-3xl" />
-        <div className="absolute bottom-[-12rem] left-1/3 h-[24rem] w-[24rem] rounded-full bg-emerald-100/60 blur-3xl" />
+        <div className="design-orb left-[-12rem] top-[-10rem] h-[28rem] w-[28rem] bg-blue-100" />
+        <div className="design-orb right-[-10rem] top-8 h-[26rem] w-[26rem] bg-cyan-100" />
+        <div className="design-orb bottom-[-12rem] left-1/3 h-[24rem] w-[24rem] bg-emerald-100" />
       </div>
 
       <div className="mx-auto grid max-w-7xl gap-6 lg:grid-cols-[1.02fr_0.98fr] lg:items-stretch">
-        <div className="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/86 p-6 shadow-[0_28px_90px_rgba(15,23,42,0.10)] backdrop-blur-2xl md:p-10">
-          <div className="absolute right-6 top-6 hidden items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-xs font-black text-blue-700 shadow-sm sm:flex">
+        <div className="relative overflow-hidden rounded-[2.25rem] border border-white/80 bg-white/90 p-6 shadow-[0_28px_90px_rgba(18,32,51,0.10)] backdrop-blur-2xl md:p-10">
+          <div className="absolute right-6 top-6 hidden items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 shadow-sm sm:flex">
             <FiShield aria-hidden="true" className="h-3.5 w-3.5" />
-            Live citizen portal
+            Verified civic portal
           </div>
           <p className="section-eyebrow">{tenant.cityName} Services</p>
-          <h1 className="heading-display mt-6 max-w-4xl text-5xl sm:text-6xl md:text-[4.8rem]">
+          <h1 className="heading-display mt-6 max-w-4xl text-5xl sm:text-6xl md:text-[4.65rem]">
             {tenant.tagline}
           </h1>
           <p className="mt-6 max-w-2xl text-base font-semibold leading-8 text-slate-600 md:text-lg">{tenant.description}</p>
 
           <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:max-w-2xl">
-            <Link href={`/${tenant.slug}/report`} className="group inline-flex min-h-14 items-center justify-center gap-3 rounded-full px-6 py-3 text-sm font-black transition btn-primary">
+            <Link href={`/${tenant.slug}/report`} className="group inline-flex min-h-14 items-center justify-center gap-3 rounded-2xl px-6 py-3 text-sm font-black transition btn-primary">
               <FiFlag aria-hidden="true" className="h-4 w-4" />
               Report a concern
             </Link>
-            <Link href={`/${tenant.slug}/track`} className="inline-flex min-h-14 items-center justify-center gap-3 rounded-full px-6 py-3 text-sm font-black transition btn-secondary">
+            <Link href={`/${tenant.slug}/track`} className="inline-flex min-h-14 items-center justify-center gap-3 rounded-2xl px-6 py-3 text-sm font-black transition btn-secondary">
               <FiSearch aria-hidden="true" className="h-4 w-4" />
               Track request
             </Link>
@@ -60,7 +60,7 @@ export function HeroSection({
 
           <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:max-w-3xl">
             {quickActions.map(({ Icon, ...action }) => (
-              <Link key={action.href} href={action.href} className="card-hover rounded-[1.35rem] border border-slate-200 bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
+              <Link key={action.href} href={action.href} className="card-hover rounded-[1.35rem] border border-slate-200 bg-white p-4 shadow-[0_12px_28px_rgba(18,32,51,0.05)]">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-[var(--brand)] ring-1 ring-blue-100">
                   <Icon aria-hidden="true" className="h-4 w-4" />
                 </span>
@@ -78,18 +78,18 @@ export function HeroSection({
         </div>
 
         <div className="grid gap-4 lg:grid-rows-[auto_1fr]">
-          <div className="relative overflow-hidden rounded-[2rem] border border-blue-100 bg-gradient-to-br from-white via-blue-50/90 to-cyan-50/80 p-5 text-slate-950 shadow-[0_28px_90px_rgba(15,23,42,0.10)] md:p-6">
+          <div className="relative overflow-hidden rounded-[2.25rem] brand-panel p-5 text-slate-950 md:p-6">
             <div className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-cyan-200/40 blur-3xl" />
             <div className="relative flex items-start justify-between gap-4">
               <div className="max-w-md">
                 <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/85 px-3 py-1 text-xs font-black uppercase tracking-[0.16em] text-blue-700 shadow-sm">
                   <FiShield aria-hidden="true" className="h-3.5 w-3.5" />
-                  Trust layer
+                  Civic trust layer
                 </div>
-                <h2 className="mt-4 text-2xl font-black tracking-[-0.04em] text-slate-950">Civic services with verifiable Stellar records.</h2>
-                <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">Payments, rewards, tax receipts, and public ledger items are designed around permanent transaction proof.</p>
+                <h2 className="mt-4 text-2xl font-black tracking-[-0.04em] text-slate-950">Service payments and records citizens can verify.</h2>
+                <p className="mt-3 text-sm font-semibold leading-6 text-slate-600">Stellar is used only where it adds civic proof: payment receipts, rewards, public ledger records, and tax receipt verification.</p>
               </div>
-              <span className="hidden rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700 sm:inline-flex">Testnet ready</span>
+              <span className="hidden rounded-full border border-emerald-100 bg-white px-3 py-1 text-xs font-black text-emerald-700 sm:inline-flex">Testnet ready</span>
             </div>
             <div className="relative mt-5 grid gap-3 sm:grid-cols-3">
               <TrustMetric Icon={FiCreditCard} value="Payments" label="Hash receipts" />
@@ -98,11 +98,11 @@ export function HeroSection({
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-white/80 bg-white/88 p-4 shadow-[0_28px_90px_rgba(15,23,42,0.10)] backdrop-blur-2xl md:p-5">
+          <div className="rounded-[2.25rem] border border-white/80 bg-white/90 p-4 shadow-[0_28px_90px_rgba(18,32,51,0.10)] backdrop-blur-2xl md:p-5">
             <div className="mb-4 flex items-center justify-between gap-3 px-1">
               <div>
                 <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Community feed</p>
-                <h2 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">What citizens see next</h2>
+                <h2 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950">Live civic activity</h2>
               </div>
               <div className="flex -space-x-2">
                 {['MC', 'PW', 'TR'].map((item) => (
@@ -113,11 +113,11 @@ export function HeroSection({
 
             <div className="grid gap-3">
               {feed.map((item) => (
-                <div key={item.title} className="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
+                <div key={item.title} className="feed-card rounded-[1.5rem] p-4">
                   <div className="flex items-start gap-3">
                     <div className="h-11 w-11 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 p-[2px]">
                       <div className="flex h-full w-full items-center justify-center rounded-full bg-white text-[var(--brand)]">
-                        <FiCheckCircle aria-hidden="true" className="h-4 w-4" />
+                        <item.Icon aria-hidden="true" className="h-4 w-4" />
                       </div>
                     </div>
                     <div className="min-w-0 flex-1">
@@ -138,9 +138,9 @@ export function HeroSection({
             </div>
 
             <div className="mt-4 grid grid-cols-3 gap-2 rounded-[1.5rem] bg-slate-50 p-2 ring-1 ring-slate-100">
-              <MiniAction Icon={FiHeart} label="Like" />
+              <MiniAction Icon={FiHeart} label="Support" />
+              <MiniAction Icon={FiMessageCircle} label="Update" />
               <MiniAction Icon={FiShare2} label="Share" />
-              <MiniAction Icon={FiUsers} label="Follow" />
             </div>
           </div>
         </div>

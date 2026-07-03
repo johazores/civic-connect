@@ -233,6 +233,8 @@ docs/ui-mobile-navigation-fixes.md
 
 ## Documentation
 
+- `docs/ui-ux-research-redesign.md` - Research-led UI/UX redesign direction and implementation notes.
+
 Start with:
 
 - `docs/user-guide.md`
