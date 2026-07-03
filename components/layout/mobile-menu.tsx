@@ -83,8 +83,8 @@ export function MobileMenu({ tenantSlug, navGroups }: { tenantSlug: string; navG
       </button>
 
       {isOpen ? (
-        <div className="fixed inset-0 top-[4.25rem] z-50 bg-slate-950/30 px-3 pb-24 backdrop-blur-md animate-fade" onClick={() => setIsOpen(false)}>
-          <div className="mx-auto max-h-[calc(100vh-6rem)] max-w-md overflow-y-auto rounded-[2rem] border border-white/80 bg-white p-3 shadow-[0_28px_90px_rgba(15,23,42,0.28)] animate-rise" onClick={(event) => event.stopPropagation()}>
+        <div className="fixed inset-x-0 bottom-0 top-[4.25rem] z-[70] overflow-y-auto bg-slate-950/30 px-3 pb-[calc(7rem+env(safe-area-inset-bottom))] backdrop-blur-md animate-fade" onClick={() => setIsOpen(false)}>
+          <div className="mx-auto max-w-md rounded-[2rem] border border-white/80 bg-white p-3 shadow-[0_28px_90px_rgba(15,23,42,0.28)] animate-rise" onClick={(event) => event.stopPropagation()}>
             <div className="rounded-[1.5rem] bg-gradient-to-br from-blue-50 via-white to-cyan-50 p-4 ring-1 ring-blue-100">
               <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-700">Citizen app menu</p>
               <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">Choose what you need now. The bottom tabs stay available for quick mobile actions.</p>
@@ -156,7 +156,7 @@ export function MobileBottomNav({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/80 bg-white/92 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 shadow-[0_-18px_50px_rgba(15,23,42,0.12)] backdrop-blur-2xl lg:hidden" aria-label="Quick mobile navigation">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-white/80 bg-white/92 px-2 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-2 shadow-[0_-18px_50px_rgba(15,23,42,0.12)] backdrop-blur-2xl lg:hidden" aria-label="Quick mobile navigation">
       <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
         {items.map((item) => {
           const isActive = pathname === item.href;

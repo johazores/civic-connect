@@ -108,7 +108,7 @@ export function PublicShell({
 
   return (
     <div
-      className="min-h-screen pb-20 text-slate-900 lg:pb-0"
+      className="min-h-screen pb-32 text-slate-900 lg:pb-0"
       style={{
         '--tenant-primary': tenant.primaryColor || '#2563eb',
         '--brand': tenant.primaryColor || '#2563eb',
@@ -140,7 +140,7 @@ export function PublicShell({
                 >
                   {group.label}
                 </button>
-                <div className="invisible absolute left-1/2 top-full z-50 w-[23rem] -translate-x-1/2 translate-y-3 rounded-[1.5rem] border border-slate-200/90 bg-white/96 p-2 opacity-0 shadow-[0_28px_80px_rgba(15,23,42,0.16)] backdrop-blur-2xl transition duration-150 group-hover:visible group-hover:translate-y-2 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-2 group-focus-within:opacity-100">
+                <div className="invisible absolute left-1/2 top-[calc(100%-0.125rem)] z-50 w-[23rem] -translate-x-1/2 rounded-[1.5rem] border border-slate-200/90 bg-white/96 p-2 opacity-0 shadow-[0_28px_80px_rgba(15,23,42,0.16)] backdrop-blur-2xl transition duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
                   <div className="px-3 pb-2 pt-2">
                     <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">{group.label}</p>
                     <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">{group.description}</p>

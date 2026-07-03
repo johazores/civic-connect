@@ -206,6 +206,31 @@ Future Stellar modules:
 - Municipal budget transparency
 - Digital property tax receipts
 
+
+
+## Stellar Learning Playground
+
+A beginner-friendly Stellar Testnet playground is available at:
+
+```text
+/stellar-playground
+```
+
+Use it to learn and test the raw Stellar pieces before using the tenant payment module:
+
+- Generate a Testnet keypair
+- Fund a Testnet account through Friendbot
+- Inspect balances through Horizon
+- Generate a SEP-7 payment URI and QR code
+- Verify a payment by transaction hash
+
+Read:
+
+```text
+docs/stellar-playground-guide.md
+docs/ui-mobile-navigation-fixes.md
+```
+
 ## Documentation
 
 Start with:
