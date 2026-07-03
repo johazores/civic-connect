@@ -82,7 +82,7 @@ export function MobileMenu({
   cityName: string;
   navGroups: NavGroup[];
 }) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? '';
   const [state, setState] = useState<'closed' | 'open' | 'closing'>('closed');
   const [frameEl, setFrameEl] = useState<HTMLElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -226,7 +226,7 @@ function MenuLink({ item, active, onNavigate }: { item: NavItem; active: boolean
 }
 
 export function Tabbar({ items }: { items: NavItem[] }) {
-  const pathname = usePathname();
+  const pathname = usePathname() ?? '';
 
   return (
     <nav className="tabbar" aria-label="Primary navigation">
