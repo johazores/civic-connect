@@ -80,6 +80,11 @@ enum PropertyTaxReceiptStatus {
   VOID
 }
 
+enum RewardPayoutMethod {
+  DIRECT
+  CLAIMABLE
+}
+
 model Tenant {
   id          String   @id @default(cuid())
   slug        String   @unique
@@ -339,8 +344,11 @@ model CivicAction {
   rewardMemo String?
   status CivicActionStatus @default(SUBMITTED)
   verificationNote String?
+  proofDigest String?
+  payoutMethod RewardPayoutMethod @default(DIRECT)
   rewardTransactionHash String? @unique
   rewardOperationId String? @unique
+  rewardClaimableBalanceId String?
   rewardLedger Int?
   rewardPaidAt DateTime?
   reviewedAt DateTime?
@@ -371,6 +379,7 @@ model TransparencyEntry {
   assetCode String @default("XLM")
   assetIssuer String?
   memo String?
+  proofDigest String?
   transactionHash String? @unique
   paymentOperationId String? @unique
   ledger Int?
@@ -399,6 +408,7 @@ model PropertyTaxReceipt {
   amount Decimal @db.Decimal(14, 7)
   assetCode String @default("XLM")
   assetIssuer String?
+  proofDigest String?
   paymentIntentId String?
   transactionHash String? @unique
   ledger Int?

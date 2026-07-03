@@ -6,3 +6,5 @@ export * from './sep7';
 export * from './utils';
 export * from './verification';
 export * from './transactions';
+export * from './explorer';
+export * from './proof';

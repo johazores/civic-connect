@@ -1,10 +1,14 @@
 import { prisma } from '@/lib/db';
 import { safeTenantSelect } from '@/lib/auth';
 import {
+  computeProofDigest,
   decryptStellarSecret,
   isValidStellarPublicKey,
   normalizeStellarAmount,
   resolveStellarNetworkConfig,
+  stellarExpertClaimableBalanceUrl,
+  stellarExpertTxUrl,
+  submitClaimableBalanceReward,
   submitSignedStellarPayment
 } from '@/lib/stellar/index';
 
@@ -76,6 +80,79 @@ function getTenantNetworkConfig(tenant: TenantWithWallet) {
     friendbotUrl: tenant.stellarFriendbotUrl,
     networkPassphrase: tenant.stellarNetworkPassphrase
   });
+}
+
+/** Canonical, reproducible SHA-256 over a civic action's tamper-sensitive fields. */
+function civicActionProofDigest(action: {
+  type: string;
+  participantName: string;
+  participantEmail?: string | null;
+  locationText: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  photoUrl?: string | null;
+  verificationNote?: string | null;
+  rewardMemo?: string | null;
+  rewardAmount: unknown;
+  rewardAssetCode: string;
+}) {
+  return computeProofDigest([
+    action.type,
+    action.participantName,
+    action.participantEmail,
+    action.locationText,
+    action.latitude,
+    action.longitude,
+    action.photoUrl,
+    action.verificationNote,
+    action.rewardMemo,
+    String(action.rewardAmount),
+    action.rewardAssetCode
+  ]);
+}
+
+function transparencyProofDigest(entry: {
+  entryType: string;
+  title: string;
+  department?: string | null;
+  recipientName?: string | null;
+  recipientPublicKey?: string | null;
+  amount: unknown;
+  assetCode: string;
+  referenceCode: string;
+  occurredAt: Date;
+}) {
+  return computeProofDigest([
+    entry.entryType,
+    entry.title,
+    entry.department,
+    entry.recipientName,
+    entry.recipientPublicKey,
+    String(entry.amount),
+    entry.assetCode,
+    entry.referenceCode,
+    entry.occurredAt.toISOString()
+  ]);
+}
+
+function taxReceiptProofDigest(receipt: {
+  taxpayerName: string;
+  propertyIndexNumber: string;
+  propertyAddress: string;
+  taxYear: number;
+  amount: unknown;
+  assetCode: string;
+  referenceCode: string;
+}) {
+  return computeProofDigest([
+    receipt.taxpayerName,
+    receipt.propertyIndexNumber,
+    receipt.propertyAddress,
+    receipt.taxYear,
+    String(receipt.amount),
+    receipt.assetCode,
+    receipt.referenceCode
+  ]);
 }
 
 export async function createCivicAction(input: CivicActionInput) {
@@ -156,11 +233,13 @@ export async function reviewCivicAction(tenantSlug: string, id: string, input: {
   }
 
   const status = ['SUBMITTED', 'REVIEWING', 'APPROVED', 'REJECTED', 'REWARDED'].includes(String(input.status || '')) ? String(input.status) : current.status;
+  const payoutMethod = ['DIRECT', 'CLAIMABLE'].includes(String((input as any).payoutMethod || '')) ? String((input as any).payoutMethod) : current.payoutMethod;
 
   return prisma.civicAction.update({
     where: { id: current.id },
     data: {
       status: status as any,
+      payoutMethod: payoutMethod as any,
       verificationNote: input.verificationNote ?? current.verificationNote,
       rewardAmount: input.rewardAmount != null ? asDecimalString(input.rewardAmount) : current.rewardAmount,
       rewardAssetCode: input.rewardAssetCode?.trim() || current.rewardAssetCode,
@@ -199,21 +278,48 @@ export async function payCivicActionReward(tenantSlug: string, id: string) {
 
   const config = getTenantNetworkConfig(tenant);
   const secret = getTenantPayoutSecret(tenant);
-  const result = await submitSignedStellarPayment({
+  const memo = action.rewardMemo || (await createUniqueReference('RWD'));
+  // Anchor a tamper-evident proof of the approved action on-chain as a 32-byte MEMO_HASH.
+  const proofDigest = civicActionProofDigest(action);
+
+  const paymentInput = {
     sourceSecretKey: secret,
     destinationPublicKey: action.rewardDestinationPublicKey,
     amount: String(action.rewardAmount),
     assetCode: action.rewardAssetCode,
     assetIssuer: action.rewardAssetIssuer,
-    memo: action.rewardMemo || (await createUniqueReference('RWD')),
+    memo,
+    memoHashHex: proofDigest,
     horizonUrl: config.horizonUrl,
     networkPassphrase: config.networkPassphrase
-  });
+  };
+
+  // CLAIMABLE commits the reward on-chain immediately so a citizen can claim it
+  // later from their own wallet — even before they have funded an account.
+  if (action.payoutMethod === 'CLAIMABLE') {
+    const claimable = await submitClaimableBalanceReward(paymentInput);
+
+    return prisma.civicAction.update({
+      where: { id: action.id },
+      data: {
+        status: 'REWARDED',
+        proofDigest,
+        rewardTransactionHash: claimable.transactionHash,
+        rewardClaimableBalanceId: claimable.claimableBalanceId || null,
+        rewardLedger: claimable.ledger || null,
+        rewardPaidAt: new Date()
+      },
+      include: civicActionInclude
+    });
+  }
+
+  const result = await submitSignedStellarPayment(paymentInput);
 
   return prisma.civicAction.update({
     where: { id: action.id },
     data: {
       status: 'REWARDED',
+      proofDigest,
       rewardTransactionHash: result.transactionHash,
       rewardLedger: result.ledger || null,
       rewardPaidAt: new Date()
@@ -250,6 +356,21 @@ export async function createTransparencyEntry(tenantSlug: string, input: Record<
   }
 
   const referenceCode = await createUniqueReference('LED');
+  const occurredAt = input.occurredAt ? new Date(String(input.occurredAt)) : new Date();
+  const entryType = String(input.entryType || 'PUBLIC_DISBURSEMENT');
+  const amount = asDecimalString(input.amount, '0');
+  const assetCode = String(input.assetCode || 'XLM').trim().toUpperCase();
+  const proofDigest = transparencyProofDigest({
+    entryType,
+    title: String(input.title).trim(),
+    department: String(input.department || '').trim() || null,
+    recipientName: String(input.recipientName || '').trim() || null,
+    recipientPublicKey: String(input.recipientPublicKey || '').trim() || null,
+    amount,
+    assetCode,
+    referenceCode,
+    occurredAt
+  });
 
   return prisma.transparencyEntry.create({
     data: {
@@ -257,17 +378,18 @@ export async function createTransparencyEntry(tenantSlug: string, input: Record<
       referenceCode,
       title: String(input.title).trim(),
       description: String(input.description).trim(),
-      entryType: String(input.entryType || 'PUBLIC_DISBURSEMENT') as any,
+      entryType: entryType as any,
       status: String(input.status || 'PUBLISHED') as any,
       department: String(input.department || '').trim() || null,
       recipientName: String(input.recipientName || '').trim() || null,
       recipientPublicKey: String(input.recipientPublicKey || '').trim() || null,
-      amount: asDecimalString(input.amount, '0'),
-      assetCode: String(input.assetCode || 'XLM').trim().toUpperCase(),
+      amount,
+      assetCode,
       assetIssuer: String(input.assetIssuer || '').trim() || null,
       memo: String(input.memo || '').trim() || referenceCode,
+      proofDigest,
       transactionHash: String(input.transactionHash || '').trim() || null,
-      occurredAt: input.occurredAt ? new Date(String(input.occurredAt)) : new Date()
+      occurredAt
     }
   });
 }
@@ -328,6 +450,17 @@ export async function publishTransparencyDisbursement(tenantSlug: string, id: st
 
   const config = getTenantNetworkConfig(tenant);
   const secret = getTenantPayoutSecret(tenant);
+  const proofDigest = entry.proofDigest || transparencyProofDigest({
+    entryType: entry.entryType,
+    title: entry.title,
+    department: entry.department,
+    recipientName: entry.recipientName,
+    recipientPublicKey: entry.recipientPublicKey,
+    amount: entry.amount,
+    assetCode: entry.assetCode,
+    referenceCode: entry.referenceCode,
+    occurredAt: entry.occurredAt
+  });
   const result = await submitSignedStellarPayment({
     sourceSecretKey: secret,
     destinationPublicKey: entry.recipientPublicKey,
@@ -335,6 +468,7 @@ export async function publishTransparencyDisbursement(tenantSlug: string, id: st
     assetCode: entry.assetCode,
     assetIssuer: entry.assetIssuer,
     memo: entry.memo || entry.referenceCode,
+    memoHashHex: proofDigest,
     horizonUrl: config.horizonUrl,
     networkPassphrase: config.networkPassphrase
   });
@@ -343,6 +477,7 @@ export async function publishTransparencyDisbursement(tenantSlug: string, id: st
     where: { id: entry.id },
     data: {
       status: 'VERIFIED_ON_STELLAR',
+      proofDigest,
       transactionHash: result.transactionHash,
       ledger: result.ledger || null
     }
@@ -412,6 +547,17 @@ export async function createPropertyTaxReceipt(tenantSlug: string, input: Record
   }
 
   const referenceCode = await createUniqueReference('TAX');
+  const amount = asDecimalString(input.amount, '0');
+  const assetCode = String(input.assetCode || 'XLM').trim().toUpperCase();
+  const proofDigest = taxReceiptProofDigest({
+    taxpayerName: String(input.taxpayerName).trim(),
+    propertyIndexNumber: String(input.propertyIndexNumber).trim(),
+    propertyAddress: String(input.propertyAddress).trim(),
+    taxYear: Number(input.taxYear || new Date().getFullYear()),
+    amount,
+    assetCode,
+    referenceCode
+  });
 
   return prisma.propertyTaxReceipt.create({
     data: {
@@ -422,9 +568,10 @@ export async function createPropertyTaxReceipt(tenantSlug: string, input: Record
       propertyIndexNumber: String(input.propertyIndexNumber).trim(),
       propertyAddress: String(input.propertyAddress).trim(),
       taxYear: Number(input.taxYear || new Date().getFullYear()),
-      amount: asDecimalString(input.amount, '0'),
-      assetCode: String(input.assetCode || 'XLM').trim().toUpperCase(),
+      amount,
+      assetCode,
       assetIssuer: String(input.assetIssuer || '').trim() || null,
+      proofDigest,
       transactionHash: String(input.transactionHash || '').trim() || null,
       ledger: input.ledger ? Number(input.ledger) : null,
       status: String(input.status || 'ISSUED') as any,
@@ -485,3 +632,167 @@ const civicActionInclude = {
   tenant: { select: safeTenantSelect },
   citizen: { select: { id: true, name: true, email: true, phone: true } }
 };
+
+export type CivicLedgerKind = 'PAYMENT' | 'REWARD' | 'DISBURSEMENT' | 'TAX_RECEIPT';
+
+export type CivicLedgerRow = {
+  id: string;
+  kind: CivicLedgerKind;
+  kindLabel: string;
+  referenceCode: string;
+  title: string;
+  counterparty: string | null;
+  amount: string;
+  assetCode: string;
+  status: string;
+  transactionHash: string | null;
+  claimableBalanceId: string | null;
+  ledger: number | null;
+  proofDigest: string | null;
+  occurredAt: string;
+  explorerTxUrl: string | null;
+  explorerBalanceUrl: string | null;
+};
+
+export type CivicLedgerResult = {
+  network: string;
+  metrics: {
+    totalRecords: number;
+    verifiedOnChain: number;
+    xlmMoved: string;
+    payments: number;
+    rewards: number;
+    disbursements: number;
+    taxReceipts: number;
+  };
+  rows: CivicLedgerRow[];
+};
+
+function sumXlm(rows: CivicLedgerRow[]) {
+  const total = rows.reduce((acc, row) => (row.assetCode === 'XLM' ? acc + Number(row.amount || 0) : acc), 0);
+  return normalizeStellarAmount(total || 0);
+}
+
+/** Unified, public civic ledger: every Stellar-backed record across all modules. */
+export async function getCivicLedger(tenantSlug: string): Promise<CivicLedgerResult | null> {
+  const tenant = await getTenantForCivicProgram(tenantSlug);
+
+  if (!tenant) {
+    return null;
+  }
+
+  const network = tenant.stellarNetwork;
+
+  const [payments, rewards, disbursements, receipts] = await Promise.all([
+    prisma.paymentIntent.findMany({
+      where: { tenantId: tenant.id, status: 'VERIFIED' },
+      include: { service: { select: { title: true } } },
+      orderBy: { verifiedAt: 'desc' }
+    }),
+    prisma.civicAction.findMany({ where: { tenantId: tenant.id, status: 'REWARDED' }, orderBy: { rewardPaidAt: 'desc' } }),
+    prisma.transparencyEntry.findMany({ where: { tenantId: tenant.id, transactionHash: { not: null } }, orderBy: { occurredAt: 'desc' } }),
+    prisma.propertyTaxReceipt.findMany({ where: { tenantId: tenant.id, transactionHash: { not: null }, status: { not: 'VOID' } }, orderBy: { issuedAt: 'desc' } })
+  ]);
+
+  const rows: CivicLedgerRow[] = [];
+
+  for (const payment of payments) {
+    rows.push({
+      id: payment.id,
+      kind: 'PAYMENT',
+      kindLabel: 'Service payment',
+      referenceCode: payment.referenceCode,
+      title: payment.service?.title || 'Government service fee',
+      counterparty: payment.payerName || null,
+      amount: normalizeStellarAmount(String(payment.amount)),
+      assetCode: payment.assetCode,
+      status: payment.status,
+      transactionHash: payment.transactionHash,
+      claimableBalanceId: null,
+      ledger: payment.ledger,
+      proofDigest: null,
+      occurredAt: (payment.verifiedAt || payment.paidAt || payment.createdAt).toISOString(),
+      explorerTxUrl: stellarExpertTxUrl(payment.transactionHash, network),
+      explorerBalanceUrl: null
+    });
+  }
+
+  for (const reward of rewards) {
+    rows.push({
+      id: reward.id,
+      kind: 'REWARD',
+      kindLabel: reward.type === 'CLEANUP' ? 'Cleanup reward' : 'Civic reward',
+      referenceCode: reward.rewardMemo || reward.id,
+      title: reward.title,
+      counterparty: reward.participantName || null,
+      amount: normalizeStellarAmount(String(reward.rewardAmount)),
+      assetCode: reward.rewardAssetCode,
+      status: reward.rewardClaimableBalanceId ? 'CLAIMABLE' : 'REWARDED',
+      transactionHash: reward.rewardTransactionHash,
+      claimableBalanceId: reward.rewardClaimableBalanceId,
+      ledger: reward.rewardLedger,
+      proofDigest: reward.proofDigest,
+      occurredAt: (reward.rewardPaidAt || reward.createdAt).toISOString(),
+      explorerTxUrl: stellarExpertTxUrl(reward.rewardTransactionHash, network),
+      explorerBalanceUrl: stellarExpertClaimableBalanceUrl(reward.rewardClaimableBalanceId, network)
+    });
+  }
+
+  for (const entry of disbursements) {
+    rows.push({
+      id: entry.id,
+      kind: 'DISBURSEMENT',
+      kindLabel: 'Public disbursement',
+      referenceCode: entry.referenceCode,
+      title: entry.title,
+      counterparty: entry.recipientName || entry.department || null,
+      amount: normalizeStellarAmount(String(entry.amount)),
+      assetCode: entry.assetCode,
+      status: entry.status,
+      transactionHash: entry.transactionHash,
+      claimableBalanceId: null,
+      ledger: entry.ledger,
+      proofDigest: entry.proofDigest,
+      occurredAt: entry.occurredAt.toISOString(),
+      explorerTxUrl: stellarExpertTxUrl(entry.transactionHash, network),
+      explorerBalanceUrl: null
+    });
+  }
+
+  for (const receipt of receipts) {
+    rows.push({
+      id: receipt.id,
+      kind: 'TAX_RECEIPT',
+      kindLabel: 'Tax receipt',
+      referenceCode: receipt.referenceCode,
+      title: `${receipt.taxYear} property tax · ${receipt.propertyIndexNumber}`,
+      counterparty: receipt.taxpayerName || null,
+      amount: normalizeStellarAmount(String(receipt.amount)),
+      assetCode: receipt.assetCode,
+      status: receipt.status,
+      transactionHash: receipt.transactionHash,
+      claimableBalanceId: null,
+      ledger: receipt.ledger,
+      proofDigest: receipt.proofDigest,
+      occurredAt: receipt.issuedAt.toISOString(),
+      explorerTxUrl: stellarExpertTxUrl(receipt.transactionHash, network),
+      explorerBalanceUrl: null
+    });
+  }
+
+  rows.sort((a, b) => (a.occurredAt < b.occurredAt ? 1 : -1));
+
+  return {
+    network,
+    metrics: {
+      totalRecords: rows.length,
+      verifiedOnChain: rows.filter((row) => row.transactionHash).length,
+      xlmMoved: sumXlm(rows),
+      payments: payments.length,
+      rewards: rewards.length,
+      disbursements: disbursements.length,
+      taxReceipts: receipts.length
+    },
+    rows
+  };
+}

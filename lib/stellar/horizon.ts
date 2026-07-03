@@ -114,6 +114,40 @@ export async function getTransactionOperations(input: { horizonUrl: string; tran
   return Array.isArray(payload?._embedded?.records) ? payload._embedded.records : [];
 }
 
+export async function getClaimableBalanceIdForTransaction(input: { horizonUrl: string; transactionHash: string }): Promise<string | null> {
+  const horizonUrl = cleanBaseUrl(input.horizonUrl);
+  const response = await fetch(`${horizonUrl}/transactions/${encodeURIComponent(input.transactionHash)}/effects?limit=50`, {
+    headers: { Accept: 'application/json' }
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const payload = await readJson(response);
+  const records: Array<Record<string, any>> = Array.isArray(payload?._embedded?.records) ? payload._embedded.records : [];
+  const created = records.find((effect) => effect.type === 'claimable_balance_created' && effect.balance_id);
+  return created?.balance_id || null;
+}
+
+export async function accountHasTrustline(input: { horizonUrl: string; publicKey: string; assetCode: string; assetIssuer?: string | null }): Promise<{ exists: boolean; trusted: boolean }> {
+  const code = String(input.assetCode || 'XLM').trim().toUpperCase();
+
+  if (code === 'XLM') {
+    const account = await fetchHorizonAccount({ horizonUrl: input.horizonUrl, publicKey: input.publicKey });
+    return { exists: account.exists, trusted: account.exists };
+  }
+
+  const account = await fetchHorizonAccount({ horizonUrl: input.horizonUrl, publicKey: input.publicKey });
+
+  if (!account.exists) {
+    return { exists: false, trusted: false };
+  }
+
+  const trusted = account.balances.some((balance) => balance.assetCode === code);
+  return { exists: true, trusted };
+}
+
 export async function getAccountTransactions(input: { horizonUrl: string; publicKey: string; limit?: number }): Promise<HorizonTransaction[]> {
   const horizonUrl = cleanBaseUrl(input.horizonUrl);
   const limit = Math.min(Math.max(input.limit || 100, 1), 200);
