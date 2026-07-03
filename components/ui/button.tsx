@@ -7,7 +7,7 @@ const variants: Record<ButtonVariant, string> = {
   secondary: 'btn-secondary',
   ghost: 'btn-ghost',
   accent: 'btn-accent',
-  danger: 'border border-rose-600 bg-rose-600 text-white shadow-[0_12px_24px_rgba(190,18,60,0.18)] hover:bg-rose-700'
+  danger: 'btn-outline text-[var(--ember-600)]'
 };
 
 export function Button({
@@ -18,7 +18,7 @@ export function Button({
 }: ButtonHTMLAttributes<HTMLButtonElement> & { children: ReactNode; variant?: ButtonVariant }) {
   return (
     <button
-      className={`inline-flex min-h-10 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:translate-y-0 disabled:opacity-60 ${variants[variant]} ${className}`}
+      className={`app-btn focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${variants[variant]} ${className}`}
       {...props}
     >
       {children}

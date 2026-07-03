@@ -1,10 +1,24 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import type { ComponentType } from 'react';
+import {
+  FiBriefcase,
+  FiCheck,
+  FiCheckCircle,
+  FiClock,
+  FiEye,
+  FiFileText,
+  FiMapPin,
+  FiSearch,
+  FiTag,
+  FiTool,
+  FiUser,
+  FiXCircle
+} from 'react-icons/fi';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { formatDate } from '@/lib/format';
 
 const statusSteps = ['SUBMITTED', 'REVIEWING', 'ASSIGNED', 'IN_PROGRESS', 'RESOLVED'];
@@ -33,10 +47,18 @@ function niceLabel(value: string) {
 }
 
 function getProgress(status: string) {
-  if (status === 'REJECTED') return 100;
   const index = statusSteps.indexOf(status);
   return index >= 0 ? Math.round(((index + 1) / statusSteps.length) * 100) : 20;
 }
+
+const updateMeta: Record<string, { icon: ComponentType<{ className?: string }>; nic: string }> = {
+  SUBMITTED: { icon: FiFileText, nic: 'nic-blue' },
+  REVIEWING: { icon: FiEye, nic: 'nic-gold' },
+  ASSIGNED: { icon: FiUser, nic: 'nic-navy' },
+  IN_PROGRESS: { icon: FiTool, nic: 'nic-gold' },
+  RESOLVED: { icon: FiCheckCircle, nic: 'nic-teal' },
+  REJECTED: { icon: FiXCircle, nic: 'nic-ember' }
+};
 
 export function TrackReport({ tenantSlug, initialReference }: { tenantSlug: string; initialReference?: string }) {
   const [referenceCode, setReferenceCode] = useState(initialReference || '');
@@ -82,99 +104,184 @@ export function TrackReport({ tenantSlug, initialReference }: { tenantSlug: stri
     loadReport();
   }
 
+  const isRejected = report?.status === 'REJECTED';
+  const currentStepIndex = report ? statusSteps.indexOf(report.status) : -1;
+
   return (
-    <div className="grid gap-6">
-      <Card>
-        <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
-          <div>
-            <label className="input-label">Reference number</label>
-            <Input required value={referenceCode} onChange={(event) => setReferenceCode(event.target.value)} placeholder="MCS-2026-0001" />
+    <div className="grid gap-5">
+      <form onSubmit={handleSubmit}>
+        <div className="field">
+          <label className="input-label" htmlFor="track-reference">
+            Reference number
+          </label>
+          <div className="searchbar" style={{ minHeight: 54 }}>
+            <FiSearch aria-hidden="true" />
+            <input
+              id="track-reference"
+              required
+              value={referenceCode}
+              onChange={(event) => setReferenceCode(event.target.value)}
+              placeholder="MCS-2026-0001"
+            />
           </div>
-          <Button disabled={isLoading}>{isLoading ? 'Searching...' : 'Track request'}</Button>
-        </form>
-        {error ? <p className="mt-4 rounded-2xl bg-rose-50 p-4 text-sm font-bold text-rose-800 ring-1 ring-rose-200">{error}</p> : null}
-      </Card>
+        </div>
+        <Button type="submit" className="btn-block" disabled={isLoading}>
+          {isLoading ? 'Searching...' : 'Track request'}
+        </Button>
+        {error ? (
+          <p className="mt-4 rounded-2xl bg-[var(--ember-soft)] p-4 text-sm font-bold text-[var(--ember-600)]">{error}</p>
+        ) : null}
+      </form>
 
       {report ? (
-        <Card>
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">{report.referenceCode}</p>
-              <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.04em] text-slate-950">{report.title}</h2>
-              <p className="mt-2 text-sm font-medium text-slate-600">Submitted {formatDate(report.submittedAt)}</p>
+        <>
+          <Card>
+            <div className="min-w-0">
+              <p className="break-all text-xs font-bold uppercase tracking-[0.14em] text-[var(--muted)]">{report.referenceCode}</p>
+              <h2 className="mt-1.5 break-words font-display text-lg font-bold leading-snug text-[var(--ink)]">{report.title}</h2>
+              <p className="mt-1.5 text-[13px] font-medium text-[var(--muted)]">Submitted {formatDate(report.submittedAt)}</p>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap gap-2">
               <Badge value={report.status} />
               <Badge value={report.priority} />
             </div>
+          </Card>
+
+          {isRejected ? (
+            <Card>
+              <div className="flex items-start gap-3">
+                <span className="nic nic-ember">
+                  <FiXCircle aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-display text-[15px] font-bold text-[var(--ink)]">This report was closed</p>
+                  <p className="mt-1 break-words text-[13px] font-medium leading-relaxed text-[var(--ink-2)]">
+                    This request was reviewed and closed without further action. See the update trail below for details.
+                  </p>
+                </div>
+              </div>
+            </Card>
+          ) : (
+            <Card>
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-sm font-bold text-[var(--ink-2)]">Progress</p>
+                <p className="text-sm font-extrabold text-[var(--ink)]">{progress}%</p>
+              </div>
+              <div className="heatbar mt-3">
+                <i style={{ width: `${progress}%` }} />
+              </div>
+              <div className="mt-4 grid gap-1">
+                {statusSteps.map((step, index) => {
+                  const isDone = index < currentStepIndex;
+                  const isCurrent = index === currentStepIndex;
+                  return (
+                    <div key={step} className="flex min-h-[44px] items-center gap-3">
+                      <span
+                        className={`flex h-8 w-8 flex-none items-center justify-center rounded-full ${
+                          isDone
+                            ? 'bg-[color-mix(in_srgb,var(--heat-1)_16%,var(--surface))] text-[#0f806d]'
+                            : isCurrent
+                              ? 'bg-[color-mix(in_srgb,var(--navy)_12%,var(--surface))] text-[var(--navy)]'
+                              : 'bg-[var(--surface-2)] text-[var(--muted)]'
+                        }`}
+                      >
+                        {isDone ? (
+                          <FiCheck aria-hidden="true" className="h-4 w-4" />
+                        ) : isCurrent ? (
+                          <FiClock aria-hidden="true" className="h-4 w-4" />
+                        ) : (
+                          <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                        )}
+                      </span>
+                      <span
+                        className={`min-w-0 text-sm ${
+                          isDone || isCurrent ? 'font-semibold text-[var(--ink)]' : 'font-medium text-[var(--muted)]'
+                        }`}
+                      >
+                        {niceLabel(step)}
+                      </span>
+                      {isCurrent ? (
+                        <span className="status-pill ml-auto bg-[color-mix(in_srgb,var(--navy)_10%,var(--surface))] text-[var(--navy)]">
+                          Current
+                        </span>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+          )}
+
+          <div className="menu-group">
+            <DetailRow icon={<FiTag aria-hidden="true" className="h-4 w-4" />} label="Category" value={report.category.name} />
+            <DetailRow
+              icon={<FiBriefcase aria-hidden="true" className="h-4 w-4" />}
+              label="Department"
+              value={report.department?.name || 'Not assigned yet'}
+            />
+            <DetailRow icon={<FiMapPin aria-hidden="true" className="h-4 w-4" />} label="Location" value={report.locationText} />
           </div>
 
-          <div className="mt-7 rounded-2xl border border-slate-200 bg-slate-50 p-5">
-            <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-bold text-slate-700">Progress</p>
-              <p className="text-sm font-extrabold text-slate-950">{progress}%</p>
-            </div>
-            <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
-              <div className="h-full rounded-full bg-[var(--brand)]" style={{ width: `${progress}%` }} />
-            </div>
-            <div className="mt-4 grid gap-2 sm:grid-cols-5">
-              {statusSteps.map((step) => {
-                const isActive = statusSteps.indexOf(step) <= statusSteps.indexOf(report.status);
-                return (
-                  <div key={step} className={`rounded-xl border px-3 py-2 text-center text-xs font-bold ${isActive ? 'border-blue-200 bg-white text-[var(--brand)]' : 'border-slate-200 bg-white/70 text-slate-400'}`}>
-                    {niceLabel(step)}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="mt-6 grid gap-4 md:grid-cols-3">
-            <InfoCard label="Category" value={report.category.name} />
-            <InfoCard label="Department" value={report.department?.name || 'Not assigned yet'} />
-            <InfoCard label="Location" value={report.locationText} />
-          </div>
-
-          <p className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 text-sm font-medium leading-7 text-slate-600">{report.description}</p>
+          <Card>
+            <p className="group-label">Description</p>
+            <p className="mt-2 break-words text-[13.5px] font-medium leading-relaxed text-[var(--ink-2)]">{report.description}</p>
+          </Card>
 
           {report.attachments.length > 0 ? (
-            <div className="mt-6 grid gap-3 md:grid-cols-2">
+            <div className="grid gap-3">
               {report.attachments.map((attachment) => (
-                <a key={attachment.id} href={attachment.imageUrl} target="_blank" rel="noreferrer" className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-100">
+                <a
+                  key={attachment.id}
+                  href={attachment.imageUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="overflow-hidden rounded-[18px] border border-[var(--line)] bg-[var(--surface-2)]"
+                >
                   <img src={attachment.imageUrl} alt="Report attachment" className="h-56 w-full object-cover" />
                 </a>
               ))}
             </div>
           ) : null}
 
-          <div className="mt-8">
-            <h3 className="text-lg font-extrabold text-slate-950">Update trail</h3>
-            <div className="mt-4 grid gap-3">
-              {report.updates.map((update, index) => (
-                <div key={update.id} className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 md:grid-cols-[auto_1fr]">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-sm font-extrabold text-slate-700">{report.updates.length - index}</div>
-                  <div>
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <Badge value={update.status} />
-                      <p className="text-xs font-bold text-slate-500">{formatDate(update.createdAt)}</p>
+          <div>
+            <div className="section-head">
+              <h2>Update trail</h2>
+            </div>
+            <div>
+              {report.updates.map((update) => {
+                const meta = updateMeta[update.status] || { icon: FiFileText, nic: 'nic-navy' };
+                const Icon = meta.icon;
+                return (
+                  <div key={update.id} className="notif">
+                    <span className={`nic ${meta.nic}`}>
+                      <Icon aria-hidden="true" className="h-5 w-5" />
+                    </span>
+                    <div className="nbody">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <Badge value={update.status} />
+                        <span className="text-[11.5px] font-semibold text-[var(--muted)]">{formatDate(update.createdAt)}</span>
+                      </div>
+                      <p className="mt-2">{update.message}</p>
                     </div>
-                    <p className="mt-3 text-sm font-medium leading-6 text-slate-600">{update.message}</p>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
-        </Card>
+        </>
       ) : null}
     </div>
   );
 }
 
-function InfoCard({ label, value }: { label: string; value: string }) {
+function DetailRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-500">{label}</p>
-      <p className="mt-1 font-extrabold text-slate-950">{value}</p>
+    <div className="menu-item">
+      <span className="mi-ic">{icon}</span>
+      <span className="mi-tx">
+        <span>{label}</span>
+        <b className="break-words">{value}</b>
+      </span>
     </div>
   );
 }

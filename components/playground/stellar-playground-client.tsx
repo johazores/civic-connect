@@ -1,8 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
-import { FiCheckCircle, FiCopy, FiExternalLink, FiRefreshCw, FiSend, FiShield, FiZap } from 'react-icons/fi';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  FiAlertTriangle,
+  FiCheckCircle,
+  FiChevronLeft,
+  FiCopy,
+  FiExternalLink,
+  FiRefreshCw,
+  FiSend,
+  FiShield,
+  FiZap
+} from 'react-icons/fi';
 
 type PlaygroundWallet = {
   publicKey: string;
@@ -46,15 +56,70 @@ function shortKey(value: string) {
   return `${value.slice(0, 9)}…${value.slice(-8)}`;
 }
 
-function SecretWarning() {
+function parseAccount(account: Record<string, unknown>) {
+  const balances = Array.isArray(account.balances) ? (account.balances as Array<Record<string, unknown>>) : [];
+  const native = balances.find((entry) => entry.asset_type === 'native');
+  const balance = typeof native?.balance === 'string' ? native.balance : null;
+  const sequence = typeof account.sequence === 'string' ? account.sequence : null;
+  const accountId =
+    typeof account.id === 'string' ? account.id : typeof account.account_id === 'string' ? account.account_id : null;
+
+  return { balance, sequence, accountId };
+}
+
+function StepHead({ icon, title, desc, more }: { icon: ReactNode; title: string; desc: string; more?: string }) {
   return (
-    <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-900">
-      <strong>Testnet only:</strong> this playground shows secret keys so you can learn how accounts work. Never paste a Mainnet secret key here and never expose real secrets in a browser UI.
+    <div className="flex items-start gap-3">
+      <span className="mi-ic">{icon}</span>
+      <div className="min-w-0 flex-1">
+        <h2 className="font-display text-[17px] font-bold tracking-[-0.01em] text-[var(--ink)]">{title}</h2>
+        <p className="mt-0.5 text-[13px] font-medium leading-5 text-[var(--muted)]">{desc}</p>
+        {more ? (
+          <details className="mt-1">
+            <summary className="cursor-pointer text-xs font-bold text-[var(--navy)]">Learn more</summary>
+            <p className="mt-1 text-xs font-medium leading-5 text-[var(--muted)]">{more}</p>
+          </details>
+        ) : null}
+      </div>
     </div>
   );
 }
 
-export function StellarPlaygroundClient() {
+function KeyRow({ label, value, onCopy }: { label: string; value: string; onCopy: () => void }) {
+  return (
+    <div className="rounded-2xl bg-[var(--surface-2)] p-3">
+      <p className="section-eyebrow">{label}</p>
+      <div className="mt-2 flex items-center gap-3">
+        <span className="min-w-0 flex-1 break-all font-mono text-xs leading-5 text-[var(--ink-2)]">{value}</span>
+        <button type="button" onClick={onCopy} aria-label={`Copy ${label}`} className="app-icon-btn">
+          <FiCopy className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function RawJson({ data }: { data: Record<string, unknown> }) {
+  return (
+    <details className="rounded-2xl bg-[var(--surface-2)] px-4 py-3">
+      <summary className="cursor-pointer text-[13px] font-bold text-[var(--navy)]">View raw JSON</summary>
+      <pre className="mt-2 max-h-64 overflow-auto rounded-xl bg-[var(--navy-900)] p-3 text-[11px] leading-4 text-[#cfe0f2]">
+        {JSON.stringify(data, null, 2)}
+      </pre>
+    </details>
+  );
+}
+
+function SecretWarning() {
+  return (
+    <div className="rounded-2xl bg-[var(--ember-soft)] px-4 py-3 text-[13px] font-semibold leading-5 text-[var(--ember-600)]">
+      <strong>Testnet only:</strong> secret keys are shown here so you can learn how accounts work. Never paste a
+      Mainnet secret key into a browser UI.
+    </div>
+  );
+}
+
+export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref?: string }) {
   const [wallet, setWallet] = useState<PlaygroundWallet | null>(null);
   const [receiver, setReceiver] = useState('');
   const [amount, setAmount] = useState('1');
@@ -69,6 +134,16 @@ export function StellarPlaygroundClient() {
     if (!sep7?.sep7Uri) return '';
     return `/api/stellar-playground/qr?uri=${encodeURIComponent(sep7.sep7Uri)}`;
   }, [sep7]);
+
+  const account = useMemo(() => (accountStatus ? parseAccount(accountStatus) : null), [accountStatus]);
+
+  useEffect(() => {
+    if (!state.message && !state.error) return;
+    const timer = setTimeout(() => {
+      setState((current) => ({ ...current, message: '', error: '' }));
+    }, 3200);
+    return () => clearTimeout(timer);
+  }, [state.message, state.error]);
 
   async function runAction(action: () => Promise<void>, successMessage: string) {
     setState({ loading: true, message: '', error: '' });
@@ -137,142 +212,256 @@ export function StellarPlaygroundClient() {
     setState({ loading: false, message: 'Copied to clipboard.', error: '' });
   }
 
-  return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.12),transparent_32rem),linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] text-slate-900">
-      <header className="border-b border-slate-200/80 bg-white/90 px-4 py-4 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-700">Stellar Testnet Lab</p>
-            <h1 className="mt-1 text-2xl font-black tracking-[-0.04em] text-slate-950 sm:text-3xl">CivicTrust Stellar Playground</h1>
-            <p className="mt-1 max-w-2xl text-sm font-semibold leading-6 text-slate-600">A beginner-friendly sandbox for Testnet accounts, SEP-7 payment QR codes, Horizon verification, and transaction receipts.</p>
-          </div>
-          <Link href="/metro-city" className="inline-flex min-h-11 items-center justify-center rounded-full px-5 py-3 text-sm font-black btn-secondary">Back to app</Link>
-        </div>
-      </header>
+  const steps = [
+    { n: 1, label: 'Create', done: Boolean(wallet) },
+    { n: 2, label: 'Fund', done: Boolean(accountStatus) },
+    { n: 3, label: 'Pay', done: Boolean(sep7) },
+    { n: 4, label: 'Verify', done: Boolean(verification) }
+  ];
+  const currentStep = steps.find((step) => !step.done)?.n ?? 4;
 
-      <main className="mx-auto grid max-w-6xl gap-5 px-4 py-6 pb-12 lg:grid-cols-[0.92fr_1.08fr] lg:py-10">
-        <section className="grid gap-5">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-start gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-700"><FiShield className="h-5 w-5" /></span>
-              <div>
-                <h2 className="text-lg font-black text-slate-950">1. Create a Testnet wallet</h2>
-                <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">A Stellar account has a public key that receives funds and a secret key that signs transactions. This button creates a learning wallet only.</p>
-              </div>
+  const verified = verification
+    ? (verification as { verified?: boolean; failureReason?: string; ledger?: number; paidAt?: string; transactionHash?: string; payerPublicKey?: string })
+    : null;
+
+  return (
+    <div className="civic-device-shell">
+      <div className="civic-app-frame">
+        <header className="civic-appbar">
+          <div className="flex min-w-0 items-center gap-3">
+            <Link href={backHref} className="app-icon-btn" aria-label="Back to app">
+              <FiChevronLeft aria-hidden="true" className="h-5 w-5" />
+            </Link>
+            <div className="min-w-0">
+              <p className="appbar-title truncate">Stellar Testnet Lab</p>
+              <p className="app-subtitle truncate">SEP-7 · Horizon · receipts</p>
             </div>
+          </div>
+        </header>
+
+        <main
+          className="civic-viewport viewport-flow grid content-start gap-4 px-5 pt-4"
+          style={{ paddingBottom: 'calc(var(--safe-bottom) + 26px)' }}
+        >
+          <div className="flex gap-2">
+            {steps.map((step) => (
+              <span
+                key={step.n}
+                className={`chip min-w-0 flex-1 justify-center px-2 ${step.done || step.n === currentStep ? 'on' : ''}`}
+              >
+                {step.done ? <FiCheckCircle className="h-3.5 w-3.5 shrink-0" /> : null}
+                <span className="truncate">{step.label}</span>
+              </span>
+            ))}
+          </div>
+
+          <section className="card p-5">
+            <StepHead
+              icon={<FiShield className="h-5 w-5" />}
+              title="1. Create a Testnet wallet"
+              desc="Generate a learning keypair with public and secret keys."
+              more="A Stellar account has a public key that receives funds and a secret key that signs transactions. This button creates a learning wallet only."
+            />
             <div className="mt-4 grid gap-3">
-              <button onClick={generateWallet} disabled={state.loading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-black btn-primary disabled:opacity-60">
+              <button onClick={generateWallet} disabled={state.loading} className="btn btn-primary btn-block disabled:opacity-60">
                 <FiZap className="h-4 w-4" /> Generate Testnet wallet
               </button>
               <SecretWarning />
               {wallet ? (
-                <div className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm">
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Public key / address</p>
-                    <div className="mt-1 flex items-center justify-between gap-3 rounded-xl bg-white p-3 font-mono text-xs text-slate-700">
-                      <span className="break-all">{wallet.publicKey}</span>
-                      <button onClick={() => copy(wallet.publicKey)} className="shrink-0 text-blue-700"><FiCopy /></button>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Secret key / signer</p>
-                    <div className="mt-1 flex items-center justify-between gap-3 rounded-xl bg-white p-3 font-mono text-xs text-slate-700">
-                      <span className="break-all">{wallet.secretKey}</span>
-                      <button onClick={() => copy(wallet.secretKey)} className="shrink-0 text-blue-700"><FiCopy /></button>
-                    </div>
-                  </div>
+                <div className="grid gap-3">
+                  <KeyRow label="Public key / address" value={wallet.publicKey} onCopy={() => copy(wallet.publicKey)} />
+                  <KeyRow label="Secret key / signer" value={wallet.secretKey} onCopy={() => copy(wallet.secretKey)} />
                 </div>
               ) : null}
             </div>
-          </div>
+          </section>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-start gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700"><FiRefreshCw className="h-5 w-5" /></span>
-              <div>
-                <h2 className="text-lg font-black text-slate-950">2. Fund and inspect the wallet</h2>
-                <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">Friendbot funds Testnet accounts with fake XLM. Horizon lets the backend read account balances and transaction history.</p>
-              </div>
+          <section className="card p-5">
+            <StepHead
+              icon={<FiRefreshCw className="h-5 w-5" />}
+              title="2. Fund and inspect the wallet"
+              desc="Friendbot sends fake XLM; Horizon reads the account."
+              more="Friendbot funds Testnet accounts with fake XLM. Horizon lets the backend read account balances and transaction history."
+            />
+            <div className="field mb-0 mt-4">
+              <label className="input-label" htmlFor="pg-receiver">Receiving public key</label>
+              <input
+                id="pg-receiver"
+                value={receiver}
+                onChange={(event) => setReceiver(event.target.value)}
+                placeholder="G..."
+                className="input font-mono"
+              />
             </div>
-            <label className="mt-4 block text-sm font-black text-slate-700">
-              Receiving public key
-              <input value={receiver} onChange={(event) => setReceiver(event.target.value)} placeholder="G..." className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-sm outline-none focus-premium" />
-            </label>
             <div className="mt-3 grid grid-cols-2 gap-2">
-              <button onClick={fundWallet} disabled={state.loading || !receiver} className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-3 text-sm font-black btn-primary disabled:opacity-60">Fund</button>
-              <button onClick={checkWallet} disabled={state.loading || !receiver} className="inline-flex min-h-11 items-center justify-center rounded-full px-4 py-3 text-sm font-black btn-secondary disabled:opacity-60">Check</button>
+              <button onClick={fundWallet} disabled={state.loading || !receiver} className="btn btn-primary disabled:opacity-60">
+                Fund
+              </button>
+              <button onClick={checkWallet} disabled={state.loading || !receiver} className="btn btn-outline disabled:opacity-60">
+                Check
+              </button>
             </div>
-            {accountStatus ? (
-              <pre className="mt-4 max-h-72 overflow-auto rounded-2xl bg-slate-950 p-4 text-xs leading-5 text-slate-100">{JSON.stringify(accountStatus, null, 2)}</pre>
-            ) : null}
-          </div>
-        </section>
-
-        <section className="grid gap-5">
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-start gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-700"><FiSend className="h-5 w-5" /></span>
-              <div>
-                <h2 className="text-lg font-black text-slate-950">3. Generate a SEP-7 payment request</h2>
-                <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">The backend creates a <code className="rounded bg-slate-100 px-1 py-0.5">web+stellar:pay</code> URI. A wallet reads the URI, signs the payment, and submits it to Testnet.</p>
-              </div>
-            </div>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <label className="text-sm font-black text-slate-700">
-                Amount XLM
-                <input value={amount} onChange={(event) => setAmount(event.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none focus-premium" />
-              </label>
-              <label className="text-sm font-black text-slate-700">
-                Memo
-                <input value={memo} maxLength={28} onChange={(event) => setMemo(event.target.value)} className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-sm outline-none focus-premium" />
-              </label>
-            </div>
-            <button onClick={createSep7} disabled={state.loading || !receiver} className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-full px-5 py-3 text-sm font-black btn-primary disabled:opacity-60">Create SEP-7 QR</button>
-            {sep7 ? (
-              <div className="mt-4 grid gap-4 rounded-2xl border border-blue-100 bg-blue-50/50 p-4 sm:grid-cols-[13rem_1fr]">
-                {qrSrc ? <img src={qrSrc} alt="SEP-7 payment QR code" className="h-52 w-52 rounded-2xl border border-white bg-white p-3 shadow-sm" /> : null}
-                <div className="min-w-0">
-                  <p className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">Payment request</p>
-                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">Scan the QR with a Stellar-compatible wallet in Testnet mode, or copy the URI.</p>
-                  <div className="mt-3 rounded-xl bg-white p-3 font-mono text-xs leading-5 text-slate-700">
-                    <p><strong>To:</strong> {shortKey(sep7.destination)}</p>
-                    <p><strong>Amount:</strong> {sep7.amount} XLM</p>
-                    <p><strong>Memo:</strong> {sep7.memo}</p>
+            {accountStatus && account ? (
+              <div className="mt-4 grid gap-3">
+                <div className="stat-grid">
+                  <div className="stat">
+                    <p className="sv">{account.balance ?? '—'}</p>
+                    <p className="sl">Balance (XLM)</p>
                   </div>
-                  <button onClick={() => copy(sep7.sep7Uri)} className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-full px-4 py-2 text-sm font-black btn-secondary"><FiCopy /> Copy URI</button>
+                  <div className="stat">
+                    <p className="sv" style={{ fontSize: '14px', lineHeight: '20px' }}>{account.sequence ?? '—'}</p>
+                    <p className="sl">Sequence</p>
+                  </div>
                 </div>
+                {account.accountId ? (
+                  <KeyRow label="Account" value={account.accountId} onCopy={() => copy(account.accountId as string)} />
+                ) : null}
+                <RawJson data={accountStatus} />
               </div>
             ) : null}
-          </div>
+          </section>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-start gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-violet-50 text-violet-700"><FiCheckCircle className="h-5 w-5" /></span>
-              <div>
-                <h2 className="text-lg font-black text-slate-950">4. Verify the transaction</h2>
-                <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">After payment, paste the transaction hash. The backend checks Horizon for destination, amount, asset, memo, and success status.</p>
-              </div>
+          <section className="card p-5">
+            <StepHead
+              icon={<FiSend className="h-5 w-5" />}
+              title="3. Create a SEP-7 payment"
+              desc="Build a web+stellar:pay request a wallet can scan."
+              more="The backend creates a web+stellar:pay URI. A wallet reads the URI, signs the payment, and submits it to Testnet."
+            />
+            <div className="field mb-0 mt-4">
+              <label className="input-label" htmlFor="pg-amount">Amount XLM</label>
+              <input id="pg-amount" value={amount} onChange={(event) => setAmount(event.target.value)} className="input" />
             </div>
-            <label className="mt-4 block text-sm font-black text-slate-700">
-              Transaction hash
-              <input value={transactionHash} onChange={(event) => setTransactionHash(event.target.value)} placeholder="64-character transaction hash" className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 font-mono text-sm outline-none focus-premium" />
-            </label>
-            <button onClick={verifyTransaction} disabled={state.loading || !transactionHash} className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-black btn-primary disabled:opacity-60"><FiExternalLink className="h-4 w-4" /> Verify with Horizon</button>
-            {verification ? (
-              <pre className="mt-4 max-h-72 overflow-auto rounded-2xl bg-slate-950 p-4 text-xs leading-5 text-slate-100">{JSON.stringify(verification, null, 2)}</pre>
+            <div className="field mb-0 mt-4">
+              <label className="input-label" htmlFor="pg-memo">Memo</label>
+              <input
+                id="pg-memo"
+                value={memo}
+                maxLength={28}
+                onChange={(event) => setMemo(event.target.value)}
+                className="input font-mono"
+              />
+            </div>
+            <button
+              onClick={createSep7}
+              disabled={state.loading || !receiver}
+              className="btn btn-primary btn-block mt-4 disabled:opacity-60"
+            >
+              Create SEP-7 QR
+            </button>
+            {sep7 ? (
+              <div className="mt-4 grid gap-3">
+                {qrSrc ? (
+                  <div className="mx-auto rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3 shadow-sm">
+                    <img src={qrSrc} alt="SEP-7 payment QR code" className="h-[200px] w-[200px]" />
+                  </div>
+                ) : null}
+                <div className="rounded-2xl bg-[var(--surface-2)] p-4">
+                  <p className="section-eyebrow">Payment request</p>
+                  <p className="mt-2 text-[13px] font-medium leading-5 text-[var(--muted)]">
+                    Scan with a Stellar wallet in Testnet mode, or copy the URI.
+                  </p>
+                  <div className="mt-3 grid gap-1.5 font-mono text-xs leading-5 text-[var(--ink-2)]">
+                    <p className="break-all"><strong>To:</strong> {shortKey(sep7.destination)}</p>
+                    <p className="break-all"><strong>Amount:</strong> {sep7.amount} XLM</p>
+                    <p className="break-all"><strong>Memo:</strong> {sep7.memo}</p>
+                  </div>
+                </div>
+                <button onClick={() => copy(sep7.sep7Uri)} className="btn btn-outline btn-block">
+                  <FiCopy className="h-4 w-4" /> Copy URI
+                </button>
+              </div>
             ) : null}
-          </div>
+          </section>
 
-          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-black text-slate-950">Where smart contracts fit</h2>
-            <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">This civic platform currently uses Stellar payments and Horizon receipts. Smart contracts on Stellar are built with Soroban and are useful later for programmable rewards, budget rules, or claim windows. They are not required for the basic proof-of-payment flow.</p>
-            <a href="https://developers.stellar.org/docs/build/smart-contracts/getting-started/hello-world" target="_blank" rel="noreferrer" className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-full px-4 py-2 text-sm font-black btn-secondary">Read the official smart contract quickstart <FiExternalLink /></a>
-          </div>
-        </section>
-      </main>
+          <section className="card p-5">
+            <StepHead
+              icon={<FiCheckCircle className="h-5 w-5" />}
+              title="4. Verify the transaction"
+              desc="Paste the transaction hash to confirm it on Horizon."
+              more="After payment, paste the transaction hash. The backend checks Horizon for destination, amount, asset, memo, and success status."
+            />
+            <div className="field mb-0 mt-4">
+              <label className="input-label" htmlFor="pg-hash">Transaction hash</label>
+              <input
+                id="pg-hash"
+                value={transactionHash}
+                onChange={(event) => setTransactionHash(event.target.value)}
+                placeholder="64-character transaction hash"
+                className="input break-all font-mono"
+              />
+            </div>
+            <button
+              onClick={verifyTransaction}
+              disabled={state.loading || !transactionHash}
+              className="btn btn-primary btn-block mt-4 disabled:opacity-60"
+            >
+              <FiExternalLink className="h-4 w-4" /> Verify with Horizon
+            </button>
+            {verification && verified ? (
+              <div className="mt-4 grid gap-3">
+                <span
+                  className={`status-pill w-fit ${
+                    verified.verified
+                      ? 'bg-[color-mix(in_srgb,var(--heat-1)_14%,var(--surface))] text-[#0f806d]'
+                      : 'bg-[var(--ember-soft)] text-[var(--ember-600)]'
+                  }`}
+                >
+                  {verified.verified ? <FiCheckCircle className="h-3.5 w-3.5" /> : <FiAlertTriangle className="h-3.5 w-3.5" />}
+                  {verified.verified ? 'Payment verified' : 'Not verified'}
+                </span>
+                {verified.failureReason ? (
+                  <p className="rounded-2xl bg-[var(--ember-soft)] px-4 py-3 text-[13px] font-semibold leading-5 text-[var(--ember-600)]">
+                    {verified.failureReason}
+                  </p>
+                ) : null}
+                {verified.transactionHash ? (
+                  <KeyRow label="Transaction hash" value={verified.transactionHash} onCopy={() => copy(verified.transactionHash as string)} />
+                ) : null}
+                {verified.payerPublicKey ? (
+                  <KeyRow label="Payer" value={verified.payerPublicKey} onCopy={() => copy(verified.payerPublicKey as string)} />
+                ) : null}
+                {verified.ledger || verified.paidAt ? (
+                  <div className="rounded-2xl bg-[var(--surface-2)] p-4 text-[13px] font-medium leading-6 text-[var(--ink-2)]">
+                    {verified.ledger ? <p><strong>Ledger:</strong> {verified.ledger}</p> : null}
+                    {verified.paidAt ? <p className="break-all"><strong>Paid at:</strong> {verified.paidAt}</p> : null}
+                  </div>
+                ) : null}
+                <RawJson data={verification} />
+              </div>
+            ) : null}
+          </section>
 
-      {state.message ? <div className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-xl rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-900 shadow-lg">{state.message}</div> : null}
-      {state.error ? <div className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-xl rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-900 shadow-lg">{state.error}</div> : null}
+          <section className="card p-5">
+            <h2 className="font-display text-[17px] font-bold tracking-[-0.01em] text-[var(--ink)]">Where smart contracts fit</h2>
+            <p className="mt-2 text-[13px] font-medium leading-5 text-[var(--muted)]">
+              CivicTrust uses Stellar payments and Horizon receipts today. Soroban smart contracts come later for
+              programmable rewards, budget rules, or claim windows.
+            </p>
+            <a
+              href="https://developers.stellar.org/docs/build/smart-contracts/getting-started/hello-world"
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-outline btn-block mt-4"
+            >
+              Smart contract quickstart <FiExternalLink className="h-4 w-4" />
+            </a>
+          </section>
+        </main>
+
+        {state.message || state.error ? (
+          <div className="toast-wrap" style={{ bottom: 'calc(var(--safe-bottom) + 16px)' }}>
+            <div className="toast">
+              {state.error ? (
+                <FiAlertTriangle className="h-4 w-4 shrink-0" style={{ color: '#ff8a99' }} />
+              ) : (
+                <FiCheckCircle className="h-4 w-4 shrink-0" style={{ color: 'var(--heat-1)' }} />
+              )}
+              <span className="min-w-0" style={{ overflowWrap: 'anywhere' }}>{state.error || state.message}</span>
+            </div>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

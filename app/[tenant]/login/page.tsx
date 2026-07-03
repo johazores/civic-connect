@@ -12,11 +12,9 @@ export default async function CitizenLoginPage({ params }: { params: Promise<{ t
   }
 
   return (
-    <PublicShell tenant={tenant}>
-      <main className="page-section">
-        <div className="mx-auto max-w-6xl">
-          <CitizenAuthForm tenantSlug={tenant.slug} mode="login" />
-        </div>
+    <PublicShell tenant={tenant} title="Sign in" subtitle="Citizen account" backHref={`/${tenant.slug}`}>
+      <main className="page-section pad-b">
+        <CitizenAuthForm tenantSlug={tenant.slug} mode="login" />
       </main>
     </PublicShell>
   );

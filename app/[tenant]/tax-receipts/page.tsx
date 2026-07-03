@@ -12,12 +12,15 @@ export default async function TaxReceiptsPage({ params }: { params: Promise<{ te
   }
 
   return (
-    <PublicShell tenant={tenant}>
-      <section className="page-section">
-        <div className="mx-auto max-w-7xl">
-          <TaxReceiptSearch tenantSlug={tenant.slug} />
-        </div>
-      </section>
+    <PublicShell
+      tenant={tenant}
+      title="Tax receipts"
+      subtitle="Verify property tax records on Stellar"
+      backHref={`/${tenant.slug}`}
+    >
+      <main className="page-section">
+        <TaxReceiptSearch tenantSlug={tenant.slug} />
+      </main>
     </PublicShell>
   );
 }

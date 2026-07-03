@@ -23,16 +23,15 @@ export default async function ReportPage({ params }: { params: Promise<{ tenant:
   });
 
   return (
-    <PublicShell tenant={tenant}>
-      <main className="page-section">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-8 max-w-3xl">
-            <p className="section-eyebrow">Citizen Report</p>
-            <h1 className="heading-display mt-4 text-4xl md:text-6xl">Report a city concern</h1>
-            <p className="mt-4 text-base font-medium leading-7 text-slate-600">Submit a local concern, upload an optional photo, and receive a reference number for tracking.</p>
-          </div>
-          <ReportForm tenantSlug={tenant.slug} categories={categories} />
-        </div>
+    <PublicShell
+      tenant={tenant}
+      flow
+      backHref={`/${tenant.slug}`}
+      title="Report a concern"
+      subtitle="Get a reference number to track it"
+    >
+      <main className="page-section pb-6">
+        <ReportForm tenantSlug={tenant.slug} categories={categories} />
       </main>
     </PublicShell>
   );

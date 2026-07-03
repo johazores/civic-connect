@@ -19,16 +19,9 @@ export default async function TrackPage({
   }
 
   return (
-    <PublicShell tenant={tenant}>
+    <PublicShell tenant={tenant} title="Track request" subtitle="Enter your reference number">
       <main className="page-section">
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-8 max-w-3xl">
-            <p className="section-eyebrow">Track Request</p>
-            <h1 className="heading-display mt-4 text-4xl md:text-6xl">Follow your report progress</h1>
-            <p className="mt-4 text-base font-medium leading-7 text-slate-600">Enter the reference number given after submitting your report.</p>
-          </div>
-          <TrackReport tenantSlug={tenant.slug} initialReference={reference} />
-        </div>
+        <TrackReport tenantSlug={tenant.slug} initialReference={reference} />
       </main>
     </PublicShell>
   );

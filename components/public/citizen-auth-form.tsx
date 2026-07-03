@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { FiLogIn, FiShield, FiUserPlus } from 'react-icons/fi';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 
 type Mode = 'login' | 'register';
@@ -24,99 +24,90 @@ export function CitizenAuthForm({ tenantSlug, mode }: { tenantSlug: string; mode
     setIsLoading(true);
     setError('');
 
-    const endpoint = isRegister ? 'register' : 'login';
-    const response = await fetch(`/api/tenant/${tenantSlug}/citizens/${endpoint}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form)
-    });
-    const payload = await response.json();
+    try {
+      const endpoint = isRegister ? 'register' : 'login';
+      const response = await fetch(`/api/tenant/${tenantSlug}/citizens/${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
+      const payload = await response.json();
 
-    if (!response.ok) {
-      setError(payload.error || 'Unable to continue.');
+      if (!response.ok) {
+        setError(payload.error || 'Unable to continue.');
+        return;
+      }
+
+      window.location.href = `/${tenantSlug}/dashboard`;
+    } catch {
+      setError('Connection problem. Check your network and try again.');
+    } finally {
       setIsLoading(false);
-      return;
     }
-
-    window.location.href = `/${tenantSlug}/dashboard`;
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-      <Card className="relative overflow-hidden p-6 md:p-8">
-        <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-blue-100/70 blur-3xl" />
-        <div className="relative">
-          <p className="section-eyebrow">Citizen account</p>
-          <h1 className="heading-display mt-5 text-4xl md:text-6xl">{isRegister ? 'Create a secure account.' : 'Welcome back.'}</h1>
-          <p className="mt-5 text-sm font-medium leading-7 text-slate-600 md:text-base">
-            Save reports, track service updates, and keep a complete request history across devices.
-          </p>
-          <div className="mt-8 grid gap-3 sm:grid-cols-3">
-            {[
-              ['Saved', 'Reports stay connected to your profile'],
-              ['Clear', 'Updates are shown in one place'],
-              ['Fast', 'No need to re-enter references']
-            ].map(([title, text]) => (
-              <div key={title} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_10px_24px_rgba(16,24,40,0.05)]">
-                <p className="text-sm font-extrabold text-[var(--brand)]">{title}</p>
-                <p className="mt-1 text-sm font-semibold leading-5 text-slate-600">{text}</p>
-              </div>
-            ))}
-          </div>
+    <div>
+      <div className="pb-6 pt-3">
+        <div className="mb-5 grid h-[60px] w-[60px] place-items-center rounded-[18px] bg-gradient-to-br from-[var(--navy)] to-[var(--navy-900)] text-white shadow-[0_14px_30px_rgba(26,73,123,0.35)]">
+          {isRegister ? <FiUserPlus aria-hidden="true" className="h-7 w-7" /> : <FiShield aria-hidden="true" className="h-7 w-7" />}
         </div>
-      </Card>
+        <h2 className="font-display text-[28px] font-bold leading-tight tracking-[-0.02em] text-[var(--ink)]">
+          {isRegister ? 'Create your account.' : 'Welcome back.'}
+        </h2>
+        <p className="mt-2 text-[14.5px] leading-6 text-[var(--muted)]">
+          {isRegister ? 'Track reports, updates, and receipts in one place.' : 'Sign in to follow your reports and receipts.'}
+        </p>
+      </div>
 
-      <Card>
-        <div className="mb-6">
-          <p className="section-eyebrow">{isRegister ? 'Register' : 'Sign in'}</p>
-          <h2 className="mt-3 text-2xl font-extrabold tracking-[-0.03em] text-slate-950">{isRegister ? 'Start tracking requests' : 'Access your dashboard'}</h2>
-          <p className="mt-2 text-sm font-medium leading-6 text-slate-600">Use your citizen account to view reports and updates securely.</p>
+      <form onSubmit={handleSubmit}>
+        {isRegister ? (
+          <div className="field">
+            <label className="input-label" htmlFor="auth-name">Full name</label>
+            <Input id="auth-name" required value={form.name} onChange={(event) => updateField('name', event.target.value)} placeholder="Enter your full name" autoComplete="name" />
+          </div>
+        ) : null}
+
+        <div className="field">
+          <label className="input-label" htmlFor="auth-email">Email</label>
+          <Input id="auth-email" required type="email" value={form.email} onChange={(event) => updateField('email', event.target.value)} placeholder="you@email.com" autoComplete="email" />
         </div>
 
-        <form onSubmit={handleSubmit} className="grid gap-5">
-          {isRegister ? (
-            <div>
-              <label className="input-label">Full name</label>
-              <Input required value={form.name} onChange={(event) => updateField('name', event.target.value)} placeholder="Enter your full name" autoComplete="name" />
-            </div>
-          ) : null}
-
-          <div>
-            <label className="input-label">Email</label>
-            <Input required type="email" value={form.email} onChange={(event) => updateField('email', event.target.value)} placeholder="Enter your email address" autoComplete="email" />
+        {isRegister ? (
+          <div className="field">
+            <label className="input-label" htmlFor="auth-phone">Phone</label>
+            <Input id="auth-phone" value={form.phone} onChange={(event) => updateField('phone', event.target.value)} placeholder="Enter your mobile number" autoComplete="tel" />
           </div>
+        ) : null}
 
-          {isRegister ? (
-            <div>
-              <label className="input-label">Phone</label>
-              <Input value={form.phone} onChange={(event) => updateField('phone', event.target.value)} placeholder="Enter your mobile number" autoComplete="tel" />
-            </div>
-          ) : null}
-
-          <div>
-            <label className="input-label">Password</label>
-            <Input required type="password" value={form.password} onChange={(event) => updateField('password', event.target.value)} placeholder="Enter your password" autoComplete={isRegister ? 'new-password' : 'current-password'} />
-          </div>
-
-          {error ? <p className="rounded-2xl bg-rose-50 p-4 text-sm font-bold text-rose-800 ring-1 ring-rose-200">{error}</p> : null}
-
-          <Button disabled={isLoading}>{isLoading ? 'Please wait...' : isRegister ? 'Create account' : 'Sign in'}</Button>
-        </form>
-
-        <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm font-medium text-slate-600">
-          {isRegister ? (
-            <p>
-              Already have an account?{' '}
-              <Link href={`/${tenantSlug}/login`} className="font-bold text-[var(--brand)]">Sign in</Link>.
-            </p>
-          ) : (
-            <p>
-              Need a citizen account?{' '}
-              <Link href={`/${tenantSlug}/register`} className="font-bold text-[var(--brand)]">Create one</Link>.
-            </p>
-          )}
+        <div className="field">
+          <label className="input-label" htmlFor="auth-password">Password</label>
+          <Input id="auth-password" required type="password" value={form.password} onChange={(event) => updateField('password', event.target.value)} placeholder="Enter your password" autoComplete={isRegister ? 'new-password' : 'current-password'} />
         </div>
-      </Card>
+
+        {error ? (
+          <div className="mb-4 rounded-[14px] bg-[var(--ember-soft)] px-4 py-3 text-sm font-semibold text-[var(--ember-600)]">{error}</div>
+        ) : null}
+
+        <Button type="submit" className="btn-block" disabled={isLoading}>
+          {isRegister ? <FiUserPlus aria-hidden="true" className="h-4 w-4" /> : <FiLogIn aria-hidden="true" className="h-4 w-4" />}
+          {isLoading ? 'Please wait...' : isRegister ? 'Create account' : 'Sign in'}
+        </Button>
+      </form>
+
+      <p className="mt-6 text-center text-[13.5px] font-medium text-[var(--muted)]">
+        {isRegister ? (
+          <>
+            Already have an account?{' '}
+            <Link href={`/${tenantSlug}/login`} className="font-bold text-[var(--ember)]">Sign in</Link>
+          </>
+        ) : (
+          <>
+            New here?{' '}
+            <Link href={`/${tenantSlug}/register`} className="font-bold text-[var(--ember)]">Create an account</Link>
+          </>
+        )}
+      </p>
     </div>
   );
 }

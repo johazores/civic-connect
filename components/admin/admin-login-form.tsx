@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { FiLogIn } from 'react-icons/fi';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -38,7 +39,7 @@ export function AdminLoginForm({ tenantSlug }: { tenantSlug: string }) {
 
   return (
     <Card className="mx-auto max-w-md">
-      <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+      <div className="mb-6 rounded-[20px] border border-[color-mix(in_srgb,var(--navy)_16%,transparent)] bg-[color-mix(in_srgb,var(--navy)_8%,white)] p-5">
         <p className="text-xs font-bold uppercase tracking-[0.14em] text-blue-700">Staff access</p>
         <h2 className="mt-2 text-2xl font-extrabold tracking-[-0.03em] text-slate-950">Operations dashboard</h2>
         <p className="mt-2 text-sm leading-6 text-slate-600">Sign in with staff credentials to manage reports, content, and tenant settings.</p>
@@ -53,7 +54,7 @@ export function AdminLoginForm({ tenantSlug }: { tenantSlug: string }) {
           <Input type="password" required value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" />
         </div>
         {error ? <p className="rounded-xl bg-rose-50 p-4 text-sm font-semibold text-rose-700 ring-1 ring-rose-200">{error}</p> : null}
-        <Button disabled={isLoading}>{isLoading ? 'Signing in...' : 'Sign in'}</Button>
+        <Button disabled={isLoading}><FiLogIn aria-hidden="true" className="h-4 w-4" />{isLoading ? 'Signing in...' : 'Sign in'}</Button>
       </form>
     </Card>
   );

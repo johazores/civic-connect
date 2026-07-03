@@ -18,15 +18,15 @@ export default async function HotlinesPage({ params }: { params: Promise<{ tenan
   });
 
   return (
-    <PublicShell tenant={tenant}>
-      <main className="page-section">
-        <div className="mx-auto max-w-7xl">
-          <p className="section-eyebrow">Hotlines</p>
-          <h1 className="heading-display mt-4 text-4xl md:text-6xl">Emergency and city contacts</h1>
-          <p className="mt-4 max-w-2xl text-base font-medium leading-7 text-slate-600">Tap a card to call the right city office quickly from mobile.</p>
-        </div>
+    <PublicShell
+      tenant={tenant}
+      title="Hotlines"
+      subtitle="Emergency and city contacts"
+      backHref={`/${tenant.slug}`}
+    >
+      <main>
+        <HotlinesSection hotlines={hotlines} />
       </main>
-      <HotlinesSection hotlines={hotlines} />
     </PublicShell>
   );
 }

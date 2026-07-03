@@ -2,10 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   FiAward,
   FiBell,
+  FiChevronRight,
   FiCreditCard,
   FiFileText,
   FiFlag,
@@ -39,11 +41,12 @@ export type NavItem = {
   label: string;
   description?: string;
   icon?: NavIconKey;
+  center?: boolean;
+  exact?: boolean;
 };
 
 export type NavGroup = {
   label: string;
-  description: string;
   items: NavItem[];
 };
 
@@ -63,126 +66,190 @@ const iconMap: Record<NavIconKey, IconType> = {
 
 function NavIcon({ name, className }: { name?: NavIconKey; className?: string }) {
   const Icon = name ? iconMap[name] : FiShield;
-  return <Icon aria-hidden="true" className={className || 'h-4 w-4'} />;
+  return <Icon aria-hidden="true" className={className} />;
 }
 
-export function MobileMenu({ tenantSlug, navGroups }: { tenantSlug: string; navGroups: NavGroup[] }) {
+const CLOSE_MS = 320;
+
+export function MobileMenu({
+  tenantSlug,
+  tenantName,
+  cityName,
+  navGroups
+}: {
+  tenantSlug: string;
+  tenantName: string;
+  cityName: string;
+  navGroups: NavGroup[];
+}) {
   const pathname = usePathname();
-  const [isOpen, setIsOpen] = useState(false);
+  const [state, setState] = useState<'closed' | 'open' | 'closing'>('closed');
+  const [frameEl, setFrameEl] = useState<HTMLElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const closeTimer = useRef<number | undefined>(undefined);
+
+  // The sheet must be portaled into the phone frame: rendering it inside the
+  // backdrop-filtered app bar would trap absolute positioning in the header box.
+  useEffect(() => {
+    setFrameEl((triggerRef.current?.closest('.civic-app-frame') as HTMLElement) ?? null);
+  }, []);
+
+  const close = useCallback(() => {
+    setState('closing');
+    closeTimer.current = window.setTimeout(() => setState('closed'), CLOSE_MS);
+  }, []);
+
+  useEffect(() => () => window.clearTimeout(closeTimer.current), []);
+
+  useEffect(() => {
+    if (state !== 'open') return;
+
+    closeBtnRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        close();
+        return;
+      }
+
+      if (event.key !== 'Tab' || !sheetRef.current) return;
+
+      const focusables = sheetRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled])');
+      if (focusables.length === 0) return;
+
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [state, close]);
+
+  const isOpen = state !== 'closed';
+  const anim = state === 'closing' ? 'out' : 'in';
+
+  const homeItem: NavItem = { href: `/${tenantSlug}`, label: 'Home', description: 'Civic app overview', icon: 'home' };
 
   return (
-    <div className="lg:hidden">
+    <>
       <button
+        ref={triggerRef}
         type="button"
-        onClick={() => setIsOpen((current) => !current)}
-        aria-label={isOpen ? 'Close menu' : 'Open menu'}
-        aria-expanded={isOpen}
-        className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 text-sm font-black text-slate-900 shadow-[0_10px_24px_rgba(18,32,51,0.10)] transition hover:bg-slate-50"
+        onClick={() => setState('open')}
+        aria-label="Open menu"
+        aria-expanded={state === 'open'}
+        aria-haspopup="dialog"
+        className="app-icon-btn"
       >
-        {isOpen ? <FiX aria-hidden="true" className="h-5 w-5" /> : <FiMenu aria-hidden="true" className="h-5 w-5" />}
-        Menu
+        <FiMenu aria-hidden="true" className="h-5 w-5" />
       </button>
 
-      {isOpen ? (
-        <div className="fixed inset-x-0 bottom-0 top-[4.25rem] z-[70] overflow-y-auto bg-slate-950/35 px-3 pb-[calc(8.5rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-md animate-fade" onClick={() => setIsOpen(false)}>
-          <div className="mx-auto max-w-md rounded-[2rem] border border-white/80 bg-white p-3 shadow-[0_28px_90px_rgba(15,23,42,0.30)] animate-scale" onClick={(event) => event.stopPropagation()}>
-            <div className="brand-panel rounded-2xl p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-700">Action hub</p>
-                  <h2 className="mt-2 text-xl font-black tracking-[-0.04em] text-slate-950">What do you need today?</h2>
+      {isOpen && frameEl
+        ? createPortal(
+            <>
+              <button type="button" className={`sheet-backdrop backdrop-${anim}`} onClick={close} aria-label="Close menu" tabIndex={-1} />
+              <div ref={sheetRef} className={`sheet sheet-${anim}`} role="dialog" aria-modal="true" aria-label="Navigation menu">
+                <div className="sheet-grab" />
+                <div className="sheet-head">
+                  <div className="min-w-0">
+                    <h2 className="truncate">Menu</h2>
+                    <p className="sheet-sub truncate">
+                      {tenantName} · {cityName}
+                    </p>
+                  </div>
+                  <button ref={closeBtnRef} type="button" onClick={close} aria-label="Close menu" className="app-icon-btn">
+                    <FiX aria-hidden="true" className="h-5 w-5" />
+                  </button>
                 </div>
-                <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-emerald-700 ring-1 ring-emerald-100">Live</span>
-              </div>
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <Link href={`/${tenantSlug}/report`} onClick={() => setIsOpen(false)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-black btn-primary">
-                  <FiFlag aria-hidden="true" className="h-4 w-4" />
-                  Report issue
-                </Link>
-                <Link href={`/${tenantSlug}/track`} onClick={() => setIsOpen(false)} className="inline-flex min-h-12 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-black btn-secondary">
-                  <FiSearch aria-hidden="true" className="h-4 w-4" />
-                  Track status
-                </Link>
-              </div>
-            </div>
 
-            <nav className="mt-3 grid gap-3" aria-label="Mobile navigation">
-              {navGroups.map((group) => (
-                <section key={group.label} className="rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
-                  <div className="px-2 py-2">
-                    <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">{group.label}</p>
-                    <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{group.description}</p>
+                <div className="sheet-scroll">
+                  <div className="mb-4 grid grid-cols-2 gap-2.5">
+                    <Link href={`/${tenantSlug}/login`} onClick={close} className="app-btn btn-outline">
+                      <FiUser aria-hidden="true" className="h-4 w-4" />
+                      Sign in
+                    </Link>
+                    <Link href={`/${tenantSlug}/admin/login`} onClick={close} className="app-btn btn-primary">
+                      <FiShield aria-hidden="true" className="h-4 w-4" />
+                      Staff portal
+                    </Link>
                   </div>
-                  <div className="grid gap-1">
-                    {group.items.map((item) => {
-                      const isActive = pathname === item.href;
 
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          onClick={() => setIsOpen(false)}
-                          className={`flex min-h-14 items-center gap-3 rounded-xl px-3 py-3 text-sm font-black transition ${
-                            isActive ? 'bg-blue-50 text-[var(--brand)] ring-1 ring-blue-100' : 'text-slate-800 hover:bg-slate-50'
-                          }`}
-                        >
-                          <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${isActive ? 'bg-white shadow-sm' : 'bg-slate-100 text-slate-600'}`}>
-                            <NavIcon name={item.icon} className="h-4 w-4" />
-                          </span>
-                          <span className="min-w-0">
-                            <span className="block truncate">{item.label}</span>
-                            {item.description ? <span className="mt-0.5 block truncate text-xs font-semibold text-slate-500">{item.description}</span> : null}
-                          </span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </section>
-              ))}
-            </nav>
+                  <nav aria-label="App navigation">
+                    <div className="menu-group">
+                      <MenuLink item={homeItem} active={pathname === homeItem.href} onNavigate={close} />
+                    </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
-              <Link href={`/${tenantSlug}/login`} onClick={() => setIsOpen(false)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-black btn-secondary">
-                <FiUser aria-hidden="true" className="h-4 w-4" />
-                Citizen sign in
-              </Link>
-              <Link href={`/${tenantSlug}/admin/login`} onClick={() => setIsOpen(false)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-black btn-primary">
-                <FiShield aria-hidden="true" className="h-4 w-4" />
-                Staff portal
-              </Link>
-            </div>
-          </div>
-        </div>
-      ) : null}
-    </div>
+                    {navGroups.map((group) => (
+                      <section key={group.label}>
+                        <p className="group-label">{group.label}</p>
+                        <div className="menu-group">
+                          {group.items.map((item) => (
+                            <MenuLink key={item.href} item={item} active={pathname === item.href} onNavigate={close} />
+                          ))}
+                        </div>
+                      </section>
+                    ))}
+                  </nav>
+                </div>
+              </div>
+            </>,
+            frameEl
+          )
+        : null}
+    </>
   );
 }
 
-export function MobileBottomNav({ items }: { items: NavItem[] }) {
+function MenuLink({ item, active, onNavigate }: { item: NavItem; active: boolean; onNavigate: () => void }) {
+  return (
+    <Link href={item.href} onClick={onNavigate} className={`menu-item ${active ? 'on' : ''}`.trim()} aria-current={active ? 'page' : undefined}>
+      <span className="mi-ic">
+        <NavIcon name={item.icon} className="h-5 w-5" />
+      </span>
+      <span className="mi-tx">
+        <b>{item.label}</b>
+        {item.description ? <span>{item.description}</span> : null}
+      </span>
+      <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
+    </Link>
+  );
+}
+
+export function Tabbar({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed inset-x-3 bottom-3 z-40 rounded-2xl border border-white/80 bg-white/94 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 shadow-[0_-10px_40px_rgba(18,32,51,0.18)] backdrop-blur-2xl lg:hidden" aria-label="Quick mobile navigation">
-      <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
-        {items.map((item) => {
-          const isActive = pathname === item.href;
+    <nav className="tabbar" aria-label="Primary navigation">
+      {items.map((item) => {
+        const isActive = item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
 
+        if (item.center) {
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-[1.15rem] text-[0.70rem] font-black transition ${
-                isActive ? 'bg-blue-50 text-[var(--brand)] ring-1 ring-blue-100' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
-              }`}
-            >
-              <span className={`flex h-7 w-7 items-center justify-center rounded-full ${isActive ? 'bg-white shadow-sm' : ''}`}>
-                <NavIcon name={item.icon} className="h-4 w-4" />
+            <Link key={item.href} href={item.href} className="tab tab-center" aria-label={item.label}>
+              <span className="fab">
+                <NavIcon name={item.icon} />
               </span>
-              {item.label}
             </Link>
           );
-        })}
-      </div>
+        }
+
+        return (
+          <Link key={item.href} href={item.href} className={`tab ${isActive ? 'on' : ''}`.trim()} aria-current={isActive ? 'page' : undefined}>
+            <NavIcon name={item.icon} />
+            {item.label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }

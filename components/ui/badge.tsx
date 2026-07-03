@@ -1,21 +1,21 @@
 import { formatStatus } from '@/lib/format';
 
 const styles: Record<string, string> = {
-  SUBMITTED: 'bg-sky-50 text-sky-800 ring-sky-200',
-  REVIEWING: 'bg-amber-50 text-amber-800 ring-amber-200',
-  ASSIGNED: 'bg-blue-50 text-blue-800 ring-blue-200',
-  IN_PROGRESS: 'bg-cyan-50 text-cyan-800 ring-cyan-200',
-  RESOLVED: 'bg-emerald-50 text-emerald-800 ring-emerald-200',
-  REJECTED: 'bg-rose-50 text-rose-800 ring-rose-200',
-  LOW: 'bg-slate-50 text-slate-700 ring-slate-200',
-  NORMAL: 'bg-blue-50 text-blue-800 ring-blue-200',
-  HIGH: 'bg-amber-50 text-amber-800 ring-amber-200',
-  URGENT: 'bg-rose-50 text-rose-800 ring-rose-200'
+  SUBMITTED: 'bg-[color-mix(in_srgb,var(--heat-0)_12%,var(--surface))] text-[var(--heat-0)]',
+  REVIEWING: 'bg-[color-mix(in_srgb,var(--heat-2)_18%,var(--surface))] text-[#9a6b00]',
+  ASSIGNED: 'bg-[color-mix(in_srgb,var(--navy)_10%,var(--surface))] text-[var(--navy)]',
+  IN_PROGRESS: 'bg-[color-mix(in_srgb,var(--heat-3)_18%,var(--surface))] text-[#a45a13]',
+  RESOLVED: 'bg-[color-mix(in_srgb,var(--heat-1)_14%,var(--surface))] text-[#0f806d]',
+  REJECTED: 'bg-[var(--ember-soft)] text-[var(--ember-600)]',
+  LOW: 'bg-[var(--surface-2)] text-[var(--muted)]',
+  NORMAL: 'bg-[color-mix(in_srgb,var(--navy)_10%,var(--surface))] text-[var(--navy)]',
+  HIGH: 'bg-[color-mix(in_srgb,var(--heat-3)_18%,var(--surface))] text-[#a45a13]',
+  URGENT: 'bg-[var(--ember-soft)] text-[var(--ember-600)]'
 };
 
 export function Badge({ value }: { value: string }) {
   return (
-    <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold ring-1 ${styles[value] || 'bg-slate-50 text-slate-700 ring-slate-200'}`}>
+    <span className={`status-pill max-w-full whitespace-nowrap ${styles[value] || 'bg-[var(--surface-2)] text-[var(--ink-2)]'}`}>
       {formatStatus(value)}
     </span>
   );

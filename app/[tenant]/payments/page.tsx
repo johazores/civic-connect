@@ -32,16 +32,23 @@ export default async function PaymentsPage({ params, searchParams }: { params: P
   }));
 
   return (
-    <PublicShell tenant={tenant}>
+    <PublicShell tenant={tenant} title="Payments" subtitle="Pay fees with a verifiable Stellar receipt">
       <main className="page-section">
-        <div className="mx-auto max-w-7xl">
-          <p className="section-eyebrow">Verified payments</p>
-          <h1 className="heading-display mt-4 text-4xl md:text-6xl">Pay service fees with a verifiable Stellar receipt.</h1>
-          <p className="mt-4 max-w-3xl text-base font-medium leading-7 text-slate-600">
-            Create a payment request for eligible public services, complete it with your own Stellar Testnet wallet, and verify the transaction hash into a permanent receipt.
-          </p>
-          <div className="mt-8">
-            <PaymentIntentForm tenantSlug={tenant.slug} services={paidServices} initialServiceId={query.serviceId} />
+        <PaymentIntentForm tenantSlug={tenant.slug} services={paidServices} initialServiceId={query.serviceId} />
+
+        <p className="group-label mt-6">How it works</p>
+        <div className="menu-group">
+          <div className="menu-item">
+            <span className="mi-tx">
+              <b>Your wallet signs the payment</b>
+              <span>The portal only creates a Stellar Testnet request — it never handles private keys.</span>
+            </span>
+          </div>
+          <div className="menu-item">
+            <span className="mi-tx">
+              <b>The memo is your receipt reference</b>
+              <span>Keep it unchanged so the transaction can be verified into a permanent public receipt.</span>
+            </span>
           </div>
         </div>
       </main>

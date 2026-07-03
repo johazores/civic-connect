@@ -12,15 +12,19 @@ export function StatCard({
   icon?: ReactNode;
 }) {
   return (
-    <div className="group rounded-2xl border border-slate-200/90 bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.05)] transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-[0_16px_34px_rgba(37,99,235,0.10)] md:p-5">
+    <div className="app-stat transition active:scale-[.985]">
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-2xl font-extrabold tracking-[-0.04em] text-slate-950 md:text-3xl">{value}</p>
-          <p className="mt-1 text-[0.7rem] font-bold uppercase tracking-[0.12em] text-slate-500">{label}</p>
+        <div className="min-w-0 flex-1">
+          <p className="app-stat-value break-words tabular-nums">{value}</p>
+          <p className="app-stat-label">{label}</p>
         </div>
-        {icon ? <div className="grid h-10 w-10 place-items-center rounded-xl bg-blue-50 text-blue-700 ring-1 ring-blue-100">{icon}</div> : null}
+        {icon ? (
+          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-[13px] bg-[var(--surface-2)] text-[var(--navy)]">
+            {icon}
+          </div>
+        ) : null}
       </div>
-      {note ? <p className="mt-3 text-xs font-medium leading-5 text-slate-500">{note}</p> : null}
+      {note ? <p className="mt-3 text-xs font-semibold leading-5 text-[var(--muted)]">{note}</p> : null}
     </div>
   );
 }

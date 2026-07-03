@@ -12,11 +12,9 @@ export default async function CitizenDashboardPage({ params }: { params: Promise
   }
 
   return (
-    <PublicShell tenant={tenant}>
-      <main className="page-section">
-        <div className="mx-auto max-w-7xl">
-          <CitizenDashboard tenantSlug={tenant.slug} />
-        </div>
+    <PublicShell tenant={tenant} title="My account" subtitle="Reports, updates, receipts">
+      <main className="page-section pad-b">
+        <CitizenDashboard tenantSlug={tenant.slug} cityEmail={tenant.email} cityPhone={tenant.phone} />
       </main>
     </PublicShell>
   );

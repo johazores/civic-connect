@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { FiCheck, FiCheckCircle, FiClipboard, FiCopy, FiCreditCard, FiSearch } from 'react-icons/fi';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -31,6 +32,17 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
   const [transactionHash, setTransactionHash] = useState(initialPayment.transactionHash || '');
   const [error, setError] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  async function copyValue(key: string, value: string) {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedKey(key);
+      window.setTimeout(() => setCopiedKey((current) => (current === key ? null : current)), 2000);
+    } catch {
+      setCopiedKey(null);
+    }
+  }
 
   async function verifyPayment(event?: React.FormEvent<HTMLFormElement>, mode: 'hash' | 'scan' = 'hash') {
     event?.preventDefault();
@@ -55,93 +67,143 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
   }
 
   const isVerified = payment.status === 'VERIFIED';
+  const statusClass = isVerified
+    ? 'bg-[color-mix(in_srgb,var(--heat-1)_14%,var(--surface))] text-[#0f806d]'
+    : payment.status === 'FAILED'
+      ? 'bg-[var(--ember-soft)] text-[var(--ember-600)]'
+      : 'bg-[color-mix(in_srgb,var(--heat-2)_18%,var(--surface))] text-[#9a6b00]';
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+    <div className="grid gap-4">
       <Card>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <p className="section-eyebrow">Payment request</p>
-            <h1 className="mt-3 text-3xl font-extrabold tracking-[-0.04em] text-slate-950 md:text-5xl">{payment.referenceCode}</h1>
-          </div>
-          <span className={`rounded-full px-4 py-2 text-xs font-extrabold ${isVerified ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : payment.status === 'FAILED' ? 'bg-rose-50 text-rose-700 ring-1 ring-rose-200' : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'}`}>
-            {formatStatus(payment.status)}
-          </span>
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">Payment request</p>
+          <span className={`status-pill shrink-0 ${statusClass}`}>{formatStatus(payment.status)}</span>
+        </div>
+        <h2 className="mt-2 font-display text-[17px] font-bold text-[var(--ink)]">{payment.service.title}</h2>
+        <p className="mt-1 text-[13px] font-medium leading-5 text-[var(--muted)]">{payment.service.description}</p>
+
+        <div className="mt-4 rounded-[14px] bg-[var(--surface-2)] p-4">
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">Amount</p>
+          <p className="mt-1 break-words font-display text-[20px] font-bold text-[var(--ink)]">
+            {payment.amount} {payment.assetCode}
+          </p>
         </div>
 
-        <div className="mt-6 rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-100">
-          <p className="text-sm font-bold text-slate-500">Service</p>
-          <p className="mt-1 text-xl font-extrabold text-slate-950">{payment.service.title}</p>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{payment.service.description}</p>
+        <div className="mt-3 flex items-center gap-3 rounded-[14px] border border-[var(--line)] p-3.5">
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">Memo</p>
+            <p className="mt-0.5 break-all font-mono text-[13px] font-semibold text-[var(--ink)]">{payment.memo}</p>
+          </div>
+          <button type="button" onClick={() => copyValue('memo', payment.memo)} className="app-icon-btn" aria-label="Copy memo">
+            {copiedKey === 'memo' ? <FiCheck aria-hidden="true" className="h-5 w-5 text-[#0f806d]" /> : <FiCopy aria-hidden="true" className="h-5 w-5" />}
+          </button>
         </div>
 
-        <dl className="mt-5 grid gap-3 text-sm">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <dt className="font-bold text-slate-500">Amount</dt>
-            <dd className="mt-1 text-2xl font-extrabold text-slate-950">{payment.amount} {payment.assetCode}</dd>
+        <div className="mt-3 flex items-center gap-3 rounded-[14px] border border-[var(--line)] p-3.5">
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">Destination wallet</p>
+            <p className="mt-0.5 break-all font-mono text-xs font-semibold text-[var(--ink)]">{payment.destinationPublicKey}</p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <dt className="font-bold text-slate-500">Memo</dt>
-            <dd className="mt-1 break-all font-extrabold text-slate-950">{payment.memo}</dd>
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <dt className="font-bold text-slate-500">Destination wallet</dt>
-            <dd className="mt-1 break-all font-mono text-xs font-bold text-slate-700">{payment.destinationPublicKey}</dd>
-          </div>
-        </dl>
+          <button type="button" onClick={() => copyValue('destination', payment.destinationPublicKey)} className="app-icon-btn" aria-label="Copy destination wallet address">
+            {copiedKey === 'destination' ? <FiCheck aria-hidden="true" className="h-5 w-5 text-[#0f806d]" /> : <FiCopy aria-hidden="true" className="h-5 w-5" />}
+          </button>
+        </div>
       </Card>
 
       <Card>
-        <p className="section-eyebrow">Complete with wallet</p>
-        <h2 className="mt-3 text-2xl font-extrabold text-slate-950">Scan or open the SEP-7 payment request</h2>
-        <p className="mt-3 text-sm leading-7 text-slate-600">
-          Use a Stellar-compatible wallet on Testnet. The memo must stay exactly the same so the receipt can be verified.
+        <h3 className="font-display text-[17px] font-bold text-[var(--ink)]">Pay with your wallet</h3>
+        <p className="mt-1 text-[13px] font-medium leading-5 text-[var(--muted)]">
+          Scan or open the SEP-7 request with a Stellar Testnet wallet. Keep the memo unchanged so the receipt can be verified.
         </p>
 
-        <div className="mt-6 grid gap-5 md:grid-cols-[220px_1fr] md:items-center">
-          <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-            <img src={`/api/tenant/${tenantSlug}/payments/${payment.referenceCode}/qr`} alt="SEP-7 payment QR code" className="h-auto w-full rounded-2xl" />
-          </div>
-          <div className="grid gap-3">
-            <a href={payment.sep7Uri} className="inline-flex min-h-11 items-center justify-center rounded-xl px-5 py-3 text-sm font-bold btn-primary">
-              Open wallet payment
-            </a>
-            <button
-              type="button"
-              onClick={() => navigator.clipboard.writeText(payment.sep7Uri)}
-              className="inline-flex min-h-11 items-center justify-center rounded-xl px-5 py-3 text-sm font-bold btn-secondary"
-            >
-              Copy payment URI
-            </button>
-            <p className="text-xs leading-5 text-slate-500">Created {formatDate(payment.createdAt)}. The app only generates a request; your wallet signs and submits it.</p>
-          </div>
+        <div className="mt-5 flex justify-center rounded-[16px] border border-[var(--line)] bg-[#fff] p-4">
+          <img
+            src={`/api/tenant/${tenantSlug}/payments/${payment.referenceCode}/qr`}
+            alt="SEP-7 payment QR code"
+            width={200}
+            height={200}
+            className="h-[200px] w-[200px]"
+          />
         </div>
 
-        {isVerified ? (
-          <div className="mt-6 rounded-2xl bg-emerald-50 p-5 ring-1 ring-emerald-200">
-            <p className="font-extrabold text-emerald-800">Payment verified</p>
-            <p className="mt-2 text-sm leading-6 text-emerald-700">Transaction hash and ledger data are permanently stored for this receipt.</p>
-            <a href={`/${tenantSlug}/receipts/${payment.referenceCode}`} className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl px-5 py-3 text-sm font-bold btn-primary">
-              View public receipt
+        <div className="mt-4 grid gap-2.5">
+          <a href={payment.sep7Uri} className="app-btn btn-primary">
+            <FiCreditCard aria-hidden="true" className="h-4 w-4" /> Open wallet payment
+          </a>
+          <button type="button" onClick={() => copyValue('uri', payment.sep7Uri)} className="app-btn btn-outline">
+            {copiedKey === 'uri' ? (
+              <>
+                <FiCheck aria-hidden="true" className="h-4 w-4 text-[#0f806d]" /> Copied
+              </>
+            ) : (
+              <>
+                <FiClipboard aria-hidden="true" className="h-4 w-4" /> Copy payment URI
+              </>
+            )}
+          </button>
+          <p className="text-xs font-medium leading-5 text-[var(--muted)]">
+            Created {formatDate(payment.createdAt)}. The app only generates a request; your wallet signs and submits it.
+          </p>
+        </div>
+      </Card>
+
+      {isVerified ? (
+        <div className="rounded-[22px] bg-[color-mix(in_srgb,var(--heat-1)_14%,var(--surface))] p-5 shadow-sm">
+          <p className="text-[15px] font-bold text-[#0f806d]">Payment verified</p>
+          <p className="mt-1 text-[13px] font-medium leading-5 text-[#0f806d]">
+            Transaction hash and ledger data are permanently stored for this receipt.
+          </p>
+          <div className="mt-4 grid">
+            <a href={`/${tenantSlug}/receipts/${payment.referenceCode}`} className="app-btn btn-primary">
+              <FiCheckCircle aria-hidden="true" className="h-4 w-4" /> View public receipt
             </a>
           </div>
-        ) : (
-          <form onSubmit={(event) => verifyPayment(event, 'hash')} className="mt-6 grid gap-4 rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-100">
-            <div>
-              <label className="text-sm font-extrabold text-slate-700">Transaction hash</label>
-              <Input required value={transactionHash} onChange={(event) => setTransactionHash(event.target.value)} placeholder="Paste the Stellar transaction hash after payment" />
+        </div>
+      ) : (
+        <Card>
+          <h3 className="font-display text-[17px] font-bold text-[var(--ink)]">Verify your payment</h3>
+          <p className="mt-1 text-[13px] font-medium leading-5 text-[var(--muted)]">
+            Paste the transaction hash from your wallet, or scan Horizon using the payment memo.
+          </p>
+
+          <form onSubmit={(event) => verifyPayment(event, 'hash')} className="mt-4">
+            <div className="field">
+              <label className="input-label" htmlFor="transaction-hash">Transaction hash</label>
+              <Input
+                id="transaction-hash"
+                required
+                value={transactionHash}
+                onChange={(event) => setTransactionHash(event.target.value)}
+                placeholder="Transaction hash"
+                className="break-all font-mono text-[13px]"
+              />
             </div>
-            {payment.failureReason ? <p className="rounded-2xl bg-rose-50 p-4 text-sm font-bold text-rose-700 ring-1 ring-rose-200">{payment.failureReason}</p> : null}
-            {error ? <p className="rounded-2xl bg-rose-50 p-4 text-sm font-bold text-rose-700 ring-1 ring-rose-200">{error}</p> : null}
-            <div className="flex flex-wrap gap-2">
-              <Button disabled={isVerifying}>{isVerifying ? 'Verifying on Horizon...' : 'Verify by transaction hash'}</Button>
-              <button type="button" disabled={isVerifying} onClick={() => verifyPayment(undefined, 'scan')} className="rounded-2xl px-5 py-3 text-sm font-extrabold btn-secondary disabled:opacity-60">
-                Scan Horizon by memo
+
+            {payment.failureReason ? (
+              <p className="mb-4 rounded-[14px] bg-[var(--ember-soft)] p-4 text-sm font-semibold leading-5 text-[var(--ember-600)]">{payment.failureReason}</p>
+            ) : null}
+            {error ? (
+              <p className="mb-4 rounded-[14px] bg-[var(--ember-soft)] p-4 text-sm font-semibold leading-5 text-[var(--ember-600)]">{error}</p>
+            ) : null}
+
+            <div className="grid gap-2.5">
+              <Button type="submit" className="btn-block" disabled={isVerifying}>
+                <FiCheckCircle aria-hidden="true" className="h-4 w-4" />
+                {isVerifying ? 'Verifying on Horizon...' : 'Verify transaction hash'}
+              </Button>
+              <button
+                type="button"
+                disabled={isVerifying}
+                onClick={() => verifyPayment(undefined, 'scan')}
+                className="app-btn btn-outline disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <FiSearch aria-hidden="true" className="h-4 w-4" /> Scan Horizon by memo
               </button>
             </div>
           </form>
-        )}
-      </Card>
+        </Card>
+      )}
     </div>
   );
 }

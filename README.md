@@ -306,3 +306,15 @@ Admin route:
 ```text
 /[tenant]/admin → Stellar Programs
 ```
+
+
+## Latest UI Direction
+
+- `docs/mobile-menu-fix.md` - Navigation overlay fix for the mobile-first app shell.
+- `docs/mobile-reference-redesign.md` - explains the mobile-first redesign inspired by the uploaded HTML reference.
+
+## Latest UI Shell Fix
+
+The mobile app navigation has been refactored to follow the uploaded app-shell reference more closely. See:
+
+- `docs/reference-app-shell-fix.md`

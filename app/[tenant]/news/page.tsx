@@ -18,16 +18,14 @@ export default async function NewsPage({ params }: { params: Promise<{ tenant: s
   });
 
   return (
-    <PublicShell tenant={tenant}>
+    <PublicShell
+      tenant={tenant}
+      title="News"
+      subtitle={`Official announcements from ${tenant.cityName}`}
+      backHref={`/${tenant.slug}`}
+    >
       <main className="page-section">
-        <div className="mx-auto max-w-7xl">
-          <p className="section-eyebrow">News</p>
-          <h1 className="heading-display mt-4 text-4xl md:text-6xl">Announcements</h1>
-          <p className="mt-4 max-w-2xl text-base font-medium leading-7 text-slate-600">Latest public updates and service information.</p>
-          <div className="mt-8">
-            <NewsGrid posts={posts} tenantSlug={tenant.slug} />
-          </div>
-        </div>
+        <NewsGrid posts={posts} tenantSlug={tenant.slug} />
       </main>
     </PublicShell>
   );

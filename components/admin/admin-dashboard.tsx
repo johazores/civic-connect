@@ -405,11 +405,23 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
   }
 
   return (
-    <div className="dashboard-shell text-slate-900">
+    <div className="civic-device-shell">
+      <div className="civic-app-frame admin-app-frame">
+        <div className="civic-appbar">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="app-mark">{tenant?.name?.slice(0, 2).toUpperCase() || 'CT'}</div>
+            <div className="min-w-0">
+              <p className="app-title truncate">Operations</p>
+              <p className="app-subtitle truncate">{tenant?.name || 'CivicTrust'} staff app</p>
+            </div>
+          </div>
+          <button onClick={handleLogout} className="app-icon-btn" aria-label="Sign out"><FiLogOut className="h-4 w-4" /></button>
+        </div>
+        <div className="civic-viewport">
       <div className="dashboard-container grid gap-6 py-5 lg:grid-cols-[16.5rem_1fr] lg:py-8">
         <aside className="dashboard-card h-fit p-4 lg:sticky lg:top-6">
           <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-blue-600 to-teal-500 text-sm font-extrabold text-white shadow-[0_12px_24px_rgba(37,99,235,0.20)]">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-[16px] bg-gradient-to-br from-[var(--navy)] to-[var(--navy-900)] text-sm font-extrabold text-white shadow-[0_12px_24px_rgba(26,73,123,0.20)]">
               {tenant?.name?.slice(0, 2).toUpperCase() || 'CT'}
             </div>
             <div className="min-w-0">
@@ -432,10 +444,10 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
           </nav>
 
           <div className="mt-5 grid gap-2 border-t border-slate-100 pt-4">
-            <a href={`/${tenantSlug}`} className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50">
+            <a href={`/${tenantSlug}`} className="app-btn btn-secondary min-h-11 px-4 py-2.5">
               <FiExternalLink className="h-4 w-4" /> Public site
             </a>
-            <button onClick={handleLogout} className="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold btn-secondary">
+            <button onClick={handleLogout} className="app-btn btn-secondary min-h-11 px-4 py-2.5">
               <FiLogOut className="h-4 w-4" /> Sign out
             </button>
           </div>
@@ -537,10 +549,10 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
                     <h2 className="mt-1 text-xl font-extrabold text-slate-900">Citizen reports</h2>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    <button onClick={exportReports} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-primary">
+                    <button onClick={exportReports} className="app-btn btn-primary min-h-11 px-4 py-2">
                       Export CSV
                     </button>
-                    <button onClick={() => loadReports(filters)} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary">
+                    <button onClick={() => loadReports(filters)} className="app-btn btn-secondary min-h-11 px-4 py-2">
                       Refresh
                     </button>
                   </div>
@@ -555,7 +567,7 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
                       onClick={() => setSelectedReportId(report.id)}
                       className={`rounded-2xl border p-4 text-left transition ${
                         selectedReport?.id === report.id
-                          ? 'border-[var(--brand)] bg-blue-50 shadow-[0_10px_24px_rgba(16,24,40,0.05)]'
+                          ? 'border-[var(--navy)] bg-[color-mix(in_srgb,var(--navy)_8%,white)] shadow-[0_10px_24px_rgba(16,24,40,0.05)]'
                           : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_10px_24px_rgba(16,24,40,0.05)]'
                       }`}
                     >
@@ -686,6 +698,8 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
           <TenantSettingsPanel tenantSlug={tenantSlug} tenant={tenant} setTenant={setTenant} setError={setError} setSuccess={setSuccess} />
         ) : null}
         </main>
+      </div>
+        </div>
       </div>
     </div>
   );

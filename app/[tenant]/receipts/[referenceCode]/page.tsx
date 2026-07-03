@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { FiExternalLink } from 'react-icons/fi';
 import { PublicShell } from '@/components/layout/public-shell';
 import { Card } from '@/components/ui/card';
 import { formatDate, formatStatus } from '@/lib/format';
@@ -20,62 +21,87 @@ export default async function ReceiptPage({ params }: { params: Promise<{ tenant
   }
 
   const isVerified = payment.status === 'VERIFIED';
+  const explorerNetwork = String(payment.tenant.stellarNetwork || 'TESTNET').toUpperCase() === 'PUBLIC' ? 'public' : 'testnet';
+  const explorerUrl = payment.transactionHash ? `https://stellar.expert/explorer/${explorerNetwork}/tx/${payment.transactionHash}` : null;
 
   return (
-    <PublicShell tenant={tenant}>
+    <PublicShell tenant={tenant} title="Receipt" subtitle={payment.referenceCode} backHref={`/${tenant.slug}/payments`}>
       <main className="page-section">
-        <div className="mx-auto max-w-5xl">
-          <Card className="overflow-hidden">
-            <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-200 pb-6">
-              <div>
-                <p className="section-eyebrow">Public receipt</p>
-                <h1 className="mt-3 text-4xl font-extrabold tracking-[-0.04em] text-slate-950 md:text-6xl">{payment.referenceCode}</h1>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">This receipt verifies a government service payment request and its matching Stellar Testnet transaction details.</p>
-              </div>
-              <span className={`rounded-full px-4 py-2 text-sm font-extrabold ${isVerified ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200' : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'}`}>
-                {formatStatus(payment.status)}
-              </span>
+        <Card>
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">Public receipt</p>
+              <h2 className="mt-1 font-display text-[17px] font-bold text-[var(--ink)]">{payment.service.title}</h2>
             </div>
+            <span
+              className={`status-pill shrink-0 ${
+                isVerified
+                  ? 'bg-[color-mix(in_srgb,var(--heat-1)_14%,var(--surface))] text-[#0f806d]'
+                  : 'bg-[color-mix(in_srgb,var(--heat-2)_18%,var(--surface))] text-[#9a6b00]'
+              }`}
+            >
+              {formatStatus(payment.status)}
+            </span>
+          </div>
+          <p className="mt-2 text-[13px] font-medium leading-5 text-[var(--muted)]">{payment.service.description}</p>
 
-            <div className="mt-8 grid gap-5 md:grid-cols-2">
-              <div className="rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-100">
-                <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Service</p>
-                <p className="mt-2 text-xl font-extrabold text-slate-950">{payment.service.title}</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{payment.service.description}</p>
-              </div>
-              <div className="rounded-2xl bg-blue-50 p-5 ring-1 ring-blue-100">
-                <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--brand)]">Amount paid</p>
-                <p className="mt-2 text-3xl font-extrabold text-slate-950">{String(payment.amount)} {payment.assetCode}</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">Network: {payment.tenant.stellarNetwork}</p>
-              </div>
-            </div>
+          <div className="mt-4 border-t border-[var(--line)] pt-4">
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">Amount paid</p>
+            <p className="mt-1 break-words font-display text-[28px] font-bold tracking-[-0.02em] text-[var(--ink)]">
+              {String(payment.amount)} {payment.assetCode}
+            </p>
+            <p className="mt-1 text-xs font-semibold text-[var(--muted)]">Network: {payment.tenant.stellarNetwork}</p>
+          </div>
+        </Card>
 
-            <dl className="mt-8 grid gap-4 text-sm">
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <dt className="font-bold text-slate-500">Payer</dt>
-                <dd className="mt-1 font-extrabold text-slate-950">{payment.payerName}</dd>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <dt className="font-bold text-slate-500">Memo</dt>
-                <dd className="mt-1 break-all font-extrabold text-slate-950">{payment.memo}</dd>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <dt className="font-bold text-slate-500">Transaction hash</dt>
-                <dd className="mt-1 break-all font-mono text-xs font-bold text-slate-700">{payment.transactionHash || 'Pending verification'}</dd>
-              </div>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                  <dt className="font-bold text-slate-500">Ledger</dt>
-                  <dd className="mt-1 font-extrabold text-slate-950">{payment.ledger || 'Pending'}</dd>
-                </div>
-                <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                  <dt className="font-bold text-slate-500">Verified at</dt>
-                  <dd className="mt-1 font-extrabold text-slate-950">{payment.verifiedAt ? formatDate(payment.verifiedAt) : 'Pending verification'}</dd>
-                </div>
-              </div>
-            </dl>
-          </Card>
+        <p className="group-label mt-6">Verification details</p>
+        <div className="menu-group">
+          <div className="menu-item">
+            <span className="mi-tx">
+              <span className="!mt-0 text-[11px] font-extrabold uppercase tracking-[0.12em]">Payer</span>
+              <b className="mt-0.5 break-words">{payment.payerName}</b>
+            </span>
+          </div>
+          <div className="menu-item">
+            <span className="mi-tx">
+              <span className="!mt-0 text-[11px] font-extrabold uppercase tracking-[0.12em]">Memo</span>
+              <b className="mt-0.5 break-all font-mono text-[13px]">{payment.memo}</b>
+            </span>
+          </div>
+          <div className="menu-item">
+            <span className="mi-tx">
+              <span className="!mt-0 text-[11px] font-extrabold uppercase tracking-[0.12em]">Transaction hash</span>
+              <b className="mt-0.5 break-all font-mono text-xs">{payment.transactionHash || 'Pending verification'}</b>
+              {explorerUrl ? (
+                <a
+                  href={explorerUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-1.5 inline-flex items-center gap-1.5 text-[13px] font-bold text-[var(--ember)]"
+                >
+                  View on explorer <FiExternalLink aria-hidden="true" className="h-4 w-4" />
+                </a>
+              ) : null}
+            </span>
+          </div>
         </div>
+
+        <div className="stat-grid">
+          <div className="stat">
+            <p className="sv">{payment.ledger || '—'}</p>
+            <p className="sl">Ledger</p>
+          </div>
+          <div className="stat">
+            <p className="break-words font-display text-[15px] font-bold leading-snug text-[var(--ink)]">
+              {payment.verifiedAt ? formatDate(payment.verifiedAt) : 'Pending'}
+            </p>
+            <p className="sl">Verified at</p>
+          </div>
+        </div>
+
+        <p className="mt-4 text-xs font-medium leading-5 text-[var(--muted)]">
+          This receipt verifies a government service payment request and its matching Stellar Testnet transaction details.
+        </p>
       </main>
     </PublicShell>
   );

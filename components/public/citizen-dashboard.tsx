@@ -1,24 +1,22 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
-  FiArrowRight,
   FiCheckCircle,
+  FiChevronRight,
   FiClock,
   FiFileText,
   FiLogOut,
+  FiMail,
   FiMapPin,
   FiMessageSquare,
+  FiPhone,
   FiPlus,
   FiRefreshCw,
-  FiShield,
-  FiTrendingUp,
-  FiUser
+  FiShield
 } from 'react-icons/fi';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { StatCard } from '@/components/ui/stat-card';
 import { formatDate, formatStatus } from '@/lib/format';
 
@@ -77,17 +75,28 @@ function getInitials(name: string) {
 
 function DashboardSkeleton() {
   return (
-    <div className="grid gap-5">
-      <div className="dashboard-card p-6">
-        <div className="skeleton-line w-32" />
-        <div className="mt-5 skeleton-line h-9 w-2/3" />
-        <div className="mt-4 skeleton-line w-1/2" />
+    <div>
+      <div className="flex items-center justify-between gap-3 py-2">
+        <div className="min-w-0 flex-1">
+          <div className="skeleton-line w-24" />
+          <div className="mt-3 skeleton-line h-5 w-40" />
+        </div>
+        <div className="skeleton-line h-[46px] w-[46px] shrink-0" />
       </div>
-      <div className="grid gap-4 sm:grid-cols-3">
-        {[1, 2, 3].map((item) => (
-          <div key={item} className="dashboard-card p-5">
-            <div className="skeleton-line h-8 w-16" />
-            <div className="mt-3 skeleton-line w-28" />
+      <div className="stat-grid mt-4">
+        {[1, 2].map((item) => (
+          <div key={item} className="app-stat">
+            <div className="skeleton-line h-6 w-12" />
+            <div className="mt-3 skeleton-line w-20" />
+          </div>
+        ))}
+      </div>
+      <div className="mt-6 grid gap-3">
+        {[1, 2].map((item) => (
+          <div key={item} className="card">
+            <div className="skeleton-line w-28" />
+            <div className="mt-3 skeleton-line h-5 w-3/4" />
+            <div className="mt-3 skeleton-line w-1/2" />
           </div>
         ))}
       </div>
@@ -97,16 +106,14 @@ function DashboardSkeleton() {
 
 function EmptyReports({ tenantSlug }: { tenantSlug: string }) {
   return (
-    <div className="dashboard-empty">
-      <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-blue-50 text-blue-700 ring-1 ring-blue-100">
-        <FiFileText className="h-5 w-5" />
+    <div className="empty">
+      <div className="eart">
+        <FiFileText aria-hidden="true" className="h-8 w-8" />
       </div>
-      <h3 className="mt-4 text-lg font-extrabold tracking-[-0.02em] text-slate-950">No reports yet</h3>
-      <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
-        Submit your first city concern and this dashboard will become your personal tracker for status, updates, and receipts.
-      </p>
-      <Link href={`/${tenantSlug}/report`} className="mt-5 inline-flex rounded-xl px-4 py-2.5 text-sm font-bold btn-primary">
-        Submit first report
+      <h3>No reports yet</h3>
+      <p>Submit your first city concern and track status, updates, and receipts right here.</p>
+      <Link href={`/${tenantSlug}/report`} className="app-btn btn-ember mt-5 px-6">
+        <FiPlus aria-hidden="true" className="h-4 w-4" /> Submit first report
       </Link>
     </div>
   );
@@ -117,58 +124,60 @@ function ReportCard({ report, tenantSlug }: { report: CitizenReport; tenantSlug:
   const progress = getProgress(report.status);
 
   return (
-    <article className="dashboard-card p-4 transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-[0_18px_38px_rgba(37,99,235,0.10)] md:p-5">
+    <article className="card">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[0.7rem] font-bold uppercase tracking-[0.08em] text-slate-600">{report.referenceCode}</span>
-            <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[0.7rem] font-bold text-blue-700 ring-1 ring-blue-100">{report.category.name}</span>
-          </div>
-          <h3 className="mt-3 text-lg font-extrabold tracking-[-0.025em] text-slate-950 md:text-xl">{report.title}</h3>
-          <p className="mt-2 flex items-start gap-2 text-sm leading-6 text-slate-600">
-            <FiMapPin className="mt-1 h-4 w-4 shrink-0 text-slate-400" />
-            <span>{report.locationText}</span>
-          </p>
-        </div>
+        <p className="min-w-0 truncate pt-0.5 text-xs font-semibold text-[var(--muted)]">
+          {report.referenceCode} · {report.category.name}
+        </p>
         <Badge value={report.status} />
       </div>
 
-      <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-sm font-bold text-slate-700">{formatStatus(report.status)}</p>
-          <p className="text-sm font-extrabold text-slate-950">{progress}%</p>
+      <h3 className="mt-2 font-display text-base font-bold tracking-[-0.01em] text-[var(--ink)]">{report.title}</h3>
+      <p className="mt-1.5 flex items-start gap-1.5 text-[13px] leading-5 text-[var(--ink-2)]">
+        <FiMapPin aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-[var(--muted)]" />
+        <span className="min-w-0">{report.locationText}</span>
+      </p>
+
+      <div className="mt-4">
+        <div className="flex items-center justify-between gap-3 text-[13px]">
+          <p className="font-semibold text-[var(--ink-2)]">{formatStatus(report.status)}</p>
+          <p className="font-bold text-[var(--ink)]">{progress}%</p>
         </div>
-        <div className="mt-3 h-2 overflow-hidden rounded-full bg-white ring-1 ring-slate-200">
-          <div className="h-full rounded-full bg-gradient-to-r from-blue-600 to-teal-400 transition-[width] duration-500" style={{ width: `${progress}%` }} />
-        </div>
-        <div className="mt-3 grid grid-cols-5 gap-1">
-          {statusSteps.map((step) => (
-            <span key={step} className={`h-1 rounded-full ${statusSteps.indexOf(step) < Math.ceil((progress / 100) * statusSteps.length) ? 'bg-blue-500' : 'bg-slate-200'}`} />
-          ))}
+        <div className="heatbar mt-2">
+          <i style={{ width: `${progress}%` }} />
         </div>
       </div>
 
       {latestUpdate ? (
-        <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.10em] text-slate-500">
-            <FiMessageSquare className="h-4 w-4" /> Latest update
+        <div className="mt-4 rounded-[14px] bg-[var(--surface-2)] p-3.5">
+          <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.08em] text-[var(--muted)]">
+            <FiMessageSquare aria-hidden="true" className="h-3.5 w-3.5" /> Latest update
           </div>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{latestUpdate.message}</p>
-          <p className="mt-2 text-xs font-semibold text-slate-400">{formatDate(latestUpdate.createdAt)}</p>
+          <p className="mt-1.5 text-[13px] leading-5 text-[var(--ink-2)]">{latestUpdate.message}</p>
+          <p className="mt-1.5 text-[11.5px] font-semibold text-[var(--muted)]">{formatDate(latestUpdate.createdAt)}</p>
         </div>
       ) : null}
 
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
-        <p className="text-xs font-semibold text-slate-500">Submitted {formatDate(report.submittedAt)}</p>
-        <Link href={`/${tenantSlug}/track?reference=${encodeURIComponent(report.referenceCode)}`} className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold btn-secondary">
-          Open tracker <FiArrowRight className="h-4 w-4" />
-        </Link>
-      </div>
+      <p className="mt-4 text-xs font-semibold text-[var(--muted)]">Submitted {formatDate(report.submittedAt)}</p>
+      <Link
+        href={`/${tenantSlug}/track?reference=${encodeURIComponent(report.referenceCode)}`}
+        className="app-btn btn-outline btn-compact btn-block mt-3"
+      >
+        Open tracker <FiChevronRight aria-hidden="true" className="h-4 w-4" />
+      </Link>
     </article>
   );
 }
 
-export function CitizenDashboard({ tenantSlug }: { tenantSlug: string }) {
+export function CitizenDashboard({
+  tenantSlug,
+  cityEmail = null,
+  cityPhone = null
+}: {
+  tenantSlug: string;
+  cityEmail?: string | null;
+  cityPhone?: string | null;
+}) {
   const [data, setData] = useState<DashboardPayload | null>(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -205,15 +214,12 @@ export function CitizenDashboard({ tenantSlug }: { tenantSlug: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const activeReports = useMemo(() => data?.reports.filter((report) => report.status !== 'RESOLVED' && report.status !== 'REJECTED') || [], [data?.reports]);
-  const latestReport = data?.reports[0];
-
   if (isLoading) {
     return <DashboardSkeleton />;
   }
 
   if (error) {
-    return <p className="rounded-2xl bg-rose-50 p-4 text-sm font-bold text-rose-800 ring-1 ring-rose-200">{error}</p>;
+    return <div className="rounded-[14px] bg-[var(--ember-soft)] px-4 py-3 text-sm font-semibold text-[var(--ember-600)]">{error}</div>;
   }
 
   if (!data) {
@@ -221,121 +227,138 @@ export function CitizenDashboard({ tenantSlug }: { tenantSlug: string }) {
   }
 
   return (
-    <div className="grid gap-6">
-      <section className="dashboard-card overflow-hidden p-0">
-        <div className="grid gap-0 lg:grid-cols-[1fr_22rem]">
-          <div className="p-5 md:p-7">
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <p className="dashboard-kicker">Citizen dashboard</p>
-                <h1 className="mt-3 text-3xl font-extrabold tracking-[-0.04em] text-slate-950 md:text-5xl">Welcome back, {data.citizen.name.split(' ')[0]}</h1>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-                  A single place to follow your requests, read official updates, and keep verified receipts connected to your account.
-                </p>
-              </div>
-              <button onClick={logout} className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold btn-secondary">
-                <FiLogOut className="h-4 w-4" /> Sign out
-              </button>
-            </div>
-
-            <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              <Link href={`/${tenantSlug}/report`} className="group rounded-2xl border border-blue-100 bg-blue-50/80 p-4 transition hover:-translate-y-0.5 hover:bg-blue-50">
-                <div className="grid h-10 w-10 place-items-center rounded-xl bg-blue-600 text-white"><FiPlus /></div>
-                <p className="mt-3 font-extrabold text-slate-950">New report</p>
-                <p className="mt-1 text-sm leading-5 text-slate-600">Submit a concern with location and photo proof.</p>
-              </Link>
-              <Link href={`/${tenantSlug}/payments`} className="group rounded-2xl border border-teal-100 bg-teal-50/70 p-4 transition hover:-translate-y-0.5 hover:bg-teal-50">
-                <div className="grid h-10 w-10 place-items-center rounded-xl bg-teal-600 text-white"><FiShield /></div>
-                <p className="mt-3 font-extrabold text-slate-950">Pay service fee</p>
-                <p className="mt-1 text-sm leading-5 text-slate-600">Create a Stellar-verifiable payment receipt.</p>
-              </Link>
-              <Link href={`/${tenantSlug}/track`} className="group rounded-2xl border border-slate-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-blue-200">
-                <div className="grid h-10 w-10 place-items-center rounded-xl bg-slate-100 text-slate-700"><FiRefreshCw /></div>
-                <p className="mt-3 font-extrabold text-slate-950">Track request</p>
-                <p className="mt-1 text-sm leading-5 text-slate-600">Look up status by reference number.</p>
-              </Link>
-            </div>
-          </div>
-
-          <aside className="border-t border-slate-200 bg-slate-50/80 p-5 lg:border-l lg:border-t-0 md:p-6">
-            <div className="flex items-center gap-3">
-              <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-blue-600 to-teal-500 text-sm font-extrabold text-white shadow-[0_12px_24px_rgba(37,99,235,0.20)]">
-                {getInitials(data.citizen.name)}
-              </div>
-              <div className="min-w-0">
-                <p className="truncate font-extrabold text-slate-950">{data.citizen.name}</p>
-                <p className="truncate text-sm font-medium text-slate-500">{data.citizen.email}</p>
-              </div>
-            </div>
-            <div className="mt-6 grid gap-3">
-              <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                <p className="text-xs font-bold uppercase tracking-[0.10em] text-slate-500">Current activity</p>
-                <p className="mt-2 text-2xl font-extrabold text-slate-950">{activeReports.length}</p>
-                <p className="mt-1 text-sm text-slate-500">open requests requiring city action</p>
-              </div>
-              {latestReport ? (
-                <div className="rounded-2xl bg-white p-4 ring-1 ring-slate-200">
-                  <p className="text-xs font-bold uppercase tracking-[0.10em] text-slate-500">Latest request</p>
-                  <p className="mt-2 font-extrabold text-slate-950">{latestReport.title}</p>
-                  <p className="mt-1 text-sm text-slate-500">{formatStatus(latestReport.status)}</p>
-                </div>
-              ) : null}
-            </div>
-          </aside>
+    <div>
+      <div className="flex items-center justify-between gap-3 py-2">
+        <div className="min-w-0">
+          <p className="text-[13.5px] font-semibold text-[var(--muted)]">Welcome back,</p>
+          <p className="truncate font-display text-[21px] font-bold tracking-[-0.01em] text-[var(--ink)]">
+            {data.citizen.name.split(' ')[0]}
+          </p>
         </div>
-      </section>
+        <div className="grid h-[46px] w-[46px] shrink-0 place-items-center rounded-[15px] bg-gradient-to-br from-[var(--navy)] to-[var(--navy-900)] font-display text-[17px] font-bold text-white shadow-[0_8px_18px_rgba(26,73,123,0.3)]">
+          {getInitials(data.citizen.name)}
+        </div>
+      </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Total reports" value={data.stats.total} icon={<FiFileText />} />
+      <div className="stat-grid mt-4">
         <StatCard label="Active reports" value={data.stats.active} icon={<FiClock />} />
         <StatCard label="Resolved" value={data.stats.resolved} icon={<FiCheckCircle />} />
+        <StatCard label="Total reports" value={data.stats.total} icon={<FiFileText />} />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
-        <section className="grid gap-4">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="dashboard-kicker">My requests</p>
-              <h2 className="mt-2 text-2xl font-extrabold tracking-[-0.035em] text-slate-950 md:text-3xl">Report history</h2>
-            </div>
-            <Link href={`/${tenantSlug}/report`} className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold btn-primary">
-              <FiPlus className="h-4 w-4" /> New report
-            </Link>
+      <div className="section-head">
+        <h3>Quick actions</h3>
+      </div>
+      <nav className="menu-group">
+        <Link href={`/${tenantSlug}/report`} className="menu-item">
+          <span className="mi-ic">
+            <FiPlus aria-hidden="true" className="h-4 w-4" />
+          </span>
+          <span className="mi-tx">
+            <b>New report</b>
+            <span>Submit a concern with location and photo</span>
+          </span>
+          <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
+        </Link>
+        <Link href={`/${tenantSlug}/payments`} className="menu-item">
+          <span className="mi-ic">
+            <FiShield aria-hidden="true" className="h-4 w-4" />
+          </span>
+          <span className="mi-tx">
+            <b>Pay service fee</b>
+            <span>Stellar-verifiable payment receipts</span>
+          </span>
+          <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
+        </Link>
+        <Link href={`/${tenantSlug}/track`} className="menu-item">
+          <span className="mi-ic">
+            <FiRefreshCw aria-hidden="true" className="h-4 w-4" />
+          </span>
+          <span className="mi-tx">
+            <b>Track request</b>
+            <span>Look up status by reference number</span>
+          </span>
+          <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
+        </Link>
+      </nav>
+
+      <div className="section-head">
+        <h3>My reports</h3>
+        <Link href={`/${tenantSlug}/report`}>New report</Link>
+      </div>
+      {data.reports.length === 0 ? (
+        <EmptyReports tenantSlug={tenantSlug} />
+      ) : (
+        <div className="grid gap-3">
+          {data.reports.map((report) => (
+            <ReportCard key={report.id} report={report} tenantSlug={tenantSlug} />
+          ))}
+        </div>
+      )}
+
+      <p className="group-label mt-6">Account</p>
+      <div className="menu-group">
+        <div className="menu-item">
+          <span className="mi-ic">
+            <FiMail aria-hidden="true" className="h-4 w-4" />
+          </span>
+          <span className="mi-tx">
+            <b>Email</b>
+            <span className="break-all">{data.citizen.email}</span>
+          </span>
+        </div>
+        <div className="menu-item">
+          <span className="mi-ic">
+            <FiPhone aria-hidden="true" className="h-4 w-4" />
+          </span>
+          <span className="mi-tx">
+            <b>Phone</b>
+            <span>{data.citizen.phone || 'Not provided'}</span>
+          </span>
+        </div>
+        <button type="button" onClick={logout} className="menu-item">
+          <span className="mi-ic" style={{ background: 'var(--ember-soft)', color: 'var(--ember-600)' }}>
+            <FiLogOut aria-hidden="true" className="h-4 w-4" />
+          </span>
+          <span className="mi-tx">
+            <b className="text-[var(--ember-600)]">Sign out</b>
+            <span>End this session on this device</span>
+          </span>
+          <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
+        </button>
+      </div>
+
+      {cityEmail || cityPhone ? (
+        <>
+          <p className="group-label">City contact</p>
+          <div className="menu-group">
+            {cityEmail ? (
+              <a href={`mailto:${cityEmail}`} className="menu-item">
+                <span className="mi-ic">
+                  <FiMail aria-hidden="true" className="h-4 w-4" />
+                </span>
+                <span className="mi-tx">
+                  <b>Email the city</b>
+                  <span className="break-all">{cityEmail}</span>
+                </span>
+                <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
+              </a>
+            ) : null}
+            {cityPhone ? (
+              <a href={`tel:${cityPhone}`} className="menu-item">
+                <span className="mi-ic">
+                  <FiPhone aria-hidden="true" className="h-4 w-4" />
+                </span>
+                <span className="mi-tx">
+                  <b>Call the city</b>
+                  <span>{cityPhone}</span>
+                </span>
+                <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
+              </a>
+            ) : null}
           </div>
-
-          {data.reports.length === 0 ? <EmptyReports tenantSlug={tenantSlug} /> : data.reports.map((report) => <ReportCard key={report.id} report={report} tenantSlug={tenantSlug} />)}
-        </section>
-
-        <aside className="grid h-fit gap-4 lg:sticky lg:top-6">
-          <Card className="p-5">
-            <div className="flex items-center gap-2 text-blue-700">
-              <FiTrendingUp className="h-5 w-5" />
-              <p className="dashboard-kicker">Next best action</p>
-            </div>
-            <h3 className="mt-3 dashboard-section-title">Keep every request traceable</h3>
-            <p className="mt-2 dashboard-section-copy">Use the tracker link when following up with city staff. It keeps the reference number, timeline, and public updates in one place.</p>
-            <Link href={`/${tenantSlug}/track`} className="mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold btn-secondary">
-              Open tracker <FiArrowRight className="h-4 w-4" />
-            </Link>
-          </Card>
-          <Card className="p-5">
-            <div className="flex items-center gap-2 text-teal-700">
-              <FiUser className="h-5 w-5" />
-              <p className="dashboard-kicker text-teal-700">Account</p>
-            </div>
-            <dl className="mt-4 grid gap-3 text-sm">
-              <div>
-                <dt className="font-bold text-slate-500">Email</dt>
-                <dd className="mt-1 break-all font-semibold text-slate-900">{data.citizen.email}</dd>
-              </div>
-              <div>
-                <dt className="font-bold text-slate-500">Phone</dt>
-                <dd className="mt-1 font-semibold text-slate-900">{data.citizen.phone || 'Not provided'}</dd>
-              </div>
-            </dl>
-          </Card>
-        </aside>
-      </div>
+        </>
+      ) : null}
     </div>
   );
 }

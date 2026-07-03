@@ -44,11 +44,15 @@ export default async function PaymentDetailPage({ params }: { params: Promise<{ 
   }
 
   return (
-    <PublicShell tenant={tenant}>
-      <main className="page-section">
-        <div className="mx-auto max-w-7xl">
-          <PaymentCheckout tenantSlug={tenant.slug} initialPayment={serializePayment(payment)} />
-        </div>
+    <PublicShell
+      tenant={tenant}
+      flow
+      backHref={`/${tenant.slug}/payments`}
+      title="Payment"
+      subtitle={payment.referenceCode}
+    >
+      <main className="page-section pb-6">
+        <PaymentCheckout tenantSlug={tenant.slug} initialPayment={serializePayment(payment)} />
       </main>
     </PublicShell>
   );

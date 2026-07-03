@@ -18,16 +18,17 @@ export default async function ServicesPage({ params }: { params: Promise<{ tenan
   });
 
   return (
-    <PublicShell tenant={tenant}>
+    <PublicShell
+      tenant={tenant}
+      title="Services"
+      subtitle="Permits, fees, and city offices"
+      backHref={`/${tenant.slug}`}
+    >
       <main className="page-section">
-        <div className="mx-auto max-w-7xl">
-          <p className="section-eyebrow">Services</p>
-          <h1 className="heading-display mt-4 text-4xl md:text-6xl">City services directory</h1>
-          <p className="mt-4 max-w-2xl text-base font-medium leading-7 text-slate-600">Browse available public services and find the right office for your concern.</p>
-          <div className="mt-8">
-            <ServicesGrid services={services.map((service: any) => ({ ...service, feeAmount: service.feeAmount ? String(service.feeAmount) : null }))} tenantSlug={tenant.slug} />
-          </div>
-        </div>
+        <ServicesGrid
+          services={services.map((service) => ({ ...service, feeAmount: service.feeAmount ? String(service.feeAmount) : null }))}
+          tenantSlug={tenant.slug}
+        />
       </main>
     </PublicShell>
   );
