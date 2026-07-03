@@ -1,6 +1,15 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import {
+  FiCreditCard,
+  FiExternalLink,
+  FiFileText,
+  FiGrid,
+  FiLogOut,
+  FiSettings,
+  FiShield
+} from 'react-icons/fi';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -211,6 +220,44 @@ function toInputDate(value: unknown) {
   return value.slice(0, 10);
 }
 
+
+const adminTabMeta: Record<MainTab, { label: string; title: string; description: string }> = {
+  reports: {
+    label: 'Reports',
+    title: 'Report operations',
+    description: 'Triage citizen reports, assign departments, publish updates, and keep the queue moving.'
+  },
+  payments: {
+    label: 'Payments',
+    title: 'Stellar payments',
+    description: 'Monitor service fee intents, verify transaction hashes, and export payment receipts.'
+  },
+  'stellar-programs': {
+    label: 'Civic trust',
+    title: 'Stellar civic programs',
+    description: 'Manage civic rewards, public transparency records, and verifiable property tax receipts.'
+  },
+  content: {
+    label: 'Content',
+    title: 'Content studio',
+    description: 'Maintain services, hotlines, announcements, categories, departments, and staff users.'
+  },
+  settings: {
+    label: 'Settings',
+    title: 'Workspace settings',
+    description: 'Configure tenant profile details, public branding, and Stellar Testnet wallet settings.'
+  }
+};
+
+function AdminTabIcon({ tab }: { tab: MainTab }) {
+  const className = 'h-4 w-4 shrink-0';
+  if (tab === 'reports') return <FiFileText className={className} />;
+  if (tab === 'payments') return <FiCreditCard className={className} />;
+  if (tab === 'stellar-programs') return <FiShield className={className} />;
+  if (tab === 'content') return <FiGrid className={className} />;
+  return <FiSettings className={className} />;
+}
+
 function createFilterParams(filters: Record<string, string>) {
   const params = new URLSearchParams();
 
@@ -358,67 +405,81 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
   }
 
   return (
-    <div className="min-h-screen bg-transparent text-slate-900">
-      <header className="border-b border-slate-200/80 bg-white/95 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-6">
-          <div>
-            <p className="section-eyebrow">Operations portal</p>
-            <h1 className="text-xl font-extrabold text-slate-900">{tenant?.name || 'Operations Dashboard'}</h1>
+    <div className="dashboard-shell text-slate-900">
+      <div className="dashboard-container grid gap-6 py-5 lg:grid-cols-[16.5rem_1fr] lg:py-8">
+        <aside className="dashboard-card h-fit p-4 lg:sticky lg:top-6">
+          <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-blue-600 to-teal-500 text-sm font-extrabold text-white shadow-[0_12px_24px_rgba(37,99,235,0.20)]">
+              {tenant?.name?.slice(0, 2).toUpperCase() || 'CT'}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-extrabold text-slate-950">{tenant?.name || 'CivicTrust'}</p>
+              <p className="truncate text-xs font-semibold text-slate-500">Operations portal</p>
+            </div>
           </div>
-          <div className="flex flex-wrap justify-end gap-2">
-            <a href={`/${tenantSlug}`} className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-extrabold text-slate-700 shadow-[0_10px_24px_rgba(16,24,40,0.05)]">
-              View public site
+
+          <nav className="mt-4 grid gap-1" aria-label="Admin navigation">
+            {mainTabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`dashboard-sidebar-item ${activeTab === tab ? 'dashboard-sidebar-item-active' : ''}`}
+              >
+                <AdminTabIcon tab={tab} />
+                <span>{adminTabMeta[tab].label}</span>
+              </button>
+            ))}
+          </nav>
+
+          <div className="mt-5 grid gap-2 border-t border-slate-100 pt-4">
+            <a href={`/${tenantSlug}`} className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50">
+              <FiExternalLink className="h-4 w-4" /> Public site
             </a>
-            <button onClick={handleLogout} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary">
-              Sign out
+            <button onClick={handleLogout} className="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold btn-secondary">
+              <FiLogOut className="h-4 w-4" /> Sign out
             </button>
           </div>
-        </div>
-      </header>
+        </aside>
 
-      <main className="mx-auto grid max-w-7xl gap-6 px-4 py-8 md:px-6">
-        <section className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-white p-6 text-slate-900 shadow-[0_10px_24px_rgba(16,24,40,0.05)]">
-          <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-            <div>
-              <p className="section-eyebrow">Operations overview</p>
-              <h2 className="mt-3 text-3xl font-extrabold md:text-5xl">Resolve reports faster and keep citizens informed.</h2>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600">
-                Review incoming concerns, assign departments, publish updates, and manage public content from one organized workspace.
-              </p>
+        <main className="grid min-w-0 gap-6">
+          <header className="dashboard-card p-5 md:p-6">
+            <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
+              <div>
+                <p className="dashboard-kicker">{adminTabMeta[activeTab].label}</p>
+                <h1 className="mt-2 text-2xl font-extrabold tracking-[-0.035em] text-slate-950 md:text-4xl">{adminTabMeta[activeTab].title}</h1>
+                <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">{adminTabMeta[activeTab].description}</p>
+              </div>
+              <div className="grid grid-cols-3 gap-3 sm:min-w-[28rem]">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                  <p className="text-xl font-extrabold text-blue-700">{Math.max(0, stats.total - stats.resolved)}</p>
+                  <p className="mt-1 text-[0.68rem] font-bold uppercase tracking-[0.10em] text-slate-500">Active</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                  <p className="text-xl font-extrabold text-amber-600">{stats.urgent}</p>
+                  <p className="mt-1 text-[0.68rem] font-bold uppercase tracking-[0.10em] text-slate-500">Urgent</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                  <p className="text-xl font-extrabold text-emerald-600">{stats.resolved}</p>
+                  <p className="mt-1 text-[0.68rem] font-bold uppercase tracking-[0.10em] text-slate-500">Resolved</p>
+                </div>
+              </div>
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <p className="text-3xl font-extrabold text-[var(--brand)]">{Math.max(0, stats.total - stats.resolved)}</p>
-                <p className="mt-1 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">Active reports</p>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <p className="text-3xl font-extrabold text-amber-600">{stats.urgent}</p>
-                <p className="mt-1 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">Urgent flags</p>
-              </div>
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <p className="text-3xl font-extrabold text-emerald-600">{stats.resolved}</p>
-                <p className="mt-1 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-500">Completed</p>
-              </div>
-            </div>
+          </header>
+
+          <div className="flex gap-2 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-2 lg:hidden">
+            {mainTabs.map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`dashboard-tab whitespace-nowrap ${activeTab === tab ? 'dashboard-tab-active' : ''}`}
+              >
+                {adminTabMeta[tab].label}
+              </button>
+            ))}
           </div>
-        </section>
 
-        <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_10px_24px_rgba(16,24,40,0.05)] backdrop-blur">
-          {mainTabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`rounded-2xl px-4 py-3 text-sm font-extrabold transition ${
-                activeTab === tab ? 'btn-primary' : 'text-slate-600 hover:bg-blue-50 hover:text-[var(--brand)]'
-              }`}
-            >
-              {tab === 'reports' ? 'Reports' : tab === 'payments' ? 'Payments' : tab === 'stellar-programs' ? 'Stellar Programs' : tab === 'content' ? 'Content' : 'Settings'}
-            </button>
-          ))}
-        </div>
-
-        {error && <p className="rounded-2xl bg-rose-50 p-4 text-sm font-extrabold text-rose-700 ring-1 ring-rose-200">{error}</p>}
-        {success && <p className="rounded-2xl bg-emerald-50 p-4 text-sm font-extrabold text-emerald-700 ring-1 ring-emerald-200">{success}</p>}
+          {error && <p className="rounded-2xl bg-rose-50 p-4 text-sm font-bold text-rose-700 ring-1 ring-rose-200">{error}</p>}
+          {success && <p className="rounded-2xl bg-emerald-50 p-4 text-sm font-bold text-emerald-700 ring-1 ring-emerald-200">{success}</p>}
 
         {activeTab === 'reports' ? (
           <section className="grid gap-6">
@@ -492,7 +553,7 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
                     <button
                       key={report.id}
                       onClick={() => setSelectedReportId(report.id)}
-                      className={`rounded-[1.5rem] border p-4 text-left transition ${
+                      className={`rounded-2xl border p-4 text-left transition ${
                         selectedReport?.id === report.id
                           ? 'border-[var(--brand)] bg-blue-50 shadow-[0_10px_24px_rgba(16,24,40,0.05)]'
                           : 'border-slate-200 bg-white hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_10px_24px_rgba(16,24,40,0.05)]'
@@ -534,19 +595,19 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
                       <InfoPanel label="Owner" value={selectedReport.department?.name || 'Unassigned'} note={`${niceLabel(selectedReport.priority)} priority`} />
                     </div>
 
-                    <p className="mt-6 rounded-[1.5rem] bg-slate-50 p-5 text-sm leading-7 text-slate-600 ring-1 ring-slate-100">{selectedReport.description}</p>
+                    <p className="mt-6 rounded-2xl bg-slate-50 p-5 text-sm leading-7 text-slate-600 ring-1 ring-slate-100">{selectedReport.description}</p>
 
                     {selectedReport.attachments.length > 0 ? (
                       <div className="mt-6 grid gap-3 sm:grid-cols-2">
                         {selectedReport.attachments.map((attachment) => (
-                          <a key={attachment.id} href={attachment.imageUrl} target="_blank" className="overflow-hidden rounded-[1.5rem] border border-slate-200 bg-slate-100" rel="noreferrer">
+                          <a key={attachment.id} href={attachment.imageUrl} target="_blank" className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-100" rel="noreferrer">
                             <img src={attachment.imageUrl} alt="Report attachment" className="h-52 w-full object-cover" />
                           </a>
                         ))}
                       </div>
                     ) : null}
 
-                    <form onSubmit={handleStatusUpdate} className="mt-8 grid gap-4 rounded-[1.5rem] bg-slate-50 p-5 ring-1 ring-slate-100">
+                    <form onSubmit={handleStatusUpdate} className="mt-8 grid gap-4 rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-100">
                       <div className="flex items-center justify-between gap-4">
                         <div>
                           <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--brand)]">Action panel</p>
@@ -589,7 +650,7 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
                       <h3 className="text-lg font-extrabold text-slate-900">Timeline</h3>
                       <div className="mt-4 grid gap-3">
                         {selectedReport.updates.map((update) => (
-                          <div key={update.id} className="rounded-[1.5rem] border border-slate-200 bg-white p-4">
+                          <div key={update.id} className="rounded-2xl border border-slate-200 bg-white p-4">
                             <div className="flex flex-wrap items-center justify-between gap-2">
                               <Badge value={update.status} />
                               <span className="rounded-xl bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-500">{update.isPublic ? 'Public' : 'Internal'}</span>
@@ -624,14 +685,15 @@ export function AdminDashboard({ tenantSlug }: { tenantSlug: string }) {
         {activeTab === 'settings' ? (
           <TenantSettingsPanel tenantSlug={tenantSlug} tenant={tenant} setTenant={setTenant} setError={setError} setSuccess={setSuccess} />
         ) : null}
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
 
 function InfoPanel({ label, value, note }: { label: string; value: string; note: string }) {
   return (
-    <div className="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-100">
+    <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
       <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-400">{label}</p>
       <p className="mt-1 font-extrabold text-slate-900">{value}</p>
       <p className="mt-1 text-sm text-slate-500">{note}</p>
@@ -944,7 +1006,7 @@ function ContentStudio({
           ))}
         </div>
 
-        <form onSubmit={saveItem} className="mt-6 grid gap-4 rounded-[1.5rem] bg-slate-50 p-5 ring-1 ring-slate-100">
+        <form onSubmit={saveItem} className="mt-6 grid gap-4 rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-100">
           <h3 className="font-extrabold text-slate-900">{editingId ? 'Edit item' : 'Create item'}</h3>
           {config.fields.map((field) => (
             <div key={field.name}>
@@ -1017,7 +1079,7 @@ function ContentStudio({
             const isActive = item.isActive ?? item.isPublished ?? true;
 
             return (
-              <div key={item.id} className="rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-[0_10px_24px_rgba(16,24,40,0.05)]">
+              <div key={item.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_10px_24px_rgba(16,24,40,0.05)]">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="font-extrabold text-slate-900">{title}</p>
@@ -1122,7 +1184,7 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
   const hasWallet = Boolean(wallet?.receivingPublicKey);
 
   return (
-    <div className="rounded-[1.5rem] bg-blue-50/70 p-5 ring-1 ring-blue-100">
+    <div className="rounded-2xl bg-blue-50/70 p-5 ring-1 ring-blue-100">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--brand)]">Real Stellar Testnet wallet</p>
@@ -1142,7 +1204,7 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
       {wallet?.error ? <p className="mt-4 rounded-2xl bg-amber-50 p-4 text-sm font-bold text-amber-800 ring-1 ring-amber-200">{wallet.error}</p> : null}
 
       {!hasWallet ? (
-        <div className="mt-5 rounded-[1.25rem] bg-white p-5 ring-1 ring-blue-100">
+        <div className="mt-5 rounded-xl bg-white p-5 ring-1 ring-blue-100">
           <p className="text-sm font-extrabold text-slate-950">No receiving wallet is configured yet.</p>
           <p className="mt-2 text-sm leading-6 text-slate-600">
             This is why public payment requests show “The receiving Stellar wallet is not configured for this service.” Start with the button below.
@@ -1160,7 +1222,7 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
         <InfoPanel label="Last checked" value={wallet?.lastCheckedAt ? formatDate(wallet.lastCheckedAt) : 'Not checked'} note={wallet?.lastFundedAt ? `Funded ${formatDate(wallet.lastFundedAt)}` : 'Friendbot funds Testnet accounts'} />
       </div>
 
-      <div className="mt-4 rounded-[1.25rem] bg-white p-4 ring-1 ring-blue-100">
+      <div className="mt-4 rounded-xl bg-white p-4 ring-1 ring-blue-100">
         <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Current receiving public key</p>
         <p className="mt-2 break-all font-mono text-sm font-bold text-slate-950">
           {wallet?.receivingPublicKey || 'Not configured yet. Click Generate Testnet Wallet.'}
@@ -1181,7 +1243,7 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
         </div>
       ) : null}
 
-      <div className="mt-5 rounded-[1.25rem] bg-white p-5 ring-1 ring-blue-100">
+      <div className="mt-5 rounded-xl bg-white p-5 ring-1 ring-blue-100">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h4 className="text-base font-extrabold text-slate-950">Advanced wallet configuration</h4>
@@ -1346,7 +1408,7 @@ function TenantSettingsPanel({
             <Input value={form.primaryColor} onChange={(event) => updateForm('primaryColor', event.target.value)} />
           </div>
         </div>
-        <div className="rounded-[1.5rem] bg-slate-50 p-5 ring-1 ring-slate-100">
+        <div className="rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-100">
           <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--brand)]">Default payment asset</p>
           <div className="mt-4 grid gap-5 md:grid-cols-2">
             <div>

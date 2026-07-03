@@ -22,7 +22,7 @@ export function NewsGrid({ posts, tenantSlug }: { posts: NewsPost[]; tenantSlug:
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       {posts.map((post, index) => (
-        <article key={post.id} className="card-hover overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.07)]">
+        <article key={post.id} className="card-hover overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.07)]">
           <div className="flex items-center gap-3 p-4 pb-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 p-[2px]">
               <div className="flex h-full w-full items-center justify-center rounded-full bg-white text-xs font-black text-[var(--brand)]">{String(index + 1).padStart(2, '0')}</div>

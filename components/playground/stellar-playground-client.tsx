@@ -152,7 +152,7 @@ export function StellarPlaygroundClient() {
 
       <main className="mx-auto grid max-w-6xl gap-5 px-4 py-6 pb-12 lg:grid-cols-[0.92fr_1.08fr] lg:py-10">
         <section className="grid gap-5">
-          <div className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-start gap-3">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-700"><FiShield className="h-5 w-5" /></span>
               <div>
@@ -186,7 +186,7 @@ export function StellarPlaygroundClient() {
             </div>
           </div>
 
-          <div className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-start gap-3">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700"><FiRefreshCw className="h-5 w-5" /></span>
               <div>
@@ -209,7 +209,7 @@ export function StellarPlaygroundClient() {
         </section>
 
         <section className="grid gap-5">
-          <div className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-start gap-3">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-cyan-50 text-cyan-700"><FiSend className="h-5 w-5" /></span>
               <div>
@@ -245,7 +245,7 @@ export function StellarPlaygroundClient() {
             ) : null}
           </div>
 
-          <div className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex items-start gap-3">
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-violet-50 text-violet-700"><FiCheckCircle className="h-5 w-5" /></span>
               <div>
@@ -263,7 +263,7 @@ export function StellarPlaygroundClient() {
             ) : null}
           </div>
 
-          <div className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="text-lg font-black text-slate-950">Where smart contracts fit</h2>
             <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">This civic platform currently uses Stellar payments and Horizon receipts. Smart contracts on Stellar are built with Soroban and are useful later for programmable rewards, budget rules, or claim windows. They are not required for the basic proof-of-payment flow.</p>
             <a href="https://developers.stellar.org/docs/build/smart-contracts/getting-started/hello-world" target="_blank" rel="noreferrer" className="mt-4 inline-flex min-h-10 items-center gap-2 rounded-full px-4 py-2 text-sm font-black btn-secondary">Read the official smart contract quickstart <FiExternalLink /></a>

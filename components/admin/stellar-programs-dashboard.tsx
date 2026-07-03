@@ -399,7 +399,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
                   <p className="mt-3 text-sm font-bold text-slate-700">{action.participantName} · {action.locationText}</p>
                   {action.rewardTransactionHash ? <p className="mt-4 break-all rounded-2xl bg-emerald-50 p-4 font-mono text-xs font-bold text-emerald-800 ring-1 ring-emerald-200">{action.rewardTransactionHash}</p> : null}
                 </div>
-                <div className="grid gap-3 rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-slate-100">
+                <div className="grid gap-3 rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
                   <div className="grid gap-3 md:grid-cols-2">
                     <Input value={action.rewardAmount} onChange={(event) => patchAction(action.id, 'rewardAmount', event.target.value)} placeholder="Reward amount" />
                     <Input value={action.rewardAssetCode} onChange={(event) => patchAction(action.id, 'rewardAssetCode', event.target.value)} placeholder="Asset code" />

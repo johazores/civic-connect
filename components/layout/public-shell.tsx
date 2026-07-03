@@ -142,7 +142,7 @@ export function PublicShell({
                 </button>
                 <div className="invisible absolute left-1/2 top-full z-50 w-[24rem] -translate-x-1/2 pt-3 opacity-0 transition duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
                   <div className="rounded-[1.6rem] border border-slate-200/90 bg-white/96 p-2 shadow-[0_28px_80px_rgba(15,23,42,0.16)] backdrop-blur-2xl animate-scale">
-                    <div className="brand-panel rounded-[1.25rem] p-4">
+                    <div className="brand-panel rounded-xl p-4">
                       <p className="text-xs font-black uppercase tracking-[0.16em] text-blue-700">{group.label}</p>
                       <p className="mt-1 text-sm font-semibold leading-6 text-slate-600">{group.description}</p>
                     </div>

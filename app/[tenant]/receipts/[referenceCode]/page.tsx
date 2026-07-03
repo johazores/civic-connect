@@ -38,12 +38,12 @@ export default async function ReceiptPage({ params }: { params: Promise<{ tenant
             </div>
 
             <div className="mt-8 grid gap-5 md:grid-cols-2">
-              <div className="rounded-[1.5rem] bg-slate-50 p-5 ring-1 ring-slate-100">
+              <div className="rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-100">
                 <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Service</p>
                 <p className="mt-2 text-xl font-extrabold text-slate-950">{payment.service.title}</p>
                 <p className="mt-2 text-sm leading-6 text-slate-600">{payment.service.description}</p>
               </div>
-              <div className="rounded-[1.5rem] bg-blue-50 p-5 ring-1 ring-blue-100">
+              <div className="rounded-2xl bg-blue-50 p-5 ring-1 ring-blue-100">
                 <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-[var(--brand)]">Amount paid</p>
                 <p className="mt-2 text-3xl font-extrabold text-slate-950">{String(payment.amount)} {payment.assetCode}</p>
                 <p className="mt-2 text-sm leading-6 text-slate-600">Network: {payment.tenant.stellarNetwork}</p>

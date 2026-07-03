@@ -42,7 +42,7 @@ export function ServicesGrid({ services, tenantSlug }: { services: ServiceItem[]
               <p className="mt-3 text-sm font-semibold leading-7 text-slate-600">{service.description}</p>
 
               {hasFee ? (
-                <div className="mt-5 rounded-[1.35rem] bg-emerald-50 p-4 ring-1 ring-emerald-100">
+                <div className="mt-5 rounded-2xl bg-emerald-50 p-4 ring-1 ring-emerald-100">
                   <p className="text-xs font-black uppercase tracking-[0.14em] text-emerald-700">Stellar verified fee</p>
                   <p className="mt-1 text-xl font-black text-slate-950">{String(service.feeAmount)} {service.feeAssetCode || 'XLM'}</p>
                 </div>

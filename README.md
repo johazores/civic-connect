@@ -233,6 +233,9 @@ docs/ui-mobile-navigation-fixes.md
 
 ## Documentation
 
+- `docs/dashboard-ui-ux-audit.md` - Admin and citizen dashboard design audit and redesign notes.
+
+
 - `docs/ui-ux-research-redesign.md` - Research-led UI/UX redesign direction and implementation notes.
 
 Start with:

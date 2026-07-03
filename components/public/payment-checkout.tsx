@@ -69,7 +69,7 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
           </span>
         </div>
 
-        <div className="mt-6 rounded-[1.5rem] bg-slate-50 p-5 ring-1 ring-slate-100">
+        <div className="mt-6 rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-100">
           <p className="text-sm font-bold text-slate-500">Service</p>
           <p className="mt-1 text-xl font-extrabold text-slate-950">{payment.service.title}</p>
           <p className="mt-2 text-sm leading-6 text-slate-600">{payment.service.description}</p>
@@ -99,7 +99,7 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
         </p>
 
         <div className="mt-6 grid gap-5 md:grid-cols-[220px_1fr] md:items-center">
-          <div className="rounded-[1.5rem] border border-slate-200 bg-white p-3 shadow-sm">
+          <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
             <img src={`/api/tenant/${tenantSlug}/payments/${payment.referenceCode}/qr`} alt="SEP-7 payment QR code" className="h-auto w-full rounded-2xl" />
           </div>
           <div className="grid gap-3">
@@ -118,7 +118,7 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
         </div>
 
         {isVerified ? (
-          <div className="mt-6 rounded-[1.5rem] bg-emerald-50 p-5 ring-1 ring-emerald-200">
+          <div className="mt-6 rounded-2xl bg-emerald-50 p-5 ring-1 ring-emerald-200">
             <p className="font-extrabold text-emerald-800">Payment verified</p>
             <p className="mt-2 text-sm leading-6 text-emerald-700">Transaction hash and ledger data are permanently stored for this receipt.</p>
             <a href={`/${tenantSlug}/receipts/${payment.referenceCode}`} className="mt-4 inline-flex min-h-11 items-center justify-center rounded-xl px-5 py-3 text-sm font-bold btn-primary">
@@ -126,7 +126,7 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
             </a>
           </div>
         ) : (
-          <form onSubmit={(event) => verifyPayment(event, 'hash')} className="mt-6 grid gap-4 rounded-[1.5rem] bg-slate-50 p-5 ring-1 ring-slate-100">
+          <form onSubmit={(event) => verifyPayment(event, 'hash')} className="mt-6 grid gap-4 rounded-2xl bg-slate-50 p-5 ring-1 ring-slate-100">
             <div>
               <label className="text-sm font-extrabold text-slate-700">Transaction hash</label>
               <Input required value={transactionHash} onChange={(event) => setTransactionHash(event.target.value)} placeholder="Paste the Stellar transaction hash after payment" />

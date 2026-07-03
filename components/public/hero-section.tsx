@@ -60,7 +60,7 @@ export function HeroSection({
 
           <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:max-w-3xl">
             {quickActions.map(({ Icon, ...action }) => (
-              <Link key={action.href} href={action.href} className="card-hover rounded-[1.35rem] border border-slate-200 bg-white p-4 shadow-[0_12px_28px_rgba(18,32,51,0.05)]">
+              <Link key={action.href} href={action.href} className="card-hover rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_12px_28px_rgba(18,32,51,0.05)]">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-[var(--brand)] ring-1 ring-blue-100">
                   <Icon aria-hidden="true" className="h-4 w-4" />
                 </span>
@@ -113,7 +113,7 @@ export function HeroSection({
 
             <div className="grid gap-3">
               {feed.map((item) => (
-                <div key={item.title} className="feed-card rounded-[1.5rem] p-4">
+                <div key={item.title} className="feed-card rounded-2xl p-4">
                   <div className="flex items-start gap-3">
                     <div className="h-11 w-11 rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 p-[2px]">
                       <div className="flex h-full w-full items-center justify-center rounded-full bg-white text-[var(--brand)]">
@@ -137,7 +137,7 @@ export function HeroSection({
               ))}
             </div>
 
-            <div className="mt-4 grid grid-cols-3 gap-2 rounded-[1.5rem] bg-slate-50 p-2 ring-1 ring-slate-100">
+            <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl bg-slate-50 p-2 ring-1 ring-slate-100">
               <MiniAction Icon={FiHeart} label="Support" />
               <MiniAction Icon={FiMessageCircle} label="Update" />
               <MiniAction Icon={FiShare2} label="Share" />
@@ -151,7 +151,7 @@ export function HeroSection({
 
 function Metric({ value, label }: { value: string | number; label: string }) {
   return (
-    <div className="rounded-[1.25rem] border border-slate-200 bg-white p-4 shadow-[0_10px_24px_rgba(16,24,40,0.05)]">
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-[0_10px_24px_rgba(16,24,40,0.05)]">
       <p className="text-2xl font-black tracking-[-0.035em] text-slate-950">{value}</p>
       <p className="mt-1 text-xs font-black uppercase tracking-[0.1em] text-slate-500">{label}</p>
     </div>

@@ -86,7 +86,7 @@ export function MobileMenu({ tenantSlug, navGroups }: { tenantSlug: string; navG
       {isOpen ? (
         <div className="fixed inset-x-0 bottom-0 top-[4.25rem] z-[70] overflow-y-auto bg-slate-950/35 px-3 pb-[calc(8.5rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-md animate-fade" onClick={() => setIsOpen(false)}>
           <div className="mx-auto max-w-md rounded-[2rem] border border-white/80 bg-white p-3 shadow-[0_28px_90px_rgba(15,23,42,0.30)] animate-scale" onClick={(event) => event.stopPropagation()}>
-            <div className="brand-panel rounded-[1.65rem] p-4">
+            <div className="brand-panel rounded-2xl p-4">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.18em] text-blue-700">Action hub</p>
@@ -108,7 +108,7 @@ export function MobileMenu({ tenantSlug, navGroups }: { tenantSlug: string; navG
 
             <nav className="mt-3 grid gap-3" aria-label="Mobile navigation">
               {navGroups.map((group) => (
-                <section key={group.label} className="rounded-[1.65rem] border border-slate-200 bg-white p-2 shadow-sm">
+                <section key={group.label} className="rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
                   <div className="px-2 py-2">
                     <p className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">{group.label}</p>
                     <p className="mt-1 text-xs font-semibold leading-5 text-slate-500">{group.description}</p>
@@ -122,7 +122,7 @@ export function MobileMenu({ tenantSlug, navGroups }: { tenantSlug: string; navG
                           key={item.href}
                           href={item.href}
                           onClick={() => setIsOpen(false)}
-                          className={`flex min-h-14 items-center gap-3 rounded-[1.25rem] px-3 py-3 text-sm font-black transition ${
+                          className={`flex min-h-14 items-center gap-3 rounded-xl px-3 py-3 text-sm font-black transition ${
                             isActive ? 'bg-blue-50 text-[var(--brand)] ring-1 ring-blue-100' : 'text-slate-800 hover:bg-slate-50'
                           }`}
                         >
@@ -162,7 +162,7 @@ export function MobileBottomNav({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed inset-x-3 bottom-3 z-40 rounded-[1.5rem] border border-white/80 bg-white/94 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 shadow-[0_-10px_40px_rgba(18,32,51,0.18)] backdrop-blur-2xl lg:hidden" aria-label="Quick mobile navigation">
+    <nav className="fixed inset-x-3 bottom-3 z-40 rounded-2xl border border-white/80 bg-white/94 px-2 pb-[max(env(safe-area-inset-bottom),0.5rem)] pt-2 shadow-[0_-10px_40px_rgba(18,32,51,0.18)] backdrop-blur-2xl lg:hidden" aria-label="Quick mobile navigation">
       <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
         {items.map((item) => {
           const isActive = pathname === item.href;

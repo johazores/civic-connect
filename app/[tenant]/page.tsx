@@ -52,7 +52,7 @@ export default async function TenantHomePage({ params }: { params: Promise<{ ten
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {quickLinks.map(({ Icon, ...item }) => (
-              <Link key={item.href} href={item.href} className="card-hover rounded-[1.75rem] border border-slate-200 bg-white/94 p-5 shadow-[0_18px_42px_rgba(18,32,51,0.07)] backdrop-blur-xl">
+              <Link key={item.href} href={item.href} className="card-hover rounded-2xl border border-slate-200 bg-white/94 p-5 shadow-[0_18px_42px_rgba(18,32,51,0.07)] backdrop-blur-xl">
                 <div className="flex items-start justify-between gap-4">
                   <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-lg font-black text-[var(--brand)] ring-1 ring-blue-100">
                     <Icon aria-hidden="true" className="h-5 w-5" />
@@ -100,7 +100,7 @@ export default async function TenantHomePage({ params }: { params: Promise<{ ten
               ].map(([Icon, title, description]) => {
                 const CardIcon = Icon as IconType;
                 return (
-                  <div key={title as string} className="rounded-[1.5rem] border border-white/80 bg-white/82 p-4 shadow-sm">
+                  <div key={title as string} className="rounded-2xl border border-white/80 bg-white/82 p-4 shadow-sm">
                     <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-700 ring-1 ring-blue-100">
                       <CardIcon aria-hidden="true" className="h-4 w-4" />
                     </span>
