@@ -2,15 +2,14 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { FiLogIn } from 'react-icons/fi';
+import { FiLock, FiLogIn, FiMail } from 'react-icons/fi';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 
 export function AdminLoginForm({ tenantSlug }: { tenantSlug: string }) {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -38,24 +37,62 @@ export function AdminLoginForm({ tenantSlug }: { tenantSlug: string }) {
   }
 
   return (
-    <Card className="mx-auto max-w-md">
-      <div className="mb-6 rounded-[20px] border border-[color-mix(in_srgb,var(--navy)_16%,transparent)] bg-[color-mix(in_srgb,var(--navy)_8%,white)] p-5">
-        <p className="text-xs font-bold uppercase tracking-[0.14em] text-blue-700">Staff access</p>
-        <h2 className="mt-2 text-2xl font-extrabold tracking-[-0.03em] text-slate-950">Operations dashboard</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-600">Sign in with staff credentials to manage reports, content, and tenant settings.</p>
+    <form onSubmit={handleSubmit}>
+      <div className="field">
+        <label className="input-label" htmlFor="admin-login-email">Email</label>
+        <div className="input flex items-center gap-3">
+          <FiMail aria-hidden="true" className="h-5 w-5 shrink-0 text-[var(--muted)]" />
+          <input
+            id="admin-login-email"
+            type="email"
+            required
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            autoComplete="email"
+            placeholder="you@city.gov"
+            className="min-w-0 flex-1 border-0 bg-transparent p-0 text-[15px] font-medium text-[var(--ink)] outline-none placeholder:text-[var(--muted)]"
+          />
+        </div>
       </div>
-      <form onSubmit={handleSubmit} className="grid gap-5">
-        <div>
-          <label className="input-label">Email</label>
-          <Input type="email" required value={email} onChange={(event) => setEmail(event.target.value)} autoComplete="email" />
+
+      <div className="field">
+        <label className="input-label" htmlFor="admin-login-password">Password</label>
+        <div className="input flex items-center gap-3">
+          <FiLock aria-hidden="true" className="h-5 w-5 shrink-0 text-[var(--muted)]" />
+          <input
+            id="admin-login-password"
+            type="password"
+            required
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            autoComplete="current-password"
+            placeholder="Enter your password"
+            className="min-w-0 flex-1 border-0 bg-transparent p-0 text-[15px] font-medium text-[var(--ink)] outline-none placeholder:text-[var(--muted)]"
+          />
         </div>
-        <div>
-          <label className="input-label">Password</label>
-          <Input type="password" required value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" />
-        </div>
-        {error ? <p className="rounded-xl bg-rose-50 p-4 text-sm font-semibold text-rose-700 ring-1 ring-rose-200">{error}</p> : null}
-        <Button disabled={isLoading}><FiLogIn aria-hidden="true" className="h-4 w-4" />{isLoading ? 'Signing in...' : 'Sign in'}</Button>
-      </form>
-    </Card>
+      </div>
+
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <button
+          type="button"
+          role="switch"
+          aria-checked={rememberMe}
+          onClick={() => setRememberMe((current) => !current)}
+          className="flex min-h-[44px] items-center gap-3 text-[13px] font-semibold text-[var(--ink-2)]"
+        >
+          <span className={`switch ${rememberMe ? 'on' : ''}`.trim()} aria-hidden="true" />
+          Remember me
+        </button>
+      </div>
+
+      {error ? (
+        <p className="mb-4 rounded-[14px] bg-[var(--ember-soft)] p-4 text-sm font-semibold leading-5 text-[var(--ember-600)]">{error}</p>
+      ) : null}
+
+      <Button type="submit" disabled={isLoading} className="btn-block">
+        <FiLogIn aria-hidden="true" className="h-4 w-4" />
+        {isLoading ? 'Signing in...' : 'Sign in'}
+      </Button>
+    </form>
   );
 }

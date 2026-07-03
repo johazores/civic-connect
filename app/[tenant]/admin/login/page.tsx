@@ -12,9 +12,9 @@ export default async function AdminLoginPage({ params }: { params: Promise<{ ten
   }
 
   return (
-    <main className="civic-device-shell">
+    <div className="civic-device-shell">
       <div className="civic-app-frame">
-        <div className="civic-appbar">
+        <header className="civic-appbar">
           <div className="flex min-w-0 items-center gap-3">
             <div className="app-mark">{tenant.name.slice(0, 2).toUpperCase()}</div>
             <div className="min-w-0">
@@ -22,21 +22,28 @@ export default async function AdminLoginPage({ params }: { params: Promise<{ ten
               <p className="app-subtitle truncate">{tenant.name} operations</p>
             </div>
           </div>
-          <span className="app-icon-btn"><FiShield className="h-4 w-4" /></span>
-        </div>
-        <div className="civic-viewport px-4 pb-6 pt-4">
-          <section className="app-pulse-card p-5">
-            <div className="relative z-10">
-              <p className="text-[0.68rem] font-black uppercase tracking-[0.18em] text-blue-100">Operations portal</p>
-              <h1 className="mt-3 font-display text-[2.05rem] font-black leading-[1.02] tracking-[-0.055em] text-white">Welcome back</h1>
-              <p className="mt-4 text-sm font-semibold leading-6 text-blue-100/90">Manage citizen reports, service content, Stellar wallets, payments, rewards, and public records.</p>
+          <span className="app-icon-btn" aria-hidden="true">
+            <FiShield className="h-5 w-5" />
+          </span>
+        </header>
+
+        <main
+          className="civic-viewport viewport-flow px-5"
+          style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 26px)' }}
+        >
+          <div className="pb-6 pt-7">
+            <div className="grid h-[60px] w-[60px] place-items-center rounded-[18px] bg-gradient-to-br from-[var(--navy)] to-[var(--navy-900)] shadow-[0_14px_30px_rgba(26,73,123,0.35)]">
+              <FiShield aria-hidden="true" className="h-7 w-7 text-[#fff]" />
             </div>
-          </section>
-          <div className="mt-5">
-            <AdminLoginForm tenantSlug={tenant.slug} />
+            <h1 className="mt-5 font-display text-[28px] font-bold tracking-[-0.02em] text-[var(--ink)]">Welcome back</h1>
+            <p className="mt-2 text-[14.5px] font-medium leading-6 text-[var(--muted)]">
+              Sign in to manage reports, payments, and content.
+            </p>
           </div>
-        </div>
+
+          <AdminLoginForm tenantSlug={tenant.slug} />
+        </main>
       </div>
-    </main>
+    </div>
   );
 }

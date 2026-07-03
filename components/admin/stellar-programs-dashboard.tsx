@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import { FiAward, FiFileText, FiHash, FiPlus, FiRefreshCw, FiX } from 'react-icons/fi';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import { Input, Textarea } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { StatCard } from '@/components/ui/stat-card';
@@ -73,6 +74,29 @@ function nice(value: string) {
   return value.replaceAll('_', ' ').toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
+function shortHash(hash: string) {
+  return hash.length > 14 ? `${hash.slice(0, 6)}…${hash.slice(-6)}` : hash;
+}
+
+function programPill(status: string) {
+  if (status === 'REWARDED' || status === 'VERIFIED_ON_STELLAR' || status === 'ISSUED') {
+    return 'status-pill whitespace-nowrap bg-[color-mix(in_srgb,var(--heat-1)_14%,var(--surface))] text-[#0f806d]';
+  }
+  if (status === 'REJECTED' || status === 'VOIDED' || status === 'ARCHIVED') {
+    return 'status-pill whitespace-nowrap bg-[var(--ember-soft)] text-[var(--ember-600)]';
+  }
+  if (status === 'APPROVED' || status === 'PUBLISHED') {
+    return 'status-pill whitespace-nowrap bg-[color-mix(in_srgb,var(--navy)_10%,var(--surface))] text-[var(--navy)]';
+  }
+  return 'status-pill whitespace-nowrap bg-[color-mix(in_srgb,var(--heat-2)_18%,var(--surface))] text-[#9a6b00]';
+}
+
+function programNic(status: string) {
+  if (status === 'REWARDED' || status === 'VERIFIED_ON_STELLAR' || status === 'ISSUED') return 'nic nic-teal';
+  if (status === 'REJECTED' || status === 'VOIDED' || status === 'ARCHIVED') return 'nic nic-ember';
+  return 'nic nic-navy';
+}
+
 function createEmptyTransparency(): Record<string, string> {
   return {
     title: '',
@@ -108,6 +132,92 @@ function createEmptyTaxReceipt(): Record<string, string> {
   };
 }
 
+/* In-frame bottom sheet helpers (absolute inside .civic-app-frame — never fixed) */
+
+const SHEET_CLOSE_MS = 320;
+
+function useSheet() {
+  const [state, setState] = useState<'closed' | 'open' | 'closing'>('closed');
+  const timer = useRef<number | undefined>(undefined);
+
+  const open = useCallback(() => {
+    window.clearTimeout(timer.current);
+    setState('open');
+  }, []);
+
+  const close = useCallback(() => {
+    setState('closing');
+    timer.current = window.setTimeout(() => setState('closed'), SHEET_CLOSE_MS);
+  }, []);
+
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+
+  return {
+    isOpen: state !== 'closed',
+    anim: state === 'closing' ? 'out' : 'in',
+    open,
+    close
+  };
+}
+
+function BottomSheet({
+  title,
+  sub,
+  anim,
+  onClose,
+  children
+}: {
+  title: string;
+  sub?: string;
+  anim: string;
+  onClose: () => void;
+  children: ReactNode;
+}) {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  return (
+    <>
+      <button type="button" className={`sheet-backdrop backdrop-${anim}`} onClick={onClose} aria-label="Close" tabIndex={-1} />
+      <div className={`sheet sheet-${anim}`} role="dialog" aria-modal="true" aria-label={title}>
+        <div className="sheet-grab" />
+        <div className="sheet-head">
+          <div className="min-w-0">
+            <h2 className="truncate">{title}</h2>
+            {sub ? <p className="sheet-sub truncate">{sub}</p> : null}
+          </div>
+          <button type="button" onClick={onClose} className="app-icon-btn" aria-label="Close">
+            <FiX aria-hidden="true" className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="sheet-scroll">{children}</div>
+      </div>
+    </>
+  );
+}
+
+function ErrorBanner({ message }: { message: string }) {
+  if (!message) return null;
+  return <p className="rounded-[14px] bg-[var(--ember-soft)] p-4 text-sm font-semibold leading-5 text-[var(--ember-600)]">{message}</p>;
+}
+
+function SuccessBanner({ message }: { message: string }) {
+  if (!message) return null;
+  return (
+    <p className="rounded-[14px] bg-[color-mix(in_srgb,var(--heat-1)_14%,var(--surface))] p-4 text-sm font-semibold leading-5 text-[#0f806d]">
+      {message}
+    </p>
+  );
+}
+
 export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string }) {
   const [activeProgram, setActiveProgram] = useState<'actions' | 'transparency' | 'tax'>('actions');
   const [actions, setActions] = useState<CivicAction[]>([]);
@@ -118,16 +228,24 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
   const [taxForm, setTaxForm] = useState(createEmptyTaxReceipt());
   const [editingTransparencyId, setEditingTransparencyId] = useState('');
   const [editingTaxId, setEditingTaxId] = useState('');
+  const [selectedActionId, setSelectedActionId] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const actionSheet = useSheet();
+  const transparencySheet = useSheet();
+  const taxSheet = useSheet();
 
-  async function loadAll() {
+  const selectedAction = actions.find((item) => item.id === selectedActionId) || null;
+  const editingTransparencyEntry = transparencyEntries.find((item) => item.id === editingTransparencyId) || null;
+  const editingTaxReceipt = taxReceipts.find((item) => item.id === editingTaxId) || null;
+
+  async function loadAll(nextActionFilter = actionFilter) {
     setIsLoading(true);
     setError('');
     const params = new URLSearchParams();
-    if (actionFilter.status !== 'ALL') params.set('status', actionFilter.status);
-    if (actionFilter.type !== 'ALL') params.set('type', actionFilter.type);
+    if (nextActionFilter.status !== 'ALL') params.set('status', nextActionFilter.status);
+    if (nextActionFilter.type !== 'ALL') params.set('type', nextActionFilter.type);
 
     const [actionsResponse, transparencyResponse, taxResponse] = await Promise.all([
       fetch(`/api/tenant/${tenantSlug}/civic-actions?${params.toString()}`),
@@ -157,6 +275,12 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
     loadAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function changeActionFilter(name: 'status' | 'type', value: string) {
+    const next = { ...actionFilter, [name]: value };
+    setActionFilter(next);
+    loadAll(next);
+  }
 
   async function updateAction(action: CivicAction, status: string) {
     setError('');
@@ -195,7 +319,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
       return;
     }
 
-    setSuccess(`Reward sent. Transaction: ${payload.data.rewardTransactionHash}`);
+    setSuccess(`Reward sent · ${shortHash(String(payload.data.rewardTransactionHash || ''))}`);
     await loadAll();
   }
 
@@ -222,6 +346,17 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
     });
   }
 
+  function openTransparencyCreate() {
+    setEditingTransparencyId('');
+    setTransparencyForm(createEmptyTransparency());
+    transparencySheet.open();
+  }
+
+  function openTransparencyEdit(entry: TransparencyEntry) {
+    editTransparency(entry);
+    transparencySheet.open();
+  }
+
   async function saveTransparency(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
@@ -241,6 +376,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
     setSuccess('Transparency entry saved.');
     setEditingTransparencyId('');
     setTransparencyForm(createEmptyTransparency());
+    transparencySheet.close();
     await loadAll();
   }
 
@@ -255,7 +391,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
       return;
     }
 
-    setSuccess(`Disbursement published on Stellar: ${payload.data.transactionHash}`);
+    setSuccess(`Disbursement published on Stellar · ${shortHash(String(payload.data.transactionHash || ''))}`);
     await loadAll();
   }
 
@@ -269,6 +405,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
     }
 
     setSuccess('Transparency entry archived.');
+    transparencySheet.close();
     await loadAll();
   }
 
@@ -290,6 +427,17 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
     });
   }
 
+  function openTaxCreate() {
+    setEditingTaxId('');
+    setTaxForm(createEmptyTaxReceipt());
+    taxSheet.open();
+  }
+
+  function openTaxEdit(receipt: TaxReceipt) {
+    editTax(receipt);
+    taxSheet.open();
+  }
+
   async function saveTaxReceipt(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError('');
@@ -309,6 +457,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
     setSuccess('Property tax receipt saved.');
     setEditingTaxId('');
     setTaxForm(createEmptyTaxReceipt());
+    taxSheet.close();
     await loadAll();
   }
 
@@ -322,167 +471,603 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
     }
 
     setSuccess('Property tax receipt voided.');
+    taxSheet.close();
     await loadAll();
   }
 
   const approvedActions = actions.filter((item) => item.status === 'APPROVED').length;
-  const rewardedActions = actions.filter((item) => item.status === 'REWARDED').length;
   const verifiedTransparency = transparencyEntries.filter((item) => item.transactionHash).length;
   const stellarTaxReceipts = taxReceipts.filter((item) => item.transactionHash).length;
 
   return (
-    <section className="grid gap-6">
-      <Card>
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <p className="section-eyebrow">Stellar civic programs</p>
-            <h2 className="mt-2 text-3xl font-extrabold tracking-[-0.04em] text-slate-950">Rewards, transparency, and verifiable receipts.</h2>
-            <p className="mt-2 max-w-4xl text-sm leading-7 text-slate-600">
-              Manage the StellarX expansion without turning the product into a generic crypto app. Each record remains tied to civic services, staff review, and public verification.
-            </p>
-          </div>
-          <button onClick={loadAll} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary">Refresh</button>
-        </div>
-        <div className="mt-6 grid gap-4 md:grid-cols-4">
-          <StatCard label="Submitted Actions" value={actions.length} />
-          <StatCard label="Approved Rewards" value={approvedActions} />
-          <StatCard label="Ledger Records" value={verifiedTransparency} />
-          <StatCard label="Tax Receipts" value={stellarTaxReceipts} />
-        </div>
-      </Card>
+    <section>
+      <div className="section-head !mt-0">
+        <h2>Civic programs</h2>
+        <button type="button" onClick={() => loadAll()} className="flex min-h-[44px] shrink-0 items-center gap-1.5 px-2 text-[13px] font-bold text-[var(--ember)]">
+          <FiRefreshCw aria-hidden="true" className="h-4 w-4" />
+          Refresh
+        </button>
+      </div>
 
-      <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_10px_24px_rgba(16,24,40,0.05)]">
-        {[
-          ['actions', 'Civic Rewards'],
-          ['transparency', 'Transparency Ledger'],
-          ['tax', 'Tax Receipts']
-        ].map(([key, label]) => (
-          <button key={key} onClick={() => setActiveProgram(key as any)} className={`rounded-2xl px-4 py-3 text-sm font-extrabold transition ${activeProgram === key ? 'btn-primary' : 'text-slate-600 hover:bg-blue-50 hover:text-[var(--brand)]'}`}>
+      <div className="stat-grid">
+        <StatCard label="Submitted actions" value={actions.length} />
+        <StatCard label="Approved rewards" value={approvedActions} />
+        <StatCard label="Ledger records" value={verifiedTransparency} />
+        <StatCard label="Tax receipts" value={stellarTaxReceipts} />
+      </div>
+
+      <div className="seg mt-4">
+        {(
+          [
+            ['actions', 'Rewards'],
+            ['transparency', 'Ledger'],
+            ['tax', 'Receipts']
+          ] as Array<['actions' | 'transparency' | 'tax', string]>
+        ).map(([key, label]) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setActiveProgram(key)}
+            className={activeProgram === key ? 'on' : ''}
+            aria-pressed={activeProgram === key}
+          >
             {label}
           </button>
         ))}
       </div>
 
-      {error ? <p className="rounded-2xl bg-rose-50 p-4 text-sm font-extrabold text-rose-700 ring-1 ring-rose-200">{error}</p> : null}
-      {success ? <p className="rounded-2xl bg-emerald-50 p-4 text-sm font-extrabold text-emerald-700 ring-1 ring-emerald-200">{success}</p> : null}
+      {error || success ? (
+        <div className="mt-4 grid gap-3">
+          <ErrorBanner message={error} />
+          <SuccessBanner message={success} />
+        </div>
+      ) : null}
 
       {activeProgram === 'actions' ? (
-        <section className="grid gap-4">
-          <Card>
-            <div className="grid gap-4 md:grid-cols-[1fr_1fr_auto] md:items-end">
-              <div>
-                <label className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Status</label>
-                <Select value={actionFilter.status} onChange={(event) => setActionFilter((current) => ({ ...current, status: event.target.value }))}>
-                  {actionStatuses.map((status) => <option key={status} value={status}>{nice(status)}</option>)}
-                </Select>
-              </div>
-              <div>
-                <label className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-500">Type</label>
-                <Select value={actionFilter.type} onChange={(event) => setActionFilter((current) => ({ ...current, type: event.target.value }))}>
-                  {actionTypes.map((type) => <option key={type} value={type}>{nice(type)}</option>)}
-                </Select>
-              </div>
-              <Button onClick={loadAll}>Apply</Button>
+        <div className="mt-4">
+          <div className="hscroll -mx-5">
+            {actionStatuses.map((status) => (
+              <button
+                key={status}
+                type="button"
+                onClick={() => changeActionFilter('status', status)}
+                className={`chip ${actionFilter.status === status ? 'on' : ''}`.trim()}
+              >
+                {nice(status)}
+              </button>
+            ))}
+          </div>
+          <div className="hscroll -mx-5 mt-2.5">
+            {actionTypes.map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => changeActionFilter('type', type)}
+                className={`chip ${actionFilter.type === type ? 'on' : ''}`.trim()}
+              >
+                {nice(type)}
+              </button>
+            ))}
+          </div>
+
+          {isLoading ? (
+            <div className="mt-4 grid gap-2.5">
+              <div className="skeleton-line w-3/4" />
+              <div className="skeleton-line" />
+              <div className="skeleton-line w-1/2" />
             </div>
-          </Card>
-          {isLoading ? <Card><p className="text-sm text-slate-500">Loading civic actions...</p></Card> : null}
-          {actions.map((action) => (
-            <Card key={action.id} className="card-hover">
-              <div className="grid gap-5 lg:grid-cols-[1fr_0.9fr]">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-extrabold text-blue-700 ring-1 ring-blue-200">{nice(action.type)}</span>
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-extrabold text-slate-700">{nice(action.status)}</span>
-                  </div>
-                  <h3 className="mt-3 text-xl font-extrabold text-slate-950">{action.title}</h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{action.description}</p>
-                  <p className="mt-3 text-sm font-bold text-slate-700">{action.participantName} · {action.locationText}</p>
-                  {action.rewardTransactionHash ? <p className="mt-4 break-all rounded-2xl bg-emerald-50 p-4 font-mono text-xs font-bold text-emerald-800 ring-1 ring-emerald-200">{action.rewardTransactionHash}</p> : null}
-                </div>
-                <div className="grid gap-3 rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100">
-                  <div className="grid gap-3 md:grid-cols-2">
-                    <Input value={action.rewardAmount} onChange={(event) => patchAction(action.id, 'rewardAmount', event.target.value)} placeholder="Reward amount" />
-                    <Input value={action.rewardAssetCode} onChange={(event) => patchAction(action.id, 'rewardAssetCode', event.target.value)} placeholder="Asset code" />
-                  </div>
-                  <Input value={action.rewardAssetIssuer || ''} onChange={(event) => patchAction(action.id, 'rewardAssetIssuer', event.target.value)} placeholder="Asset issuer, required for USDC/custom assets" />
-                  <Input value={action.rewardDestinationPublicKey || ''} onChange={(event) => patchAction(action.id, 'rewardDestinationPublicKey', event.target.value)} placeholder="Participant G... reward wallet" />
-                  <Textarea value={action.verificationNote || ''} onChange={(event) => patchAction(action.id, 'verificationNote', event.target.value)} placeholder="Review note" />
-                  <div className="flex flex-wrap gap-2">
-                    <button onClick={() => updateAction(action, 'APPROVED')} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-primary">Approve</button>
-                    <button onClick={() => updateAction(action, 'REJECTED')} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary">Reject</button>
-                    <button disabled={action.status !== 'APPROVED'} onClick={() => payReward(action)} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary disabled:opacity-50">Send reward</button>
-                  </div>
-                </div>
+          ) : null}
+
+          {!isLoading && actions.length === 0 ? (
+            <div className="empty">
+              <div className="eart">
+                <FiAward aria-hidden="true" className="h-9 w-9" />
               </div>
-            </Card>
-          ))}
-        </section>
+              <h3>No civic actions</h3>
+              <p>No actions match the current filters.</p>
+            </div>
+          ) : null}
+
+          <div className="mt-4">
+            {actions.map((action) => (
+              <button
+                key={action.id}
+                type="button"
+                onClick={() => {
+                  setSelectedActionId(action.id);
+                  actionSheet.open();
+                }}
+                className="notif w-full text-left"
+              >
+                <span className={programNic(action.status)}>
+                  <FiAward aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <span className="nbody">
+                  <span className="flex items-center justify-between gap-2">
+                    <b className="min-w-0 truncate">{action.title}</b>
+                    <span className={programPill(action.status)}>{nice(action.status)}</span>
+                  </span>
+                  <span className="mt-0.5 block truncate text-[13px] font-medium text-[var(--ink-2)]">
+                    {action.participantName} · {action.locationText}
+                  </span>
+                  <span className="nt block">
+                    {nice(action.type)} · {formatDate(action.createdAt)}
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
       ) : null}
 
       {activeProgram === 'transparency' ? (
-        <section className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-          <Card>
-            <p className="section-eyebrow">Transparency ledger</p>
-            <h3 className="mt-2 text-2xl font-extrabold text-slate-950">Create public record</h3>
-            <form onSubmit={saveTransparency} className="mt-5 grid gap-4">
-              <Input required value={transparencyForm.title} onChange={(event) => setTransparencyForm({ ...transparencyForm, title: event.target.value })} placeholder="Title" />
-              <Textarea required value={transparencyForm.description} onChange={(event) => setTransparencyForm({ ...transparencyForm, description: event.target.value })} placeholder="Description" />
-              <Select value={transparencyForm.entryType} onChange={(event) => setTransparencyForm({ ...transparencyForm, entryType: event.target.value })}>{entryTypes.map((type) => <option key={type} value={type}>{nice(type)}</option>)}</Select>
-              <Select value={transparencyForm.status} onChange={(event) => setTransparencyForm({ ...transparencyForm, status: event.target.value })}>{entryStatuses.map((status) => <option key={status} value={status}>{nice(status)}</option>)}</Select>
-              <Input value={transparencyForm.department} onChange={(event) => setTransparencyForm({ ...transparencyForm, department: event.target.value })} placeholder="Department" />
-              <Input value={transparencyForm.recipientName} onChange={(event) => setTransparencyForm({ ...transparencyForm, recipientName: event.target.value })} placeholder="Recipient name" />
-              <Input value={transparencyForm.recipientPublicKey} onChange={(event) => setTransparencyForm({ ...transparencyForm, recipientPublicKey: event.target.value })} placeholder="Recipient G... public key for Stellar disbursement" />
-              <div className="grid gap-3 md:grid-cols-2"><Input value={transparencyForm.amount} onChange={(event) => setTransparencyForm({ ...transparencyForm, amount: event.target.value })} placeholder="Amount" /><Input value={transparencyForm.assetCode} onChange={(event) => setTransparencyForm({ ...transparencyForm, assetCode: event.target.value })} placeholder="Asset code" /></div>
-              <Input value={transparencyForm.assetIssuer} onChange={(event) => setTransparencyForm({ ...transparencyForm, assetIssuer: event.target.value })} placeholder="Asset issuer for non-XLM assets" />
-              <Input value={transparencyForm.transactionHash} onChange={(event) => setTransparencyForm({ ...transparencyForm, transactionHash: event.target.value })} placeholder="Existing transaction hash, optional" />
-              <Button>{editingTransparencyId ? 'Save Changes' : 'Create Record'}</Button>
-            </form>
-          </Card>
-          <div className="grid gap-4">
+        <div className="mt-4">
+          <Button type="button" onClick={openTransparencyCreate} className="btn-block">
+            <FiPlus aria-hidden="true" className="h-4 w-4" />
+            Create record
+          </Button>
+
+          {isLoading ? (
+            <div className="mt-4 grid gap-2.5">
+              <div className="skeleton-line w-3/4" />
+              <div className="skeleton-line" />
+              <div className="skeleton-line w-1/2" />
+            </div>
+          ) : null}
+
+          {!isLoading && transparencyEntries.length === 0 ? (
+            <div className="empty">
+              <div className="eart">
+                <FiHash aria-hidden="true" className="h-9 w-9" />
+              </div>
+              <h3>No ledger records</h3>
+              <p>Create the first public transparency record.</p>
+            </div>
+          ) : null}
+
+          <div className="mt-4">
             {transparencyEntries.map((entry) => (
-              <Card key={entry.id} className="card-hover">
-                <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-400">{entry.referenceCode}</p><h3 className="mt-2 text-xl font-extrabold text-slate-950">{entry.title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{entry.description}</p></div><span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-extrabold text-blue-700">{nice(entry.status)}</span></div>
-                <div className="mt-4 grid gap-3 md:grid-cols-3"><Mini label="Amount" value={`${entry.amount} ${entry.assetCode}`} /><Mini label="Recipient" value={entry.recipientName || 'Public record'} /><Mini label="Date" value={formatDate(entry.occurredAt)} /></div>
-                {entry.transactionHash ? <p className="mt-4 break-all rounded-2xl bg-slate-50 p-4 font-mono text-xs font-bold text-slate-600 ring-1 ring-slate-100">{entry.transactionHash}</p> : null}
-                <div className="mt-4 flex flex-wrap gap-2"><button onClick={() => editTransparency(entry)} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-primary">Edit</button><button disabled={Boolean(entry.transactionHash)} onClick={() => sendTransparencyDisbursement(entry)} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary disabled:opacity-50">Send Stellar disbursement</button><button onClick={() => archiveTransparency(entry)} className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-extrabold text-slate-700">Archive</button></div>
-              </Card>
+              <button key={entry.id} type="button" onClick={() => openTransparencyEdit(entry)} className="notif w-full text-left">
+                <span className={programNic(entry.status)}>
+                  <FiHash aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <span className="nbody">
+                  <span className="flex items-center justify-between gap-2">
+                    <b className="min-w-0 truncate">{entry.title}</b>
+                    <span className={programPill(entry.status)}>{nice(entry.status)}</span>
+                  </span>
+                  <span className="mt-0.5 block truncate text-[13px] font-medium text-[var(--ink-2)]">{entry.referenceCode}</span>
+                  <span className="nt block">
+                    {entry.amount} {entry.assetCode} · {formatDate(entry.occurredAt)}
+                  </span>
+                </span>
+              </button>
             ))}
           </div>
-        </section>
+        </div>
       ) : null}
 
       {activeProgram === 'tax' ? (
-        <section className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-          <Card>
-            <p className="section-eyebrow">Tax receipts</p>
-            <h3 className="mt-2 text-2xl font-extrabold text-slate-950">Issue receipt record</h3>
-            <form onSubmit={saveTaxReceipt} className="mt-5 grid gap-4">
-              <Input required value={taxForm.taxpayerName} onChange={(event) => setTaxForm({ ...taxForm, taxpayerName: event.target.value })} placeholder="Taxpayer name" />
-              <Input value={taxForm.taxpayerEmail} onChange={(event) => setTaxForm({ ...taxForm, taxpayerEmail: event.target.value })} placeholder="Taxpayer email" />
-              <Input required value={taxForm.propertyIndexNumber} onChange={(event) => setTaxForm({ ...taxForm, propertyIndexNumber: event.target.value })} placeholder="Property index number" />
-              <Textarea required value={taxForm.propertyAddress} onChange={(event) => setTaxForm({ ...taxForm, propertyAddress: event.target.value })} placeholder="Property address" />
-              <div className="grid gap-3 md:grid-cols-2"><Input value={taxForm.taxYear} onChange={(event) => setTaxForm({ ...taxForm, taxYear: event.target.value })} placeholder="Tax year" /><Input value={taxForm.amount} onChange={(event) => setTaxForm({ ...taxForm, amount: event.target.value })} placeholder="Amount" /></div>
-              <div className="grid gap-3 md:grid-cols-2"><Input value={taxForm.assetCode} onChange={(event) => setTaxForm({ ...taxForm, assetCode: event.target.value })} placeholder="Asset code" /><Input value={taxForm.ledger} onChange={(event) => setTaxForm({ ...taxForm, ledger: event.target.value })} placeholder="Ledger number" /></div>
-              <Input value={taxForm.transactionHash} onChange={(event) => setTaxForm({ ...taxForm, transactionHash: event.target.value })} placeholder="Verified Stellar transaction hash" />
-              <Button>{editingTaxId ? 'Save Changes' : 'Issue Receipt'}</Button>
-            </form>
-          </Card>
-          <div className="grid gap-4">
+        <div className="mt-4">
+          <Button type="button" onClick={openTaxCreate} className="btn-block">
+            <FiPlus aria-hidden="true" className="h-4 w-4" />
+            Issue receipt
+          </Button>
+
+          {isLoading ? (
+            <div className="mt-4 grid gap-2.5">
+              <div className="skeleton-line w-3/4" />
+              <div className="skeleton-line" />
+              <div className="skeleton-line w-1/2" />
+            </div>
+          ) : null}
+
+          {!isLoading && taxReceipts.length === 0 ? (
+            <div className="empty">
+              <div className="eart">
+                <FiFileText aria-hidden="true" className="h-9 w-9" />
+              </div>
+              <h3>No tax receipts</h3>
+              <p>Issue the first property tax receipt record.</p>
+            </div>
+          ) : null}
+
+          <div className="mt-4">
             {taxReceipts.map((receipt) => (
-              <Card key={receipt.id} className="card-hover">
-                <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-400">{receipt.referenceCode}</p><h3 className="mt-2 text-xl font-extrabold text-slate-950">{receipt.taxpayerName}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{receipt.propertyAddress}</p></div><span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-extrabold text-emerald-700">{nice(receipt.status)}</span></div>
-                <div className="mt-4 grid gap-3 md:grid-cols-3"><Mini label="Property" value={receipt.propertyIndexNumber} /><Mini label="Year" value={String(receipt.taxYear)} /><Mini label="Amount" value={`${receipt.amount} ${receipt.assetCode}`} /></div>
-                {receipt.transactionHash ? <p className="mt-4 break-all rounded-2xl bg-slate-50 p-4 font-mono text-xs font-bold text-slate-600 ring-1 ring-slate-100">{receipt.transactionHash}</p> : null}
-                <div className="mt-4 flex flex-wrap gap-2"><button onClick={() => editTax(receipt)} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-primary">Edit</button><a href={`/${tenantSlug}/tax-receipts/${receipt.referenceCode}`} className="rounded-xl px-4 py-2 text-sm font-extrabold btn-secondary">Public receipt</a><button onClick={() => voidTaxReceipt(receipt)} className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-extrabold text-slate-700">Void</button></div>
-              </Card>
+              <button key={receipt.id} type="button" onClick={() => openTaxEdit(receipt)} className="notif w-full text-left">
+                <span className={programNic(receipt.status)}>
+                  <FiFileText aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <span className="nbody">
+                  <span className="flex items-center justify-between gap-2">
+                    <b className="min-w-0 truncate">{receipt.taxpayerName}</b>
+                    <span className={programPill(receipt.status)}>{nice(receipt.status)}</span>
+                  </span>
+                  <span className="mt-0.5 block truncate text-[13px] font-medium text-[var(--ink-2)]">{receipt.propertyAddress}</span>
+                  <span className="nt block">
+                    PIN {receipt.propertyIndexNumber} · {receipt.taxYear} · {receipt.amount} {receipt.assetCode}
+                  </span>
+                </span>
+              </button>
             ))}
           </div>
-        </section>
+        </div>
+      ) : null}
+
+      {actionSheet.isOpen && selectedAction ? (
+        <BottomSheet
+          title={selectedAction.title}
+          sub={`${nice(selectedAction.type)} · ${selectedAction.participantName}`}
+          anim={actionSheet.anim}
+          onClose={actionSheet.close}
+        >
+          <span className={programPill(selectedAction.status)}>{nice(selectedAction.status)}</span>
+
+          <p className="mt-3 text-sm font-medium leading-6 text-[var(--ink-2)]">{selectedAction.description}</p>
+          <p className="mt-2 break-words text-[13px] font-semibold text-[var(--muted)]">
+            {selectedAction.participantName}
+            {selectedAction.participantEmail ? ` · ${selectedAction.participantEmail}` : ''} · {selectedAction.locationText}
+          </p>
+
+          {error || success ? (
+            <div className="mt-4 grid gap-3">
+              <ErrorBanner message={error} />
+              <SuccessBanner message={success} />
+            </div>
+          ) : null}
+
+          {selectedAction.rewardTransactionHash ? (
+            <div className="mt-4 rounded-[16px] bg-[color-mix(in_srgb,var(--heat-1)_14%,var(--surface))] p-4">
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#0f806d]">Reward transaction</p>
+              <p className="mt-2 break-all font-mono text-xs font-semibold leading-5 text-[#0f806d]">{selectedAction.rewardTransactionHash}</p>
+            </div>
+          ) : null}
+
+          <div className="mt-5">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="field">
+                <label className="input-label" htmlFor="action-reward-amount">Reward amount</label>
+                <Input
+                  id="action-reward-amount"
+                  value={selectedAction.rewardAmount}
+                  onChange={(event) => patchAction(selectedAction.id, 'rewardAmount', event.target.value)}
+                />
+              </div>
+              <div className="field">
+                <label className="input-label" htmlFor="action-reward-asset">Asset code</label>
+                <Input
+                  id="action-reward-asset"
+                  value={selectedAction.rewardAssetCode}
+                  onChange={(event) => patchAction(selectedAction.id, 'rewardAssetCode', event.target.value)}
+                />
+              </div>
+            </div>
+            <div className="field">
+              <label className="input-label" htmlFor="action-reward-issuer">Asset issuer</label>
+              <Input
+                id="action-reward-issuer"
+                value={selectedAction.rewardAssetIssuer || ''}
+                onChange={(event) => patchAction(selectedAction.id, 'rewardAssetIssuer', event.target.value)}
+                placeholder="Required for non-XLM assets"
+              />
+              <p className="mt-2 text-xs font-medium leading-4 text-[var(--muted)]">Needed for USDC or other custom assets.</p>
+            </div>
+            <div className="field">
+              <label className="input-label" htmlFor="action-reward-wallet">Reward wallet</label>
+              <Input
+                id="action-reward-wallet"
+                value={selectedAction.rewardDestinationPublicKey || ''}
+                onChange={(event) => patchAction(selectedAction.id, 'rewardDestinationPublicKey', event.target.value)}
+                placeholder="Participant G... address"
+              />
+            </div>
+            <div className="field">
+              <label className="input-label" htmlFor="action-review-note">Verification note</label>
+              <Textarea
+                id="action-review-note"
+                value={selectedAction.verificationNote || ''}
+                onChange={(event) => patchAction(selectedAction.id, 'verificationNote', event.target.value)}
+                placeholder="Review note"
+              />
+            </div>
+          </div>
+
+          <div className="grid gap-2.5 pb-2">
+            <Button type="button" onClick={() => updateAction(selectedAction, 'APPROVED')}>
+              Approve
+            </Button>
+            <button type="button" onClick={() => updateAction(selectedAction, 'REJECTED')} className="app-btn btn-outline text-[var(--ember-600)]">
+              Reject
+            </button>
+            <button
+              type="button"
+              disabled={selectedAction.status !== 'APPROVED'}
+              onClick={() => payReward(selectedAction)}
+              className="app-btn btn-accent disabled:opacity-50"
+            >
+              Send reward
+            </button>
+          </div>
+        </BottomSheet>
+      ) : null}
+
+      {transparencySheet.isOpen ? (
+        <BottomSheet
+          title={editingTransparencyId ? 'Edit record' : 'Create record'}
+          sub="Transparency ledger"
+          anim={transparencySheet.anim}
+          onClose={transparencySheet.close}
+        >
+          {error || success ? (
+            <div className="mb-4 grid gap-3">
+              <ErrorBanner message={error} />
+              <SuccessBanner message={success} />
+            </div>
+          ) : null}
+
+          <form onSubmit={saveTransparency}>
+            <div className="field">
+              <label className="input-label" htmlFor="ledger-title">Title</label>
+              <Input
+                id="ledger-title"
+                required
+                value={transparencyForm.title}
+                onChange={(event) => setTransparencyForm({ ...transparencyForm, title: event.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label className="input-label" htmlFor="ledger-description">Description</label>
+              <Textarea
+                id="ledger-description"
+                required
+                value={transparencyForm.description}
+                onChange={(event) => setTransparencyForm({ ...transparencyForm, description: event.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label className="input-label" htmlFor="ledger-entry-type">Entry type</label>
+              <Select
+                id="ledger-entry-type"
+                value={transparencyForm.entryType}
+                onChange={(event) => setTransparencyForm({ ...transparencyForm, entryType: event.target.value })}
+              >
+                {entryTypes.map((type) => (
+                  <option key={type} value={type}>{nice(type)}</option>
+                ))}
+              </Select>
+            </div>
+            <div className="field">
+              <label className="input-label" htmlFor="ledger-status">Status</label>
+              <Select
+                id="ledger-status"
+                value={transparencyForm.status}
+                onChange={(event) => setTransparencyForm({ ...transparencyForm, status: event.target.value })}
+              >
+                {entryStatuses.map((status) => (
+                  <option key={status} value={status}>{nice(status)}</option>
+                ))}
+              </Select>
+            </div>
+            <div className="field">
+              <label className="input-label" htmlFor="ledger-department">Department</label>
+              <Input
+                id="ledger-department"
+                value={transparencyForm.department}
+                onChange={(event) => setTransparencyForm({ ...transparencyForm, department: event.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label className="input-label" htmlFor="ledger-recipient">Recipient name</label>
+              <Input
+                id="ledger-recipient"
+                value={transparencyForm.recipientName}
+                onChange={(event) => setTransparencyForm({ ...transparencyForm, recipientName: event.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label className="input-label" htmlFor="ledger-recipient-key">Recipient public key</label>
+              <Input
+                id="ledger-recipient-key"
+                value={transparencyForm.recipientPublicKey}
+                onChange={(event) => setTransparencyForm({ ...transparencyForm, recipientPublicKey: event.target.value })}
+                placeholder="G... address"
+              />
+              <p className="mt-2 text-xs font-medium leading-4 text-[var(--muted)]">Used for the Stellar disbursement.</p>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="field">
+                <label className="input-label" htmlFor="ledger-amount">Amount</label>
+                <Input
+                  id="ledger-amount"
+                  value={transparencyForm.amount}
+                  onChange={(event) => setTransparencyForm({ ...transparencyForm, amount: event.target.value })}
+                />
+              </div>
+              <div className="field">
+                <label className="input-label" htmlFor="ledger-asset">Asset code</label>
+                <Input
+                  id="ledger-asset"
+                  value={transparencyForm.assetCode}
+                  onChange={(event) => setTransparencyForm({ ...transparencyForm, assetCode: event.target.value })}
+                />
+              </div>
+            </div>
+            <div className="field">
+              <label className="input-label" htmlFor="ledger-issuer">Asset issuer</label>
+              <Input
+                id="ledger-issuer"
+                value={transparencyForm.assetIssuer}
+                onChange={(event) => setTransparencyForm({ ...transparencyForm, assetIssuer: event.target.value })}
+                placeholder="For non-XLM assets"
+              />
+            </div>
+            <div className="field">
+              <label className="input-label" htmlFor="ledger-hash">Transaction hash</label>
+              <Input
+                id="ledger-hash"
+                value={transparencyForm.transactionHash}
+                onChange={(event) => setTransparencyForm({ ...transparencyForm, transactionHash: event.target.value })}
+                placeholder="Optional existing hash"
+              />
+            </div>
+            <div className="field">
+              <label className="input-label" htmlFor="ledger-date">Occurred on</label>
+              <Input
+                id="ledger-date"
+                type="date"
+                value={transparencyForm.occurredAt}
+                onChange={(event) => setTransparencyForm({ ...transparencyForm, occurredAt: event.target.value })}
+              />
+            </div>
+
+            {editingTransparencyEntry?.transactionHash ? (
+              <div className="mb-4 rounded-[16px] bg-[var(--surface-2)] p-4">
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[var(--muted)]">On-chain transaction</p>
+                <p className="mt-2 break-all font-mono text-xs font-semibold leading-5 text-[var(--ink-2)]">{editingTransparencyEntry.transactionHash}</p>
+              </div>
+            ) : null}
+
+            <div className="grid gap-2.5 pb-2">
+              <Button type="submit">{editingTransparencyId ? 'Save changes' : 'Create record'}</Button>
+              {editingTransparencyId && editingTransparencyEntry ? (
+                <>
+                  <button
+                    type="button"
+                    disabled={Boolean(editingTransparencyEntry.transactionHash)}
+                    onClick={() => sendTransparencyDisbursement(editingTransparencyEntry)}
+                    className="app-btn btn-accent disabled:opacity-50"
+                  >
+                    Send Stellar disbursement
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => archiveTransparency(editingTransparencyEntry)}
+                    className="app-btn btn-outline text-[var(--ember-600)]"
+                  >
+                    Archive
+                  </button>
+                </>
+              ) : null}
+            </div>
+          </form>
+        </BottomSheet>
+      ) : null}
+
+      {taxSheet.isOpen ? (
+        <BottomSheet
+          title={editingTaxId ? 'Edit receipt' : 'Issue receipt'}
+          sub="Property tax receipts"
+          anim={taxSheet.anim}
+          onClose={taxSheet.close}
+        >
+          {error || success ? (
+            <div className="mb-4 grid gap-3">
+              <ErrorBanner message={error} />
+              <SuccessBanner message={success} />
+            </div>
+          ) : null}
+
+          <form onSubmit={saveTaxReceipt}>
+            <div className="field">
+              <label className="input-label" htmlFor="tax-name">Taxpayer name</label>
+              <Input
+                id="tax-name"
+                required
+                value={taxForm.taxpayerName}
+                onChange={(event) => setTaxForm({ ...taxForm, taxpayerName: event.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label className="input-label" htmlFor="tax-email">Taxpayer email</label>
+              <Input
+                id="tax-email"
+                value={taxForm.taxpayerEmail}
+                onChange={(event) => setTaxForm({ ...taxForm, taxpayerEmail: event.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label className="input-label" htmlFor="tax-pin">Property index number</label>
+              <Input
+                id="tax-pin"
+                required
+                value={taxForm.propertyIndexNumber}
+                onChange={(event) => setTaxForm({ ...taxForm, propertyIndexNumber: event.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label className="input-label" htmlFor="tax-address">Property address</label>
+              <Textarea
+                id="tax-address"
+                required
+                value={taxForm.propertyAddress}
+                onChange={(event) => setTaxForm({ ...taxForm, propertyAddress: event.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="field">
+                <label className="input-label" htmlFor="tax-year">Tax year</label>
+                <Input
+                  id="tax-year"
+                  value={taxForm.taxYear}
+                  onChange={(event) => setTaxForm({ ...taxForm, taxYear: event.target.value })}
+                />
+              </div>
+              <div className="field">
+                <label className="input-label" htmlFor="tax-amount">Amount</label>
+                <Input
+                  id="tax-amount"
+                  value={taxForm.amount}
+                  onChange={(event) => setTaxForm({ ...taxForm, amount: event.target.value })}
+                />
+              </div>
+            </div>
+            <div className="field">
+              <label className="input-label" htmlFor="tax-asset">Asset code</label>
+              <Input
+                id="tax-asset"
+                value={taxForm.assetCode}
+                onChange={(event) => setTaxForm({ ...taxForm, assetCode: event.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label className="input-label" htmlFor="tax-ledger">Ledger number</label>
+              <Input
+                id="tax-ledger"
+                value={taxForm.ledger}
+                onChange={(event) => setTaxForm({ ...taxForm, ledger: event.target.value })}
+              />
+            </div>
+            <div className="field">
+              <label className="input-label" htmlFor="tax-hash">Transaction hash</label>
+              <Input
+                id="tax-hash"
+                value={taxForm.transactionHash}
+                onChange={(event) => setTaxForm({ ...taxForm, transactionHash: event.target.value })}
+                placeholder="Verified Stellar hash"
+              />
+              <p className="mt-2 text-xs font-medium leading-4 text-[var(--muted)]">Links this receipt to an on-chain payment.</p>
+            </div>
+
+            <div className="grid gap-2.5 pb-2">
+              <Button type="submit">{editingTaxId ? 'Save changes' : 'Issue receipt'}</Button>
+              {editingTaxId && editingTaxReceipt ? (
+                <>
+                  <a href={`/${tenantSlug}/tax-receipts/${editingTaxReceipt.referenceCode}`} className="app-btn btn-outline">
+                    Public receipt
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => voidTaxReceipt(editingTaxReceipt)}
+                    className="app-btn btn-outline text-[var(--ember-600)]"
+                  >
+                    Void
+                  </button>
+                </>
+              ) : null}
+            </div>
+          </form>
+        </BottomSheet>
       ) : null}
     </section>
   );
-}
-
-function Mini({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-2xl bg-slate-50 p-4 ring-1 ring-slate-100"><p className="text-xs font-extrabold uppercase tracking-[0.14em] text-slate-400">{label}</p><p className="mt-1 font-extrabold text-slate-950">{value}</p></div>;
 }

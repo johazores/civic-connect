@@ -544,6 +544,7 @@ h3,
 .app-info-card,
 .dashboard-card,
 .admin-panel {
+  min-width: 0;
   border: 1px solid color-mix(in srgb, var(--line) 96%, transparent);
   border-radius: var(--radius);
   background: var(--surface);
@@ -555,6 +556,15 @@ h3,
 .app-info-card {
   display: block;
   padding: 16px;
+}
+
+/* Default card padding lives in the components layer so Tailwind p-* utilities
+   (and the <Card> component's conditional padding) always win over it. This
+   makes raw `className="card"` elements padded without breaking p-0/p-6 callers. */
+@layer components {
+  .card {
+    padding: 20px;
+  }
 }
 
 .card.p-0,
