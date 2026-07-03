@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
-import { FiExternalLink } from 'react-icons/fi';
 import { PublicShell } from '@/components/layout/public-shell';
+import { StellarProof } from '@/components/stellar/stellar-proof';
 import { Card } from '@/components/ui/card';
 import { formatDate, formatStatus } from '@/lib/format';
 import { getPaymentIntentByReference } from '@/services/payment-service';
@@ -21,8 +21,6 @@ export default async function ReceiptPage({ params }: { params: Promise<{ tenant
   }
 
   const isVerified = payment.status === 'VERIFIED';
-  const explorerNetwork = String(payment.tenant.stellarNetwork || 'TESTNET').toUpperCase() === 'PUBLIC' ? 'public' : 'testnet';
-  const explorerUrl = payment.transactionHash ? `https://stellar.expert/explorer/${explorerNetwork}/tx/${payment.transactionHash}` : null;
 
   return (
     <PublicShell tenant={tenant} title="Receipt" subtitle={payment.referenceCode} backHref={`/${tenant.slug}/payments`}>
@@ -68,22 +66,14 @@ export default async function ReceiptPage({ params }: { params: Promise<{ tenant
               <b className="mt-0.5 break-all font-mono text-[13px]">{payment.memo}</b>
             </span>
           </div>
-          <div className="menu-item">
-            <span className="mi-tx">
-              <span className="!mt-0 text-[11px] font-extrabold uppercase tracking-[0.12em]">Transaction hash</span>
-              <b className="mt-0.5 break-all font-mono text-xs">{payment.transactionHash || 'Pending verification'}</b>
-              {explorerUrl ? (
-                <a
-                  href={explorerUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-1.5 inline-flex items-center gap-1.5 text-[13px] font-bold text-[var(--ember)]"
-                >
-                  View on explorer <FiExternalLink aria-hidden="true" className="h-4 w-4" />
-                </a>
-              ) : null}
-            </span>
-          </div>
+        </div>
+
+        <div className="mt-4">
+          <StellarProof
+            transactionHash={payment.transactionHash}
+            ledger={payment.ledger}
+            network={payment.tenant.stellarNetwork}
+          />
         </div>
 
         <div className="stat-grid">

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { FiCheck, FiCheckCircle, FiClipboard, FiCopy, FiCreditCard, FiSearch } from 'react-icons/fi';
+import { StellarProof } from '@/components/stellar/stellar-proof';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -154,6 +155,13 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
           <p className="mt-1 text-[13px] font-medium leading-5 text-[#0f806d]">
             Transaction hash and ledger data are permanently stored for this receipt.
           </p>
+          <div className="mt-4">
+            <StellarProof
+              transactionHash={payment.transactionHash}
+              ledger={payment.ledger}
+              network="TESTNET"
+            />
+          </div>
           <div className="mt-4 grid">
             <a href={`/${tenantSlug}/receipts/${payment.referenceCode}`} className="app-btn btn-primary">
               <FiCheckCircle aria-hidden="true" className="h-4 w-4" /> View public receipt

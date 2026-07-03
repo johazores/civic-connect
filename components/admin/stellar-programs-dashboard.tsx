@@ -2,12 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
-import { FiAward, FiFileText, FiHash, FiPlus, FiRefreshCw, FiX } from 'react-icons/fi';
+import { FiAward, FiExternalLink, FiFileText, FiHash, FiPlus, FiRefreshCw, FiX } from 'react-icons/fi';
 import { Button } from '@/components/ui/button';
 import { Input, Textarea } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { StatCard } from '@/components/ui/stat-card';
 import { formatDate } from '@/lib/format';
+import { stellarExpertTxUrl } from '@/lib/stellar/explorer';
+
+type PayoutMethod = 'DIRECT' | 'CLAIMABLE';
 
 type CivicAction = {
   id: string;
@@ -26,6 +29,9 @@ type CivicAction = {
   verificationNote: string | null;
   rewardTransactionHash: string | null;
   rewardPaidAt: string | null;
+  proofDigest: string | null;
+  payoutMethod: PayoutMethod;
+  rewardClaimableBalanceId: string | null;
   createdAt: string;
 };
 
@@ -229,6 +235,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
   const [editingTransparencyId, setEditingTransparencyId] = useState('');
   const [editingTaxId, setEditingTaxId] = useState('');
   const [selectedActionId, setSelectedActionId] = useState('');
+  const [payoutMethod, setPayoutMethod] = useState<PayoutMethod>('DIRECT');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -294,7 +301,8 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
         rewardAmount: action.rewardAmount,
         rewardAssetCode: action.rewardAssetCode,
         rewardAssetIssuer: action.rewardAssetIssuer || '',
-        rewardDestinationPublicKey: action.rewardDestinationPublicKey || ''
+        rewardDestinationPublicKey: action.rewardDestinationPublicKey || '',
+        payoutMethod
       })
     });
     const payload = await response.json();
@@ -575,6 +583,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
                 type="button"
                 onClick={() => {
                   setSelectedActionId(action.id);
+                  setPayoutMethod(action.payoutMethod === 'CLAIMABLE' ? 'CLAIMABLE' : 'DIRECT');
                   actionSheet.open();
                 }}
                 className="notif w-full text-left"
@@ -716,10 +725,40 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
             </div>
           ) : null}
 
-          {selectedAction.rewardTransactionHash ? (
+          {selectedAction.rewardTransactionHash || selectedAction.rewardClaimableBalanceId || selectedAction.proofDigest ? (
             <div className="mt-4 rounded-[16px] bg-[color-mix(in_srgb,var(--heat-1)_14%,var(--surface))] p-4">
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#0f806d]">Reward transaction</p>
-              <p className="mt-2 break-all font-mono text-xs font-semibold leading-5 text-[#0f806d]">{selectedAction.rewardTransactionHash}</p>
+              {selectedAction.rewardTransactionHash ? (
+                <div className="min-w-0">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#0f806d]">Reward transaction</p>
+                  <p className="mt-2 break-all font-mono text-xs font-semibold leading-5 text-[#0f806d]">{selectedAction.rewardTransactionHash}</p>
+                </div>
+              ) : null}
+
+              {selectedAction.rewardClaimableBalanceId ? (
+                <div className="mt-3 min-w-0">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#0f806d]">Claimable balance ID</p>
+                  <p className="mt-2 break-all font-mono text-xs font-semibold leading-5 text-[#0f806d]">{selectedAction.rewardClaimableBalanceId}</p>
+                </div>
+              ) : null}
+
+              {selectedAction.proofDigest ? (
+                <div className="mt-3 min-w-0">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#0f806d]">Proof digest</p>
+                  <p className="mt-2 break-all font-mono text-xs font-semibold leading-5 text-[#0f806d]">{selectedAction.proofDigest}</p>
+                </div>
+              ) : null}
+
+              {stellarExpertTxUrl(selectedAction.rewardTransactionHash, 'TESTNET') ? (
+                <a
+                  href={stellarExpertTxUrl(selectedAction.rewardTransactionHash, 'TESTNET') || undefined}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="app-btn btn-outline btn-compact mt-3"
+                >
+                  <FiExternalLink aria-hidden="true" className="h-4 w-4" />
+                  View on Stellar Expert
+                </a>
+              ) : null}
             </div>
           ) : null}
 
@@ -760,6 +799,30 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
                 onChange={(event) => patchAction(selectedAction.id, 'rewardDestinationPublicKey', event.target.value)}
                 placeholder="Participant G... address"
               />
+            </div>
+            <div className="field">
+              <span className="input-label">Payout method</span>
+              <div className="seg mt-1">
+                {(
+                  [
+                    ['DIRECT', 'Direct payment'],
+                    ['CLAIMABLE', 'Claimable balance']
+                  ] as Array<[PayoutMethod, string]>
+                ).map(([key, label]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setPayoutMethod(key)}
+                    className={payoutMethod === key ? 'on' : ''}
+                    aria-pressed={payoutMethod === key}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <p className="mt-2 text-xs font-medium leading-4 text-[var(--muted)]">
+                Reward waits on-chain until the citizen claims it — good when they don&apos;t have a wallet yet.
+              </p>
             </div>
             <div className="field">
               <label className="input-label" htmlFor="action-review-note">Verification note</label>

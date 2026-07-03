@@ -258,6 +258,21 @@ Avoid saying:
 2. Add sponsored-reserve onboarding prototype.
 3. Add Soroban proof registry only if time allows.
 
+## Implemented in the demo-readiness pass (July 2026)
+
+The highest-ranked items from the matrix above are now built:
+
+1. **Unified Civic Ledger Explorer** (Rank 1) — `/[tenant]/ledger` + public API `GET /api/tenant/[tenantSlug]/ledger`. Aggregates verified service payments, civic/cleanup rewards, public disbursements, and tax receipts into one page with impact metrics (records, on-chain count, XLM moved) and a "Verify on Stellar Expert" external link per record. Linked from the app menu and the transparency page.
+2. **On-chain proof-digest anchoring** (Rank 2) — every reward payout and public disbursement now anchors a SHA-256 proof digest of the record's canonical fields **on the ledger as a 32-byte MEMO_HASH** (the Stellar-native way to bind off-chain proof to a transaction). Digests are stored on civic actions, transparency entries, and tax receipts (`proofDigest` column) and shown in the UI so anyone can recompute and compare. See `lib/stellar/proof.ts` and `computeProofDigest`.
+3. **Claimable-balance rewards** (novelty primitive) — `payoutMethod = CLAIMABLE` issues a civic reward as a Stellar claimable balance so it is committed on-chain immediately and a citizen can claim it later from their own wallet, even before funding an account. See `submitClaimableBalanceReward` and `rewardClaimableBalanceId`.
+4. **Guided wallet onboarding** (Rank 6 lite) — `/[tenant]/wallet` explains public vs secret keys, generates a practice Testnet keypair, and funds it via Friendbot, with trustline-readiness helpers (`accountHasTrustline`).
+5. **Consistent "Verified on Stellar" proof card** — `components/stellar/stellar-proof.tsx` reused across payment receipts, checkout, tax receipts, transparency, and the admin rewards view (hash, ledger, proof digest, claimable-balance id, explorer link).
+6. **Demo reliability** — `/api/health` keep-warm endpoint plus a client heartbeat (`components/layout/keep-warm.tsx`) so the serverless Postgres connection stays warm during a live demo.
+
+Explorer/link helpers live in `lib/stellar/explorer.ts` (`stellarExpertTxUrl`, `stellarExpertAccountUrl`, `stellarExpertClaimableBalanceUrl`, `horizonTxUrl`).
+
+Still open (roadmap): multi-sig treasury approval, sponsored-reserve account creation, muxed accounts, and an optional Soroban proof registry.
+
 ## Final Verdict
 
 The project is now much closer to StellarX alignment than the original civic SaaS. The strongest path is not adding random blockchain features. The strongest path is making the Stellar-backed civic trust layer impossible to miss:

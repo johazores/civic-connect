@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import {
   FiAward,
@@ -222,6 +223,12 @@ export function CivicActionForm({ tenantSlug }: { tenantSlug: string }) {
             />
             <p className="mt-2 text-xs font-semibold leading-5 text-[var(--muted)]">
               This is where the reward is sent after staff approval. The app never asks for your secret key.
+            </p>
+            <p className="mt-2 text-xs font-semibold leading-5 text-[var(--muted)]">
+              Don&apos;t have a wallet?{' '}
+              <Link href={`/${tenantSlug}/wallet`} className="font-bold text-[var(--navy)] underline">
+                Set one up
+              </Link>
             </p>
           </div>
 

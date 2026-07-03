@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
 import { FiArrowLeft, FiUser } from 'react-icons/fi';
 import { MobileMenu, Tabbar, type NavGroup, type NavItem } from '@/components/layout/mobile-menu';
+import { KeepWarm } from '@/components/layout/keep-warm';
 
 function initials(value: string) {
   return (
@@ -90,6 +91,7 @@ export function PublicShell({
 
   return (
     <div className="civic-device-shell">
+      <KeepWarm />
       <div
         className="civic-app-frame"
         style={{

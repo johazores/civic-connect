@@ -1,6 +1,8 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { FiFileText } from 'react-icons/fi';
+import { FiFileText, FiArrowRight } from 'react-icons/fi';
 import { PublicShell } from '@/components/layout/public-shell';
+import { StellarProof } from '@/components/stellar/stellar-proof';
 import { Card } from '@/components/ui/card';
 import { StatCard } from '@/components/ui/stat-card';
 import { formatDate } from '@/lib/format';
@@ -22,6 +24,11 @@ export default async function TransparencyPage({ params }: { params: Promise<{ t
   return (
     <PublicShell tenant={tenant} title="Transparency" subtitle="Public spending, ledger-verified" backHref={`/${tenant.slug}`}>
       <main className="page-section pb-6">
+        <Link href={`/${tenant.slug}/ledger`} className="app-btn btn-primary mb-4 w-full">
+          View the full civic ledger
+          <FiArrowRight aria-hidden="true" className="h-4 w-4" />
+        </Link>
+
         <div className="stat-grid">
           <StatCard label="Published records" value={entries.length} />
           <StatCard label="Stellar verified" value={verified} />
@@ -71,18 +78,13 @@ export default async function TransparencyPage({ params }: { params: Promise<{ t
                 </div>
 
                 {entry.transactionHash ? (
-                  <div className="mt-3 flex items-center justify-between gap-3">
-                    <span className="min-w-0 truncate rounded-full bg-[var(--surface-2)] px-3 py-1.5 font-mono text-xs font-bold text-[var(--ink-2)]">
-                      {String(entry.transactionHash).slice(0, 6)}…{String(entry.transactionHash).slice(-6)}
-                    </span>
-                    <a
-                      href={`https://horizon-testnet.stellar.org/transactions/${entry.transactionHash}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="shrink-0 text-[13px] font-bold text-[var(--ember)]"
-                    >
-                      View on Horizon
-                    </a>
+                  <div className="mt-3">
+                    <StellarProof
+                      transactionHash={entry.transactionHash}
+                      ledger={entry.ledger}
+                      network={tenant.stellarNetwork}
+                      proofDigest={entry.proofDigest}
+                    />
                   </div>
                 ) : null}
               </Card>
