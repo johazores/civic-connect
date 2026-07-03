@@ -146,6 +146,14 @@ async function main() {
   const passwordHash = await bcrypt.hash('admin12345', 10);
   const citizenPasswordHash = await bcrypt.hash('citizen12345', 10);
 
+  // Platform (root) administrator that manages all tenants at /root.
+  const platformPasswordHash = await bcrypt.hash('root12345', 10);
+  await prisma.platformAdmin.upsert({
+    where: { email: 'root@civictrust.local' },
+    update: { name: 'Platform Root Admin', isActive: true },
+    create: { name: 'Platform Root Admin', email: 'root@civictrust.local', passwordHash: platformPasswordHash, isActive: true }
+  });
+
   await prisma.tenant.deleteMany({
     where: {
       slug: {

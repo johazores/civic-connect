@@ -85,6 +85,12 @@ export default function RootPage() {
             </span>
             <FiArrowRight className="h-4 w-4 shrink-0 text-[var(--ember)]" />
           </Link>
+
+          <div className="mt-8 text-center">
+            <Link href="/root" className="text-[12px] font-semibold text-[var(--muted)] underline decoration-[var(--line-strong)] underline-offset-4">
+              Platform console
+            </Link>
+          </div>
         </div>
       </div>
     </main>

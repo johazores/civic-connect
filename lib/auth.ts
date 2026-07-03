@@ -4,6 +4,7 @@ import { prisma } from '@/lib/db';
 
 const adminCookieName = 'civic_token';
 const citizenCookieName = 'civic_citizen_token';
+const platformCookieName = 'civic_platform_token';
 
 export const safeTenantSelect = {
   id: true,
@@ -158,6 +159,55 @@ export async function getCitizenAuthUser(req: NextApiRequest): Promise<CitizenAu
   } catch {
     return null;
   }
+}
+
+export type PlatformAdminUser = {
+  id: string;
+  name: string;
+  email: string;
+};
+
+type PlatformAuthToken = {
+  platformAdminId: string;
+};
+
+export function signPlatformAuthToken(payload: PlatformAuthToken) {
+  return jwt.sign({ ...payload, kind: 'platform' }, getSecret(), { expiresIn: '7d' });
+}
+
+export function setPlatformAuthCookie(res: NextApiResponse, token: string) {
+  res.setHeader('Set-Cookie', createCookie(platformCookieName, token, 60 * 60 * 24 * 7));
+}
+
+export function clearPlatformAuthCookie(res: NextApiResponse) {
+  res.setHeader('Set-Cookie', `${platformCookieName}=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax`);
+}
+
+export async function getPlatformAdmin(req: NextApiRequest): Promise<PlatformAdminUser | null> {
+  const token = readCookie(req, platformCookieName);
+
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const payload = jwt.verify(token, getSecret()) as PlatformAuthToken & { kind?: string };
+
+    if (payload.kind !== 'platform') {
+      return null;
+    }
+
+    return prisma.platformAdmin.findFirst({
+      where: { id: payload.platformAdminId, isActive: true },
+      select: { id: true, name: true, email: true }
+    });
+  } catch {
+    return null;
+  }
+}
+
+export async function requirePlatformAdmin(req: NextApiRequest) {
+  return getPlatformAdmin(req);
 }
 
 export async function requireTenantAdmin(req: NextApiRequest, tenantSlug: string) {

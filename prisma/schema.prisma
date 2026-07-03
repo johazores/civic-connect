@@ -12,6 +12,16 @@ enum UserRole {
   STAFF
 }
 
+model PlatformAdmin {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 enum ReportStatus {
   SUBMITTED
   REVIEWING
