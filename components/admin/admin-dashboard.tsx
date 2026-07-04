@@ -143,11 +143,11 @@ const contentConfig: Record<ContentTab, { label: string; endpoint: string; listU
       { name: 'department', label: 'Department label' },
       { name: 'linkUrl', label: 'Link URL' },
       { name: 'sortOrder', label: 'Sort order', type: 'number' },
-      { name: 'paymentRequired', label: 'Require Stellar payment', type: 'checkbox' },
+      { name: 'paymentRequired', label: 'Collect online payment', type: 'checkbox' },
       { name: 'feeAmount', label: 'Service fee amount', type: 'number' },
-      { name: 'feeAssetCode', label: 'Fee asset code' },
-      { name: 'feeAssetIssuer', label: 'Asset issuer public key' },
-      { name: 'receivingPublicKey', label: 'Service receiving wallet' },
+      { name: 'feeAssetCode', label: 'Payment currency (XLM or USDC)' },
+      { name: 'feeAssetIssuer', label: 'Token issuer address' },
+      { name: 'receivingPublicKey', label: 'Where this service payment goes' },
       { name: 'isActive', label: 'Active', type: 'checkbox' }
     ],
     empty: { id: '', title: '', description: '', department: '', linkUrl: '', sortOrder: 0, paymentRequired: false, feeAmount: 0, feeAssetCode: 'XLM', feeAssetIssuer: '', receivingPublicKey: '', isActive: true }
@@ -254,7 +254,7 @@ const adminTabMeta: Record<MainTab, { label: string; title: string; description:
   settings: {
     label: 'Settings',
     title: 'Workspace settings',
-    description: 'Profile, branding, and Stellar wallet'
+    description: 'Profile, wallet, and approvals'
   }
 };
 
@@ -1477,6 +1477,15 @@ type StellarWallet = {
   error: string | null;
 };
 
+type ApprovalPolicy = {
+  enabled: boolean;
+  signerCount: number;
+  requiredApprovals: number;
+  note: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
   const [wallet, setWallet] = useState<StellarWallet | null>(null);
   const [publicKey, setPublicKey] = useState('');
@@ -1742,6 +1751,152 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
    Settings tab — organization form
 --------------------------------------------------------------------------- */
 
+function ApprovalPolicyPanel({ tenantSlug }: { tenantSlug: string }) {
+  const [policy, setPolicy] = useState<ApprovalPolicy | null>(null);
+  const [enabled, setEnabled] = useState(false);
+  const [signerCount, setSignerCount] = useState(10);
+  const [requiredApprovals, setRequiredApprovals] = useState(6);
+  const [note, setNote] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  function syncPolicy(nextPolicy: ApprovalPolicy) {
+    setPolicy(nextPolicy);
+    setEnabled(nextPolicy.enabled);
+    setSignerCount(nextPolicy.signerCount);
+    setRequiredApprovals(nextPolicy.requiredApprovals);
+    setNote(nextPolicy.note || '');
+  }
+
+  async function loadPolicy() {
+    setError('');
+    const response = await fetch(`/api/tenant/${tenantSlug}/approvals/policy`);
+    const payload = await response.json();
+
+    if (!response.ok) {
+      setError(payload.error || 'Unable to load approval settings.');
+      return;
+    }
+
+    syncPolicy(payload.data);
+  }
+
+  useEffect(() => {
+    loadPolicy();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tenantSlug]);
+
+  async function savePolicy(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setIsSaving(true);
+    setError('');
+    setSuccess('');
+
+    const response = await fetch(`/api/tenant/${tenantSlug}/approvals/policy`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled, signerCount, requiredApprovals, note })
+    });
+    const payload = await response.json();
+
+    if (!response.ok) {
+      setError(payload.error || 'Unable to save approval settings.');
+      setIsSaving(false);
+      return;
+    }
+
+    syncPolicy(payload.data);
+    setSuccess('Approval rule saved.');
+    setIsSaving(false);
+  }
+
+  const cappedRequired = Math.min(requiredApprovals, Math.max(1, signerCount));
+
+  return (
+    <form onSubmit={savePolicy}>
+      <p className="group-label">Release approvals</p>
+      <Card className="mb-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="font-display text-[15px] font-bold text-[var(--ink)]">Majority approval</h3>
+            <p className="mt-1 text-xs font-medium leading-5 text-[var(--muted)]">
+              Rewards and public releases wait for enough staff approvals before money leaves the LGU wallet.
+            </p>
+          </div>
+          <span className={`status-pill shrink-0 ${enabled ? 'bg-[color-mix(in_srgb,var(--heat-1)_14%,var(--surface))] text-[#0f806d]' : 'bg-[var(--surface-2)] text-[var(--ink-2)]'}`}>
+            {enabled ? 'On' : 'Off'}
+          </span>
+        </div>
+
+        {error || success ? (
+          <div className="mt-4 grid gap-3">
+            <ErrorBanner message={error} />
+            <SuccessBanner message={success} />
+          </div>
+        ) : null}
+
+        <div className="mt-4 rounded-[16px] bg-[var(--surface-2)] p-4">
+          <SwitchRow
+            label="Require more than one approval"
+            sub="Example: 10 reviewers, 6 needed to release funds."
+            checked={enabled}
+            onToggle={() => setEnabled((current) => !current)}
+          />
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="field mb-0">
+            <label className="input-label" htmlFor="approval-signers">Reviewers</label>
+            <Input
+              id="approval-signers"
+              type="number"
+              min={1}
+              max={50}
+              value={signerCount}
+              onChange={(event) => setSignerCount(Number(event.target.value))}
+            />
+          </div>
+          <div className="field mb-0">
+            <label className="input-label" htmlFor="approval-required">Needed</label>
+            <Input
+              id="approval-required"
+              type="number"
+              min={1}
+              max={Math.max(1, signerCount)}
+              value={requiredApprovals}
+              onChange={(event) => setRequiredApprovals(Number(event.target.value))}
+            />
+          </div>
+        </div>
+
+        <div className="field mt-4">
+          <label className="input-label" htmlFor="approval-note">Plain-language note</label>
+          <Textarea
+            id="approval-note"
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            placeholder="Example: Six staff members must approve before the LGU wallet sends money."
+          />
+        </div>
+
+        <div className="rounded-[16px] border border-[var(--line)] p-4">
+          <p className="text-sm font-bold text-[var(--ink)]">
+            {enabled ? `${cappedRequired} of ${Math.max(1, signerCount)} approvals required` : 'Single approval mode'}
+          </p>
+          <p className="mt-1 text-xs font-medium leading-5 text-[var(--muted)]">
+            This controls outgoing rewards and public disbursements. Service payments still go directly to the LGU receiving wallet.
+          </p>
+        </div>
+
+        <Button type="submit" disabled={isSaving || !policy} className="btn-block mt-4">
+          {isSaving ? 'Saving...' : 'Save approval rule'}
+        </Button>
+      </Card>
+    </form>
+  );
+}
+
 function TenantSettingsPanel({
   tenantSlug,
   tenant,
@@ -1820,6 +1975,7 @@ function TenantSettingsPanel({
       </div>
 
       <StellarWalletPanel tenantSlug={tenantSlug} />
+      <ApprovalPolicyPanel tenantSlug={tenantSlug} />
 
       <form onSubmit={saveSettings}>
         <p className="group-label">Organization</p>
@@ -1866,23 +2022,25 @@ function TenantSettingsPanel({
           </div>
         </Card>
 
-        <p className="group-label">Default payment asset</p>
+        <p className="group-label">Default payment currency</p>
         <Card className="mb-5">
           <div className="field">
-            <label className="input-label" htmlFor="settings-asset-code">Default asset code</label>
+            <label className="input-label" htmlFor="settings-asset-code">Currency code</label>
             <Input
               id="settings-asset-code"
               value={form.stellarDefaultAssetCode || 'XLM'}
               onChange={(event) => updateForm('stellarDefaultAssetCode', event.target.value)}
+              placeholder="XLM or USDC"
             />
+            <p className="mt-2 text-xs font-medium leading-4 text-[var(--muted)]">Use a stable token like USDC when the fee should stay close to a peso or dollar value.</p>
           </div>
           <div className="field mb-0">
-            <label className="input-label" htmlFor="settings-asset-issuer">Default asset issuer</label>
+            <label className="input-label" htmlFor="settings-asset-issuer">Token issuer address</label>
             <Input
               id="settings-asset-issuer"
               value={form.stellarDefaultAssetIssuer || ''}
               onChange={(event) => updateForm('stellarDefaultAssetIssuer', event.target.value)}
-              placeholder="Required only for non-XLM assets"
+              placeholder="Required for USDC or other non-XLM tokens"
             />
           </div>
         </Card>

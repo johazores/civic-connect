@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (req.method === 'GET') {
       const admin = await requireTenantAdmin(req, tenantSlug);
       const includeDrafts = Boolean(admin && req.query.includeDrafts === 'true');
-      const entries = await listTransparencyEntries(tenantSlug, includeDrafts);
+      const entries = await listTransparencyEntries(tenantSlug, includeDrafts, admin?.user.id || null);
       return ok(res, entries.map(serializeEntry));
     }
 

@@ -95,6 +95,11 @@ enum RewardPayoutMethod {
   CLAIMABLE
 }
 
+enum CivicApprovalTargetType {
+  CIVIC_REWARD
+  TRANSPARENCY_DISBURSEMENT
+}
+
 model Tenant {
   id          String   @id @default(cuid())
   slug        String   @unique
@@ -134,6 +139,8 @@ model Tenant {
   civicActions CivicAction[]
   transparencyEntries TransparencyEntry[]
   propertyTaxReceipts PropertyTaxReceipt[]
+  approvalPolicy TenantApprovalPolicy?
+  transactionApprovals CivicTransactionApproval[]
 }
 
 model User {
@@ -149,9 +156,42 @@ model User {
 
   tenant        Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   reportUpdates ReportUpdate[]
+  transactionApprovals CivicTransactionApproval[]
 
   @@unique([tenantId, email])
   @@index([tenantId])
+}
+
+model TenantApprovalPolicy {
+  id                String   @id @default(cuid())
+  tenantId          String   @unique
+  enabled           Boolean  @default(false)
+  signerCount       Int      @default(10)
+  requiredApprovals Int      @default(6)
+  note              String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+}
+
+model CivicTransactionApproval {
+  id         String                   @id @default(cuid())
+  tenantId   String
+  targetType CivicApprovalTargetType
+  targetId   String
+  userId     String
+  note       String?
+  createdAt  DateTime                 @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, targetType, targetId, userId])
+  @@index([tenantId, targetType, targetId])
+  @@index([userId])
 }
 
 

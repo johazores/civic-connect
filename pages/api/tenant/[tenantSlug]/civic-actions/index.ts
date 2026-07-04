@@ -18,7 +18,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const actions = await listCivicActions(tenantSlug, {
         status: String(req.query.status || 'ALL'),
         type: String(req.query.type || 'ALL'),
-        mineCitizenId: !admin && citizen ? citizen.citizen.id : null
+        mineCitizenId: !admin && citizen ? citizen.citizen.id : null,
+        userId: admin?.user.id || null
       });
 
       return ok(res, actions.map(serializeAction));

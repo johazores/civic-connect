@@ -12,6 +12,16 @@ import { stellarExpertTxUrl } from '@/lib/stellar/explorer';
 
 type PayoutMethod = 'DIRECT' | 'CLAIMABLE';
 
+type ApprovalSummary = {
+  enabled: boolean;
+  signerCount: number;
+  requiredApprovals: number;
+  approvalCount: number;
+  remainingApprovals: number;
+  approvedByCurrentUser: boolean;
+  approvers: Array<{ name: string; email: string; approvedAt: string }>;
+};
+
 type CivicAction = {
   id: string;
   type: string;
@@ -32,6 +42,7 @@ type CivicAction = {
   proofDigest: string | null;
   payoutMethod: PayoutMethod;
   rewardClaimableBalanceId: string | null;
+  approvalSummary?: ApprovalSummary;
   createdAt: string;
 };
 
@@ -51,6 +62,7 @@ type TransparencyEntry = {
   memo: string | null;
   transactionHash: string | null;
   ledger: number | null;
+  approvalSummary?: ApprovalSummary;
   occurredAt: string;
 };
 
@@ -82,6 +94,47 @@ function nice(value: string) {
 
 function shortHash(hash: string) {
   return hash.length > 14 ? `${hash.slice(0, 6)}…${hash.slice(-6)}` : hash;
+}
+
+function approvalSuccess(summary?: ApprovalSummary) {
+  if (!summary?.enabled) {
+    return 'Approval saved.';
+  }
+
+  if (summary.remainingApprovals <= 0) {
+    return 'Enough approvals collected. Releasing funds now.';
+  }
+
+  return `Approval saved. ${summary.remainingApprovals} more needed before funds are released.`;
+}
+
+function ApprovalProgress({ summary }: { summary?: ApprovalSummary }) {
+  if (!summary?.enabled) {
+    return null;
+  }
+
+  return (
+    <div className="mt-4 rounded-[16px] border border-[var(--line)] bg-[var(--surface-2)] p-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-bold text-[var(--ink)]">{summary.approvalCount} of {summary.requiredApprovals} approved</p>
+        <span className="status-pill whitespace-nowrap bg-[color-mix(in_srgb,var(--navy)_10%,var(--surface))] text-[var(--navy)]">
+          {summary.remainingApprovals === 0 ? 'Ready' : `${summary.remainingApprovals} left`}
+        </span>
+      </div>
+      <p className="mt-1 text-xs font-medium leading-5 text-[var(--muted)]">
+        {summary.remainingApprovals === 0 ? 'The required staff approvals are complete.' : 'Money stays in the LGU wallet until enough staff approve.'}
+      </p>
+      {summary.approvers.length ? (
+        <div className="mt-3 grid gap-1.5">
+          {summary.approvers.map((approver) => (
+            <p key={`${approver.email}-${approver.approvedAt}`} className="truncate text-xs font-semibold text-[var(--ink-2)]">
+              {approver.name} approved {formatDate(approver.approvedAt)}
+            </p>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function programPill(status: string) {
@@ -327,7 +380,11 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
       return;
     }
 
-    setSuccess(`Reward sent · ${shortHash(String(payload.data.rewardTransactionHash || ''))}`);
+    setSuccess(
+      payload.data.rewardTransactionHash
+        ? `Reward sent · ${shortHash(String(payload.data.rewardTransactionHash || ''))}`
+        : approvalSuccess(payload.data.approvalSummary)
+    );
     await loadAll();
   }
 
@@ -399,7 +456,11 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
       return;
     }
 
-    setSuccess(`Disbursement published on Stellar · ${shortHash(String(payload.data.transactionHash || ''))}`);
+    setSuccess(
+      payload.data.transactionHash
+        ? `Disbursement published on Stellar · ${shortHash(String(payload.data.transactionHash || ''))}`
+        : approvalSuccess(payload.data.approvalSummary)
+    );
     await loadAll();
   }
 
@@ -602,6 +663,11 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
                   <span className="nt block">
                     {nice(action.type)} · {formatDate(action.createdAt)}
                   </span>
+                  {action.approvalSummary?.enabled && !action.rewardTransactionHash ? (
+                    <span className="nt block">
+                      Release approvals: {action.approvalSummary.approvalCount}/{action.approvalSummary.requiredApprovals}
+                    </span>
+                  ) : null}
                 </span>
               </button>
             ))}
@@ -649,6 +715,11 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
                   <span className="nt block">
                     {entry.amount} {entry.assetCode} · {formatDate(entry.occurredAt)}
                   </span>
+                  {entry.approvalSummary?.enabled && !entry.transactionHash ? (
+                    <span className="nt block">
+                      Release approvals: {entry.approvalSummary.approvalCount}/{entry.approvalSummary.requiredApprovals}
+                    </span>
+                  ) : null}
                 </span>
               </button>
             ))}
@@ -724,6 +795,8 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
               <SuccessBanner message={success} />
             </div>
           ) : null}
+
+          <ApprovalProgress summary={selectedAction.approvalSummary} />
 
           {selectedAction.rewardTransactionHash || selectedAction.rewardClaimableBalanceId || selectedAction.proofDigest ? (
             <div className="mt-4 rounded-[16px] bg-[color-mix(in_srgb,var(--heat-1)_14%,var(--surface))] p-4">
@@ -844,11 +917,18 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
             </button>
             <button
               type="button"
-              disabled={selectedAction.status !== 'APPROVED'}
+              disabled={
+                selectedAction.status !== 'APPROVED' ||
+                Boolean(selectedAction.approvalSummary?.enabled && selectedAction.approvalSummary.approvedByCurrentUser && selectedAction.approvalSummary.remainingApprovals > 0)
+              }
               onClick={() => payReward(selectedAction)}
               className="app-btn btn-accent disabled:opacity-50"
             >
-              Send reward
+              {selectedAction.approvalSummary?.enabled && !selectedAction.rewardTransactionHash
+                ? selectedAction.approvalSummary.approvedByCurrentUser && selectedAction.approvalSummary.remainingApprovals > 0
+                  ? 'Approved by you'
+                  : 'Approve release'
+                : 'Send reward'}
             </button>
           </div>
         </BottomSheet>
@@ -990,17 +1070,26 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
               </div>
             ) : null}
 
+            <ApprovalProgress summary={editingTransparencyEntry?.approvalSummary} />
+
             <div className="grid gap-2.5 pb-2">
               <Button type="submit">{editingTransparencyId ? 'Save changes' : 'Create record'}</Button>
               {editingTransparencyId && editingTransparencyEntry ? (
                 <>
                   <button
                     type="button"
-                    disabled={Boolean(editingTransparencyEntry.transactionHash)}
+                    disabled={
+                      Boolean(editingTransparencyEntry.transactionHash) ||
+                      Boolean(editingTransparencyEntry.approvalSummary?.enabled && editingTransparencyEntry.approvalSummary.approvedByCurrentUser && editingTransparencyEntry.approvalSummary.remainingApprovals > 0)
+                    }
                     onClick={() => sendTransparencyDisbursement(editingTransparencyEntry)}
                     className="app-btn btn-accent disabled:opacity-50"
                   >
-                    Send Stellar disbursement
+                    {editingTransparencyEntry.approvalSummary?.enabled && !editingTransparencyEntry.transactionHash
+                      ? editingTransparencyEntry.approvalSummary.approvedByCurrentUser && editingTransparencyEntry.approvalSummary.remainingApprovals > 0
+                        ? 'Approved by you'
+                        : 'Approve release'
+                      : 'Send Stellar disbursement'}
                   </button>
                   <button
                     type="button"

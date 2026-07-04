@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (req.method === 'POST') {
-      const action = await payCivicActionReward(tenantSlug, id);
+      const action = await payCivicActionReward(tenantSlug, id, auth.user.id);
       return ok(res, serializeAction(action));
     }
 

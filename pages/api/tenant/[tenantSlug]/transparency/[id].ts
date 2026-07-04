@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     if (req.method === 'POST') {
-      const entry = await publishTransparencyDisbursement(tenantSlug, id);
+      const entry = await publishTransparencyDisbursement(tenantSlug, id, auth.user.id);
       return ok(res, serializeEntry(entry));
     }
 

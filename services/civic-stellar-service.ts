@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db';
 import { safeTenantSelect } from '@/lib/auth';
+import { approveRelease, getApprovalSummary } from '@/services/approval-service';
 import {
   computeProofDigest,
   decryptStellarSecret,
@@ -196,14 +197,14 @@ export async function createCivicAction(input: CivicActionInput) {
   });
 }
 
-export async function listCivicActions(tenantSlug: string, filters?: { status?: string; type?: string; mineCitizenId?: string | null }) {
+export async function listCivicActions(tenantSlug: string, filters?: { status?: string; type?: string; mineCitizenId?: string | null; userId?: string | null }) {
   const tenant = await getTenantForCivicProgram(tenantSlug);
 
   if (!tenant) {
     throw new Error('Tenant not found.');
   }
 
-  return prisma.civicAction.findMany({
+  const actions = await prisma.civicAction.findMany({
     where: {
       tenantId: tenant.id,
       ...(filters?.status && filters.status !== 'ALL' ? { status: filters.status as any } : {}),
@@ -213,6 +214,8 @@ export async function listCivicActions(tenantSlug: string, filters?: { status?: 
     orderBy: { createdAt: 'desc' },
     include: civicActionInclude
   });
+
+  return Promise.all(actions.map((action: any) => attachActionApprovalSummary(action, filters?.userId || null)));
 }
 
 export async function reviewCivicAction(tenantSlug: string, id: string, input: { status?: string; verificationNote?: string | null; rewardAmount?: string | number | null; rewardAssetCode?: string | null; rewardAssetIssuer?: string | null; rewardDestinationPublicKey?: string | null }) {
@@ -234,6 +237,29 @@ export async function reviewCivicAction(tenantSlug: string, id: string, input: {
 
   const status = ['SUBMITTED', 'REVIEWING', 'APPROVED', 'REJECTED', 'REWARDED'].includes(String(input.status || '')) ? String(input.status) : current.status;
   const payoutMethod = ['DIRECT', 'CLAIMABLE'].includes(String((input as any).payoutMethod || '')) ? String((input as any).payoutMethod) : current.payoutMethod;
+  const nextRewardAmount = input.rewardAmount != null ? asDecimalString(input.rewardAmount) : current.rewardAmount;
+  const nextRewardAssetCode = input.rewardAssetCode?.trim() || current.rewardAssetCode;
+  const nextRewardAssetIssuer = input.rewardAssetIssuer?.trim() || null;
+  const nextRewardDestinationPublicKey = input.rewardDestinationPublicKey?.trim() || current.rewardDestinationPublicKey;
+  const approvalSensitiveChange = [
+    status !== current.status,
+    payoutMethod !== current.payoutMethod,
+    String(nextRewardAmount) !== String(current.rewardAmount),
+    nextRewardAssetCode !== current.rewardAssetCode,
+    nextRewardAssetIssuer !== current.rewardAssetIssuer,
+    nextRewardDestinationPublicKey !== current.rewardDestinationPublicKey,
+    (input.verificationNote ?? current.verificationNote) !== current.verificationNote
+  ].some(Boolean);
+
+  if (approvalSensitiveChange && !current.rewardTransactionHash) {
+    await prisma.civicTransactionApproval.deleteMany({
+      where: {
+        tenantId: tenant.id,
+        targetType: 'CIVIC_REWARD',
+        targetId: current.id
+      }
+    });
+  }
 
   return prisma.civicAction.update({
     where: { id: current.id },
@@ -241,24 +267,24 @@ export async function reviewCivicAction(tenantSlug: string, id: string, input: {
       status: status as any,
       payoutMethod: payoutMethod as any,
       verificationNote: input.verificationNote ?? current.verificationNote,
-      rewardAmount: input.rewardAmount != null ? asDecimalString(input.rewardAmount) : current.rewardAmount,
-      rewardAssetCode: input.rewardAssetCode?.trim() || current.rewardAssetCode,
-      rewardAssetIssuer: input.rewardAssetIssuer?.trim() || null,
-      rewardDestinationPublicKey: input.rewardDestinationPublicKey?.trim() || current.rewardDestinationPublicKey,
+      rewardAmount: nextRewardAmount,
+      rewardAssetCode: nextRewardAssetCode,
+      rewardAssetIssuer: nextRewardAssetIssuer,
+      rewardDestinationPublicKey: nextRewardDestinationPublicKey,
       reviewedAt: ['APPROVED', 'REJECTED'].includes(status) ? new Date() : current.reviewedAt
     },
     include: civicActionInclude
   });
 }
 
-export async function payCivicActionReward(tenantSlug: string, id: string) {
+export async function payCivicActionReward(tenantSlug: string, id: string, userId?: string | null) {
   const tenant = await getTenantForCivicProgram(tenantSlug);
 
   if (!tenant) {
     throw new Error('Tenant not found.');
   }
 
-  const action = await prisma.civicAction.findFirst({ where: { id, tenantId: tenant.id } });
+  const action = await prisma.civicAction.findFirst({ where: { id, tenantId: tenant.id }, include: civicActionInclude });
 
   if (!action) {
     throw new Error('Civic action not found.');
@@ -274,6 +300,19 @@ export async function payCivicActionReward(tenantSlug: string, id: string) {
 
   if (!action.rewardDestinationPublicKey || !isValidStellarPublicKey(action.rewardDestinationPublicKey)) {
     throw new Error('A valid participant Stellar reward wallet is required before payout.');
+  }
+
+  if (userId) {
+    const approvalSummary = await approveRelease({
+      tenantId: tenant.id,
+      targetType: 'CIVIC_REWARD',
+      targetId: action.id,
+      userId
+    });
+
+    if (approvalSummary.enabled && approvalSummary.remainingApprovals > 0) {
+      return { ...action, approvalSummary };
+    }
   }
 
   const config = getTenantNetworkConfig(tenant);
@@ -299,7 +338,7 @@ export async function payCivicActionReward(tenantSlug: string, id: string) {
   if (action.payoutMethod === 'CLAIMABLE') {
     const claimable = await submitClaimableBalanceReward(paymentInput);
 
-    return prisma.civicAction.update({
+    const updated = await prisma.civicAction.update({
       where: { id: action.id },
       data: {
         status: 'REWARDED',
@@ -311,11 +350,13 @@ export async function payCivicActionReward(tenantSlug: string, id: string) {
       },
       include: civicActionInclude
     });
+
+    return attachActionApprovalSummary(updated, userId);
   }
 
   const result = await submitSignedStellarPayment(paymentInput);
 
-  return prisma.civicAction.update({
+  const updated = await prisma.civicAction.update({
     where: { id: action.id },
     data: {
       status: 'REWARDED',
@@ -326,22 +367,26 @@ export async function payCivicActionReward(tenantSlug: string, id: string) {
     },
     include: civicActionInclude
   });
+
+  return attachActionApprovalSummary(updated, userId);
 }
 
-export async function listTransparencyEntries(tenantSlug: string, includeDrafts = false) {
+export async function listTransparencyEntries(tenantSlug: string, includeDrafts = false, userId?: string | null) {
   const tenant = await getTenantForCivicProgram(tenantSlug);
 
   if (!tenant) {
     throw new Error('Tenant not found.');
   }
 
-  return prisma.transparencyEntry.findMany({
+  const entries = await prisma.transparencyEntry.findMany({
     where: {
       tenantId: tenant.id,
       ...(includeDrafts ? {} : { status: { in: ['PUBLISHED', 'VERIFIED_ON_STELLAR'] as any } })
     },
     orderBy: { occurredAt: 'desc' }
   });
+
+  return Promise.all(entries.map((entry: any) => attachTransparencyApprovalSummary(entry, userId)));
 }
 
 export async function createTransparencyEntry(tenantSlug: string, input: Record<string, unknown>) {
@@ -407,27 +452,65 @@ export async function updateTransparencyEntry(tenantSlug: string, id: string, in
     throw new Error('Transparency entry not found.');
   }
 
+  const nextTitle = String(input.title ?? entry.title).trim();
+  const nextDescription = String(input.description ?? entry.description).trim();
+  const nextEntryType = String(input.entryType || entry.entryType);
+  const nextStatus = String(input.status || entry.status);
+  const nextDepartment = String(input.department ?? entry.department ?? '').trim() || null;
+  const nextRecipientName = String(input.recipientName ?? entry.recipientName ?? '').trim() || null;
+  const nextRecipientPublicKey = String(input.recipientPublicKey ?? entry.recipientPublicKey ?? '').trim() || null;
+  const nextAmount = input.amount != null ? asDecimalString(input.amount) : entry.amount;
+  const nextAssetCode = String(input.assetCode || entry.assetCode).trim().toUpperCase();
+  const nextAssetIssuer = String(input.assetIssuer ?? entry.assetIssuer ?? '').trim() || null;
+  const nextMemo = String(input.memo ?? entry.memo ?? '').trim() || entry.referenceCode;
+  const nextTransactionHash = String(input.transactionHash ?? entry.transactionHash ?? '').trim() || null;
+  const nextOccurredAt = input.occurredAt ? new Date(String(input.occurredAt)) : entry.occurredAt;
+  const approvalSensitiveChange = [
+    nextTitle !== entry.title,
+    nextDescription !== entry.description,
+    nextEntryType !== entry.entryType,
+    nextStatus !== entry.status,
+    nextDepartment !== entry.department,
+    nextRecipientName !== entry.recipientName,
+    nextRecipientPublicKey !== entry.recipientPublicKey,
+    String(nextAmount) !== String(entry.amount),
+    nextAssetCode !== entry.assetCode,
+    nextAssetIssuer !== entry.assetIssuer,
+    nextMemo !== entry.memo,
+    nextOccurredAt.getTime() !== entry.occurredAt.getTime()
+  ].some(Boolean);
+
+  if (approvalSensitiveChange && !entry.transactionHash) {
+    await prisma.civicTransactionApproval.deleteMany({
+      where: {
+        tenantId: tenant.id,
+        targetType: 'TRANSPARENCY_DISBURSEMENT',
+        targetId: entry.id
+      }
+    });
+  }
+
   return prisma.transparencyEntry.update({
     where: { id: entry.id },
     data: {
-      title: String(input.title ?? entry.title).trim(),
-      description: String(input.description ?? entry.description).trim(),
-      entryType: String(input.entryType || entry.entryType) as any,
-      status: String(input.status || entry.status) as any,
-      department: String(input.department ?? entry.department ?? '').trim() || null,
-      recipientName: String(input.recipientName ?? entry.recipientName ?? '').trim() || null,
-      recipientPublicKey: String(input.recipientPublicKey ?? entry.recipientPublicKey ?? '').trim() || null,
-      amount: input.amount != null ? asDecimalString(input.amount) : entry.amount,
-      assetCode: String(input.assetCode || entry.assetCode).trim().toUpperCase(),
-      assetIssuer: String(input.assetIssuer ?? entry.assetIssuer ?? '').trim() || null,
-      memo: String(input.memo ?? entry.memo ?? '').trim() || entry.referenceCode,
-      transactionHash: String(input.transactionHash ?? entry.transactionHash ?? '').trim() || null,
-      occurredAt: input.occurredAt ? new Date(String(input.occurredAt)) : entry.occurredAt
+      title: nextTitle,
+      description: nextDescription,
+      entryType: nextEntryType as any,
+      status: nextStatus as any,
+      department: nextDepartment,
+      recipientName: nextRecipientName,
+      recipientPublicKey: nextRecipientPublicKey,
+      amount: nextAmount,
+      assetCode: nextAssetCode,
+      assetIssuer: nextAssetIssuer,
+      memo: nextMemo,
+      transactionHash: nextTransactionHash,
+      occurredAt: nextOccurredAt
     }
   });
 }
 
-export async function publishTransparencyDisbursement(tenantSlug: string, id: string) {
+export async function publishTransparencyDisbursement(tenantSlug: string, id: string, userId?: string | null) {
   const tenant = await getTenantForCivicProgram(tenantSlug);
 
   if (!tenant) {
@@ -446,6 +529,19 @@ export async function publishTransparencyDisbursement(tenantSlug: string, id: st
 
   if (!entry.recipientPublicKey || !isValidStellarPublicKey(entry.recipientPublicKey)) {
     throw new Error('A valid recipient Stellar public key is required for a ledger-backed disbursement.');
+  }
+
+  if (userId) {
+    const approvalSummary = await approveRelease({
+      tenantId: tenant.id,
+      targetType: 'TRANSPARENCY_DISBURSEMENT',
+      targetId: entry.id,
+      userId
+    });
+
+    if (approvalSummary.enabled && approvalSummary.remainingApprovals > 0) {
+      return { ...entry, approvalSummary };
+    }
   }
 
   const config = getTenantNetworkConfig(tenant);
@@ -473,7 +569,7 @@ export async function publishTransparencyDisbursement(tenantSlug: string, id: st
     networkPassphrase: config.networkPassphrase
   });
 
-  return prisma.transparencyEntry.update({
+  const updated = await prisma.transparencyEntry.update({
     where: { id: entry.id },
     data: {
       status: 'VERIFIED_ON_STELLAR',
@@ -482,6 +578,8 @@ export async function publishTransparencyDisbursement(tenantSlug: string, id: st
       ledger: result.ledger || null
     }
   });
+
+  return attachTransparencyApprovalSummary(updated, userId);
 }
 
 export async function archiveTransparencyEntry(tenantSlug: string, id: string) {
@@ -632,6 +730,36 @@ const civicActionInclude = {
   tenant: { select: safeTenantSelect },
   citizen: { select: { id: true, name: true, email: true, phone: true } }
 };
+
+async function attachActionApprovalSummary<T extends { id: string; tenantId: string }>(action: T, userId?: string | null) {
+  if (!userId) {
+    return action;
+  }
+
+  const approvalSummary = await getApprovalSummary({
+    tenantId: action.tenantId,
+    targetType: 'CIVIC_REWARD',
+    targetId: action.id,
+    userId
+  });
+
+  return { ...action, approvalSummary };
+}
+
+async function attachTransparencyApprovalSummary<T extends { id: string; tenantId: string }>(entry: T, userId?: string | null) {
+  if (!userId) {
+    return entry;
+  }
+
+  const approvalSummary = await getApprovalSummary({
+    tenantId: entry.tenantId,
+    targetType: 'TRANSPARENCY_DISBURSEMENT',
+    targetId: entry.id,
+    userId
+  });
+
+  return { ...entry, approvalSummary };
+}
 
 export type CivicLedgerKind = 'PAYMENT' | 'REWARD' | 'DISBURSEMENT' | 'TAX_RECEIPT';
 
