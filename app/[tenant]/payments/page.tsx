@@ -32,7 +32,7 @@ export default async function PaymentsPage({ params, searchParams }: { params: P
   }));
 
   return (
-    <PublicShell tenant={tenant} title="Payments" subtitle="Pay fees with a verifiable Stellar receipt">
+    <PublicShell tenant={tenant} title="Payments" subtitle="Pay fees and get a public receipt">
       <main className="page-section">
         <PaymentIntentForm tenantSlug={tenant.slug} services={paidServices} initialServiceId={query.serviceId} />
 
@@ -40,14 +40,14 @@ export default async function PaymentsPage({ params, searchParams }: { params: P
         <div className="menu-group">
           <div className="menu-item">
             <span className="mi-tx">
-              <b>Your wallet signs the payment</b>
-              <span>The portal only creates a Stellar Testnet request — it never handles private keys.</span>
+              <b>You approve the payment</b>
+              <span>CivicTrust prepares the request. Your wallet sends it. The portal never asks for your private key.</span>
             </span>
           </div>
           <div className="menu-item">
             <span className="mi-tx">
-              <b>The memo is your receipt reference</b>
-              <span>Keep it unchanged so the transaction can be verified into a permanent public receipt.</span>
+              <b>The receipt note links your payment</b>
+              <span>Keep the note unchanged so CivicTrust can match your receipt.</span>
             </span>
           </div>
         </div>

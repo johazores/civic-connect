@@ -84,19 +84,18 @@ export function AboutClient() {
             <div className="app-pulse-card fade-up p-6">
               <div className="relative z-10">
                 <span className="inline-flex items-center gap-2 rounded-full bg-white/12 px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#cfe0f4]">
-                  <FiZap aria-hidden="true" className="h-3.5 w-3.5" /> Powered by Stellar
+                  <FiZap aria-hidden="true" className="h-3.5 w-3.5" /> Public payment proof
                 </span>
                 <h1 className="mt-4 font-display text-[30px] font-extrabold leading-[1.08] tracking-[-0.03em] text-white">
                   Civic services citizens can actually verify.
                 </h1>
                 <p className="mt-3 text-[14px] font-medium leading-6 text-[#b9d0ea]">
-                  Report an issue, pay a service fee, and walk away with a permanent, public receipt anyone can check on the
-                  Stellar network — no phone calls, no doubt.
+                  Report an issue, pay a service fee, and walk away with a public receipt anyone can check.
                 </p>
                 <div className="mt-5 flex gap-5 border-t border-white/15 pt-4">
-                  <HeroStat value="SEP-7" label="Wallet pay" />
-                  <HeroStat value="Hash" label="Public proof" />
-                  <HeroStat value="Horizon" label="Verified" />
+                  <HeroStat value="QR" label="Wallet pay" />
+                  <HeroStat value="ID" label="Public proof" />
+                  <HeroStat value="Check" label="Verified" />
                 </div>
               </div>
             </div>
@@ -108,8 +107,8 @@ export function AboutClient() {
               <span className="about-eyebrow">What it is</span>
               <h2 className="about-section-title mt-3">A civic operating system with trust built in.</h2>
               <p className="about-lead">
-                CivicTrust gives local governments — cities, municipalities, barangays, and provinces — one app for citizen
-                requests, service payments, and public records. Each organization runs on its own tenant space, with a public
+                CivicTrust gives local governments - cities, municipalities, barangays, and provinces - one app for citizen
+                requests, service payments, and public records. Each organization gets its own secure space, with a public
                 portal for residents and a staff workspace for operations.
               </p>
             </Reveal>
@@ -117,7 +116,7 @@ export function AboutClient() {
               {[
                 { icon: <FiSmartphone />, title: 'One mobile-first app', body: 'Residents report, track, pay, and read updates from a single phone-native experience.' },
                 { icon: <FiActivity />, title: 'A real staff workspace', body: 'Teams route requests, update status, manage services, and review verified payments.' },
-                { icon: <FiShield />, title: 'Trust as a feature', body: 'Payments and records carry cryptographic proof — not just an internal database row.' }
+                { icon: <FiShield />, title: 'Trust as a feature', body: 'Payments and records carry public proof, not just an internal office record.' }
               ].map((item, index) => (
                 <Reveal key={item.title} delay={index * 80}>
                   <FeatureRow icon={item.icon} title={item.title} body={item.body} />
@@ -135,15 +134,15 @@ export function AboutClient() {
               <h2 className="about-section-title mt-3">Citizens are asked to trust what they can&rsquo;t see.</h2>
               <p className="about-lead">
                 When you pay a government fee, you usually get a paper stub or a number in a system only the office can read. If
-                a record is questioned — a payment, a disbursement, a receipt — there is no independent way to prove it. Trust
+                a record is questioned - a payment, a disbursement, a receipt - there is no independent way to prove it. Trust
                 depends entirely on the institution&rsquo;s word.
               </p>
             </Reveal>
             <Reveal delay={80}>
               <div className="app-info-card mt-5 p-5">
                 <p className="text-sm font-semibold leading-6 text-[var(--ink-2)]">
-                  CivicTrust closes that gap: the moment a payment settles, it becomes a permanent entry on a public ledger that
-                  the citizen, the office, and any observer can verify independently — forever.
+                  CivicTrust closes that gap: once a payment is confirmed, it gets a public proof that the citizen, the office,
+                  and any observer can check later.
                 </p>
               </div>
             </Reveal>
@@ -167,13 +166,13 @@ export function AboutClient() {
                   icon: <FiShield />,
                   tone: 'ember',
                   title: 'Staff & administrators',
-                  body: 'Triage the report queue, assign departments, update status, manage services and content, and review Horizon-verified payments.'
+                  body: 'Triage the report queue, assign departments, update status, manage services and content, and review confirmed payments.'
                 },
                 {
                   icon: <FiHome />,
                   tone: 'teal',
-                  title: 'Organizations (tenants)',
-                  body: 'Each LGU runs an isolated tenant with its own branding, services, wallet, and public transparency records.'
+                  title: 'Organizations',
+                  body: 'Each LGU has its own branded space, services, wallet, and public transparency records.'
                 }
               ].map((role, index) => (
                 <Reveal key={role.title} delay={index * 80}>
@@ -187,16 +186,16 @@ export function AboutClient() {
           <section className="px-5 pt-9">
             <Reveal>
               <span className="about-eyebrow">The journey</span>
-              <h2 className="about-section-title mt-3">From request to verifiable receipt.</h2>
+              <h2 className="about-section-title mt-3">From request to public receipt.</h2>
               <p className="about-lead">Follow a single service request through the whole flow.</p>
             </Reveal>
             <div className="timeline mt-6">
               {[
                 { icon: <FiFlag />, tone: '', title: 'Submit a request', body: 'A resident reports an issue or starts a paid service, adding details, a location, and an optional photo.' },
                 { icon: <FiSearch />, tone: '', title: 'Get a reference number', body: 'An auto-generated tracking code lets them follow status and updates from any device.' },
-                { icon: <FiCreditCard />, tone: 'ember', title: 'Pay from your own wallet', body: 'For fees, the app generates a SEP-7 pay link and QR. The citizen signs in their own Stellar wallet — the app never sees a secret key.' },
-                { icon: <FiHash />, tone: '', title: 'Confirmed on Stellar', body: 'The transaction settles on the network and the app verifies it through Horizon by transaction hash, memo, and amount.' },
-                { icon: <FiCheckCircle />, tone: 'teal', title: 'Permanent public receipt', body: 'A receipt page is created with the transaction hash — a proof the citizen and office can re-verify at any time, forever.' }
+                { icon: <FiCreditCard />, tone: 'ember', title: 'Pay from your own wallet', body: 'For fees, the app creates a payment link and QR code. The citizen approves it in their own wallet, and the app never asks for a private key.' },
+                { icon: <FiHash />, tone: '', title: 'Payment is confirmed', body: 'CivicTrust checks the payment amount, receipt note, and destination wallet.' },
+                { icon: <FiCheckCircle />, tone: 'teal', title: 'Permanent public receipt', body: 'A receipt page is created with a payment ID that the citizen and office can check later.' }
               ].map((step, index) => (
                 <Reveal key={step.title} delay={index * 70}>
                   <div className="tl-item">
@@ -218,15 +217,15 @@ export function AboutClient() {
           {/* ============ HOW STELLAR POWERS IT ============ */}
           <section className="px-5 pt-9">
             <Reveal>
-              <span className="about-eyebrow">How Stellar powers it</span>
-              <h2 className="about-section-title mt-3">The trust layer, in four pieces.</h2>
+              <span className="about-eyebrow">How public proof works</span>
+              <h2 className="about-section-title mt-3">The trust layer, in four simple pieces.</h2>
             </Reveal>
             <div className="mt-5 grid gap-3">
               {[
-                { icon: <FiSmartphone />, title: 'SEP-7 pay links & QR', body: 'Standard web+stellar:pay URIs let citizens pay in the wallet they already trust — no custody, no shared secrets.' },
-                { icon: <FiLink />, title: 'Horizon verification', body: 'Every payment is checked against the live network: transaction hash, memo, amount, and ledger.' },
-                { icon: <FiFileText />, title: 'Transaction-hash receipts', body: 'The hash is the receipt — permanent, tamper-evident, and independently verifiable by anyone.' },
-                { icon: <FiLock />, title: 'Encrypted tenant wallets', body: 'Each organization has a Testnet wallet; secret keys stay encrypted server-side and never reach the browser.' }
+                { icon: <FiSmartphone />, title: 'Payment links and QR codes', body: 'Citizens can pay in the wallet they already trust. CivicTrust never takes control of their wallet.' },
+                { icon: <FiLink />, title: 'Payment checks', body: 'Every payment is checked for amount, receipt note, destination wallet, and public record number.' },
+                { icon: <FiFileText />, title: 'Public receipts', body: 'Each receipt gets a payment ID that anyone can check later.' },
+                { icon: <FiLock />, title: 'Protected LGU wallets', body: 'Each organization has its own wallet, and private keys stay protected.' }
               ].map((item, index) => (
                 <Reveal key={item.title} delay={index * 70}>
                   <FeatureRow icon={item.icon} title={item.title} body={item.body} />
@@ -238,11 +237,11 @@ export function AboutClient() {
           {/* ============ WHY STELLAR VS TRADITIONAL ============ */}
           <section className="px-5 pt-9">
             <Reveal>
-              <span className="about-eyebrow">Why Stellar</span>
+              <span className="about-eyebrow">Why public proof</span>
               <h2 className="about-section-title mt-3">Why not just a card processor?</h2>
               <p className="about-lead">
-                Traditional rails move money, but the proof lives inside private systems. Stellar makes the proof public,
-                portable, and permanent — exactly what civic trust needs.
+                Traditional payment systems move money, but the proof often stays inside private systems. CivicTrust makes the
+                proof public, portable, and permanent - exactly what civic trust needs.
               </p>
             </Reveal>
             <Reveal delay={80}>
@@ -262,11 +261,11 @@ export function AboutClient() {
                   ))}
                 </div>
                 <div className="vs-col new">
-                  <p className="mb-2 text-[11px] font-extrabold uppercase tracking-[0.12em] text-[var(--navy)]">CivicTrust on Stellar</p>
+                  <p className="mb-2 text-[11px] font-extrabold uppercase tracking-[0.12em] text-[var(--navy)]">CivicTrust public proof</p>
                   {[
-                    'Permanent public ledger entry',
-                    'Anyone can verify the exact transaction',
-                    'Automatic proof by transaction hash',
+                    'Permanent public record',
+                    'Anyone can check the payment',
+                    'Automatic proof by payment ID',
                     'Open network, low fees, no lock-in'
                   ].map((row) => (
                     <div key={row} className="vs-row" style={{ color: 'var(--ink)' }}>
@@ -288,10 +287,10 @@ export function AboutClient() {
             </Reveal>
             <div className="mt-5 grid gap-3">
               {[
-                { icon: <FiAward />, title: 'Civic participation rewards', body: 'Verified attendance and civic actions can trigger transparent, on-ledger reward payouts.' },
+                { icon: <FiAward />, title: 'Civic participation rewards', body: 'Verified attendance and civic actions can trigger public reward payments.' },
                 { icon: <FiActivity />, title: 'Environmental cleanup incentives', body: 'Reviewed cleanup submissions can be rewarded, with every payout publicly traceable.' },
-                { icon: <FiHash />, title: 'Municipal budget transparency', body: 'Public allocations and disbursements are recorded with Stellar transaction hashes.' },
-                { icon: <FiFileText />, title: 'Digital property tax receipts', body: 'Tax receipts carry a permanent transaction hash citizens can verify for years.' }
+                { icon: <FiHash />, title: 'Municipal budget transparency', body: 'Public allocations and disbursements are recorded with payment IDs.' },
+                { icon: <FiFileText />, title: 'Digital property tax receipts', body: 'Tax receipts carry a permanent payment ID citizens can check for years.' }
               ].map((item, index) => (
                 <Reveal key={item.title} delay={index * 70}>
                   <FeatureRow icon={item.icon} title={item.title} body={item.body} />
@@ -309,19 +308,19 @@ export function AboutClient() {
                 </span>
                 <h2 className="mt-4 font-display text-[22px] font-extrabold tracking-[-0.02em] text-[var(--ink)]">See it in action.</h2>
                 <p className="mx-auto mt-2 max-w-[19rem] text-[14px] font-medium leading-6 text-[var(--ink-2)]">
-                  Explore a live demo city, or open the Stellar playground to try the raw building blocks yourself.
+                  Explore a live demo city, or open the practice payment page to try it yourself.
                 </p>
                 <div className="mt-5 grid gap-2.5">
                   <Link href="/metro-city" className="app-btn btn-primary">
                     Explore the demo city <FiArrowRight aria-hidden="true" className="h-4 w-4" />
                   </Link>
                   <Link href="/stellar-playground" className="app-btn btn-outline">
-                    <FiZap aria-hidden="true" className="h-4 w-4" /> Open the Stellar playground
+                    <FiZap aria-hidden="true" className="h-4 w-4" /> Open practice payments
                   </Link>
                 </div>
               </div>
             </Reveal>
-            <p className="mt-6 text-center text-[12px] font-semibold text-[var(--muted)]">CivicTrust · Verifiable civic services on Stellar</p>
+            <p className="mt-6 text-center text-[12px] font-semibold text-[var(--muted)]">CivicTrust - Civic services with public proof</p>
           </section>
         </div>
       </div>

@@ -10,13 +10,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const publicKey = String(req.body?.publicKey || '').trim();
 
   if (!isValidStellarPublicKey(publicKey)) {
-    return res.status(400).json({ error: 'Enter a valid Stellar public key that starts with G.' });
+    return res.status(400).json({ error: 'Enter a valid wallet address.' });
   }
 
   const config = resolveStellarNetworkConfig({ network: 'TESTNET' });
 
   if (!config.friendbotUrl) {
-    return res.status(400).json({ error: 'Friendbot is only available on Stellar Testnet.' });
+    return res.status(400).json({ error: 'Test funding is only available on the practice network.' });
   }
 
   await fundTestnetAccount({ friendbotUrl: config.friendbotUrl, publicKey });

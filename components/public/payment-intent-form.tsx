@@ -89,7 +89,7 @@ export function PaymentIntentForm({ tenantSlug, services, initialServiceId }: { 
     <Card>
       <h2 className="font-display text-[17px] font-bold text-[var(--ink)]">Payment details</h2>
       <p className="mt-1 text-[13px] font-medium leading-5 text-[var(--muted)]">
-        The memo on your Stellar Testnet payment becomes your verifiable receipt reference.
+        Your payment will include a receipt note so CivicTrust can match it to your request.
       </p>
 
       <form onSubmit={submitPaymentIntent} className="mt-5">
@@ -98,7 +98,7 @@ export function PaymentIntentForm({ tenantSlug, services, initialServiceId }: { 
           <Select id="payment-service" required value={serviceId} onChange={(event) => setServiceId(event.target.value)}>
             {services.map((service) => (
               <option key={service.id} value={service.id}>
-                {service.title} — {service.feeAmount} {service.feeAssetCode}
+                {service.title} - {service.feeAmount} {service.feeAssetCode}
               </option>
             ))}
           </Select>
@@ -110,7 +110,7 @@ export function PaymentIntentForm({ tenantSlug, services, initialServiceId }: { 
             <p className="mt-1 break-words font-display text-[20px] font-bold text-[var(--ink)]">
               {selectedService.feeAmount} {selectedService.feeAssetCode}
             </p>
-            <p className="mt-1 text-xs font-medium leading-5 text-[var(--muted)]">Paid from your own Stellar wallet — the portal never handles private keys.</p>
+            <p className="mt-1 text-xs font-medium leading-5 text-[var(--muted)]">Paid from your own wallet. The portal never asks for your private key.</p>
           </div>
         ) : null}
 
@@ -133,7 +133,7 @@ export function PaymentIntentForm({ tenantSlug, services, initialServiceId }: { 
 
         <Button className="btn-block" disabled={isSaving || !serviceId}>
           <FiCreditCard aria-hidden="true" className="h-4 w-4" />
-          {isSaving ? 'Creating payment...' : 'Continue to Stellar payment'}
+          {isSaving ? 'Creating payment...' : 'Continue to payment'}
         </Button>
       </form>
     </Card>

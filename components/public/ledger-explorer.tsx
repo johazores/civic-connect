@@ -66,27 +66,24 @@ export function LedgerExplorer({ ledger }: { ledger: LedgerData | null }) {
         <div className="eart">
           <FiLayers aria-hidden="true" className="h-8 w-8" />
         </div>
-        <h3>Ledger unavailable</h3>
-        <p>The civic ledger could not be loaded right now.</p>
+        <h3>Public records unavailable</h3>
+        <p>The public records could not be loaded right now.</p>
       </div>
     );
   }
-
-  const networkLabel = String(ledger.network).toUpperCase() === 'MAINNET' ? 'Stellar' : 'Stellar Testnet';
 
   return (
     <div>
       <div className="app-pulse-card fade-up p-5">
         <div className="relative z-10">
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#9fc0e6]">Public civic ledger · {networkLabel}</p>
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#9fc0e6]">Public civic records</p>
           <p className="mt-2 text-[13px] font-medium leading-6 text-[#b9d0ea]">
-            Every payment, reward, disbursement, and tax receipt below is anchored on Stellar. Open any record on a public
-            explorer to verify it independently.
+            Every payment, reward, disbursement, and tax receipt below has a public proof that anyone can check.
           </p>
           <div className="mt-4 flex gap-5 border-t border-white/15 pt-4">
             <Metric value={String(ledger.metrics.totalRecords)} label="Records" />
-            <Metric value={String(ledger.metrics.verifiedOnChain)} label="On-chain" />
-            <Metric value={ledger.metrics.xlmMoved} label="XLM moved" />
+            <Metric value={String(ledger.metrics.verifiedOnChain)} label="With proof" />
+            <Metric value={ledger.metrics.xlmMoved} label="Total paid" />
           </div>
         </div>
       </div>
@@ -117,7 +114,7 @@ export function LedgerExplorer({ ledger }: { ledger: LedgerData | null }) {
             <FiHash aria-hidden="true" className="h-8 w-8" />
           </div>
           <h3>No records yet</h3>
-          <p>Verified Stellar civic records will appear here as they are created.</p>
+          <p>Public civic records will appear here as they are created.</p>
         </div>
       ) : (
         <div className="mt-4 grid gap-3">
@@ -141,7 +138,7 @@ export function LedgerExplorer({ ledger }: { ledger: LedgerData | null }) {
 
               {row.transactionHash ? (
                 <>
-                  <p className="mt-2 text-[10.5px] font-extrabold uppercase tracking-[0.12em] text-[var(--muted)]">Transaction hash</p>
+                  <p className="mt-2 text-[10.5px] font-extrabold uppercase tracking-[0.12em] text-[var(--muted)]">Payment ID</p>
                   <p className="break-all font-mono text-[12px] font-semibold text-[var(--ink)]">{row.transactionHash}</p>
                 </>
               ) : null}
@@ -150,12 +147,12 @@ export function LedgerExplorer({ ledger }: { ledger: LedgerData | null }) {
                 <div className="mt-3 grid gap-2">
                   {row.explorerTxUrl ? (
                     <a href={row.explorerTxUrl} target="_blank" rel="noreferrer" className="app-btn btn-outline btn-compact">
-                      <FiExternalLink aria-hidden="true" className="h-4 w-4" /> Verify on Stellar Expert
+                      <FiExternalLink aria-hidden="true" className="h-4 w-4" /> Open public proof
                     </a>
                   ) : null}
                   {row.explorerBalanceUrl ? (
                     <a href={row.explorerBalanceUrl} target="_blank" rel="noreferrer" className="app-btn btn-outline btn-compact">
-                      <FiExternalLink aria-hidden="true" className="h-4 w-4" /> View claimable balance
+                      <FiExternalLink aria-hidden="true" className="h-4 w-4" /> Open claim record
                     </a>
                   ) : null}
                 </div>

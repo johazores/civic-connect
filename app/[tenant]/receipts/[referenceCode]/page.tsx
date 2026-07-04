@@ -48,7 +48,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ tenant
             <p className="mt-1 break-words font-display text-[28px] font-bold tracking-[-0.02em] text-[var(--ink)]">
               {String(payment.amount)} {payment.assetCode}
             </p>
-            <p className="mt-1 text-xs font-semibold text-[var(--muted)]">Network: {payment.tenant.stellarNetwork}</p>
+            <p className="mt-1 text-xs font-semibold text-[var(--muted)]">Public proof: {payment.transactionHash ? 'Saved' : 'Pending'}</p>
           </div>
         </Card>
 
@@ -62,7 +62,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ tenant
           </div>
           <div className="menu-item">
             <span className="mi-tx">
-              <span className="!mt-0 text-[11px] font-extrabold uppercase tracking-[0.12em]">Memo</span>
+              <span className="!mt-0 text-[11px] font-extrabold uppercase tracking-[0.12em]">Receipt note</span>
               <b className="mt-0.5 break-all font-mono text-[13px]">{payment.memo}</b>
             </span>
           </div>
@@ -79,18 +79,18 @@ export default async function ReceiptPage({ params }: { params: Promise<{ tenant
         <div className="stat-grid">
           <div className="stat">
             <p className="sv">{payment.ledger || '—'}</p>
-            <p className="sl">Ledger</p>
+            <p className="sl">Public record</p>
           </div>
           <div className="stat">
             <p className="break-words font-display text-[15px] font-bold leading-snug text-[var(--ink)]">
               {payment.verifiedAt ? formatDate(payment.verifiedAt) : 'Pending'}
             </p>
-            <p className="sl">Verified at</p>
+            <p className="sl">Confirmed on</p>
           </div>
         </div>
 
         <p className="mt-4 text-xs font-medium leading-5 text-[var(--muted)]">
-          This receipt verifies a government service payment request and its matching Stellar Testnet transaction details.
+          This receipt matches a government service payment with its public proof.
         </p>
       </main>
     </PublicShell>

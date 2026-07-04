@@ -21,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const wallet = await generateTenantTestnetWallet(tenantSlug, asBoolean(req.body?.fund, true));
     return ok(res, wallet);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unable to generate Stellar Testnet wallet.';
+    const message = error instanceof Error ? error.message : 'Unable to create practice wallet.';
     return badRequest(res, message);
   }
 }

@@ -188,7 +188,7 @@ export function MobileMenu({
                     <div className="menu-group">
                       <MenuLink item={homeItem} active={pathname === homeItem.href} onNavigate={close} />
                       <MenuLink
-                        item={{ href: '/about', label: 'How it works', description: 'What CivicTrust is & how Stellar powers it', icon: 'transparency' }}
+                        item={{ href: '/about', label: 'How it works', description: 'How public proof helps civic services', icon: 'transparency' }}
                         active={pathname === '/about'}
                         onNavigate={close}
                       />

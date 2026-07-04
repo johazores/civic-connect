@@ -32,8 +32,8 @@ type CivicAction = {
 const howItWorks = [
   { icon: FiSend, label: 'Submit action evidence', sub: 'Attendance, cleanups, volunteer work' },
   { icon: FiClipboard, label: 'Staff reviews and approves', sub: 'The city team verifies your proof' },
-  { icon: FiAward, label: 'Reward is paid through Stellar', sub: 'Sent from the tenant Testnet wallet' },
-  { icon: FiHash, label: 'Transaction hash becomes the proof', sub: 'Ledger-verified, publicly checkable' }
+  { icon: FiAward, label: 'Reward is sent to your wallet', sub: 'Paid after staff approval' },
+  { icon: FiHash, label: 'A public proof is saved', sub: 'Anyone can check the record' }
 ];
 
 export function CivicActionForm({ tenantSlug }: { tenantSlug: string }) {
@@ -103,7 +103,7 @@ export function CivicActionForm({ tenantSlug }: { tenantSlug: string }) {
         </div>
         <h2 className="mt-4 font-display text-[19px] font-bold text-[var(--ink)]">Submitted for review</h2>
         <p className="mt-2 text-sm font-medium leading-6 text-[var(--muted)]">
-          Staff will verify your evidence. Once approved, the reward is paid to your Stellar wallet.
+          Staff will check your proof. Once approved, the reward is sent to your wallet.
         </p>
 
         <div className="mt-4">
@@ -114,10 +114,10 @@ export function CivicActionForm({ tenantSlug }: { tenantSlug: string }) {
 
         {created.rewardMemo ? (
           <div className="mt-4">
-            <p className="group-label">Reference memo</p>
+            <p className="group-label">Reward note</p>
             <div className="flex items-center gap-3 rounded-[16px] bg-[var(--surface-2)] p-4">
               <p className="min-w-0 flex-1 break-all font-mono text-sm font-bold text-[var(--ink)]">{created.rewardMemo}</p>
-              <button type="button" onClick={copyMemo} className="app-icon-btn" aria-label="Copy reference memo">
+              <button type="button" onClick={copyMemo} className="app-icon-btn" aria-label="Copy reward note">
                 {copied ? <FiCheck aria-hidden="true" className="h-5 w-5 text-[#0f806d]" /> : <FiCopy aria-hidden="true" className="h-5 w-5" />}
               </button>
             </div>
@@ -209,7 +209,7 @@ export function CivicActionForm({ tenantSlug }: { tenantSlug: string }) {
 
           <p className="group-label mt-5">Reward wallet</p>
           <div className="field">
-            <label className="input-label" htmlFor="action-wallet">Stellar public key</label>
+            <label className="input-label" htmlFor="action-wallet">Wallet address</label>
             <Input
               id="action-wallet"
               className="font-mono"
@@ -219,10 +219,10 @@ export function CivicActionForm({ tenantSlug }: { tenantSlug: string }) {
               spellCheck={false}
               value={form.rewardDestinationPublicKey}
               onChange={(event) => update('rewardDestinationPublicKey', event.target.value)}
-              placeholder="G... Testnet wallet address"
+              placeholder="Wallet address"
             />
             <p className="mt-2 text-xs font-semibold leading-5 text-[var(--muted)]">
-              This is where the reward is sent after staff approval. The app never asks for your secret key.
+              This is where the reward is sent after staff approval. The app never asks for your private key.
             </p>
             <p className="mt-2 text-xs font-semibold leading-5 text-[var(--muted)]">
               Don&apos;t have a wallet?{' '}

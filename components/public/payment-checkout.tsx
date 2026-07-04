@@ -58,7 +58,7 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
     const payload = await response.json();
 
     if (!response.ok) {
-      setError(payload.error || 'Unable to verify transaction.');
+      setError(payload.error || 'Unable to check payment.');
       setIsVerifying(false);
       return;
     }
@@ -93,17 +93,17 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
 
         <div className="mt-3 flex items-center gap-3 rounded-[14px] border border-[var(--line)] p-3.5">
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">Memo</p>
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">Receipt note</p>
             <p className="mt-0.5 break-all font-mono text-[13px] font-semibold text-[var(--ink)]">{payment.memo}</p>
           </div>
-          <button type="button" onClick={() => copyValue('memo', payment.memo)} className="app-icon-btn" aria-label="Copy memo">
+          <button type="button" onClick={() => copyValue('memo', payment.memo)} className="app-icon-btn" aria-label="Copy receipt note">
             {copiedKey === 'memo' ? <FiCheck aria-hidden="true" className="h-5 w-5 text-[#0f806d]" /> : <FiCopy aria-hidden="true" className="h-5 w-5" />}
           </button>
         </div>
 
         <div className="mt-3 flex items-center gap-3 rounded-[14px] border border-[var(--line)] p-3.5">
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">Destination wallet</p>
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">Pay to</p>
             <p className="mt-0.5 break-all font-mono text-xs font-semibold text-[var(--ink)]">{payment.destinationPublicKey}</p>
           </div>
           <button type="button" onClick={() => copyValue('destination', payment.destinationPublicKey)} className="app-icon-btn" aria-label="Copy destination wallet address">
@@ -115,13 +115,13 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
       <Card>
         <h3 className="font-display text-[17px] font-bold text-[var(--ink)]">Pay with your wallet</h3>
         <p className="mt-1 text-[13px] font-medium leading-5 text-[var(--muted)]">
-          Scan or open the SEP-7 request with a Stellar Testnet wallet. Keep the memo unchanged so the receipt can be verified.
+          Scan or open this payment request in your wallet. Keep the receipt note unchanged so the payment can be matched.
         </p>
 
         <div className="mt-5 flex justify-center rounded-[16px] border border-[var(--line)] bg-[#fff] p-4">
           <img
             src={`/api/tenant/${tenantSlug}/payments/${payment.referenceCode}/qr`}
-            alt="SEP-7 payment QR code"
+            alt="Payment QR code"
             width={200}
             height={200}
             className="h-[200px] w-[200px]"
@@ -139,21 +139,21 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
               </>
             ) : (
               <>
-                <FiClipboard aria-hidden="true" className="h-4 w-4" /> Copy payment URI
+                <FiClipboard aria-hidden="true" className="h-4 w-4" /> Copy payment link
               </>
             )}
           </button>
           <p className="text-xs font-medium leading-5 text-[var(--muted)]">
-            Created {formatDate(payment.createdAt)}. The app only generates a request; your wallet signs and submits it.
+            Created {formatDate(payment.createdAt)}. CivicTrust prepares the payment; your wallet approves and sends it.
           </p>
         </div>
       </Card>
 
       {isVerified ? (
         <div className="rounded-[22px] bg-[color-mix(in_srgb,var(--heat-1)_14%,var(--surface))] p-5 shadow-sm">
-          <p className="text-[15px] font-bold text-[#0f806d]">Payment verified</p>
+          <p className="text-[15px] font-bold text-[#0f806d]">Payment confirmed</p>
           <p className="mt-1 text-[13px] font-medium leading-5 text-[#0f806d]">
-            Transaction hash and ledger data are permanently stored for this receipt.
+            This receipt now includes a permanent public payment ID.
           </p>
           <div className="mt-4">
             <StellarProof
@@ -170,20 +170,20 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
         </div>
       ) : (
         <Card>
-          <h3 className="font-display text-[17px] font-bold text-[var(--ink)]">Verify your payment</h3>
+          <h3 className="font-display text-[17px] font-bold text-[var(--ink)]">Check your payment</h3>
           <p className="mt-1 text-[13px] font-medium leading-5 text-[var(--muted)]">
-            Paste the transaction hash from your wallet, or scan Horizon using the payment memo.
+            Paste the payment ID from your wallet, or let CivicTrust search for the matching receipt note.
           </p>
 
           <form onSubmit={(event) => verifyPayment(event, 'hash')} className="mt-4">
             <div className="field">
-              <label className="input-label" htmlFor="transaction-hash">Transaction hash</label>
+              <label className="input-label" htmlFor="transaction-hash">Payment ID</label>
               <Input
                 id="transaction-hash"
                 required
                 value={transactionHash}
                 onChange={(event) => setTransactionHash(event.target.value)}
-                placeholder="Transaction hash"
+                placeholder="Paste payment ID"
                 className="break-all font-mono text-[13px]"
               />
             </div>
@@ -198,7 +198,7 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
             <div className="grid gap-2.5">
               <Button type="submit" className="btn-block" disabled={isVerifying}>
                 <FiCheckCircle aria-hidden="true" className="h-4 w-4" />
-                {isVerifying ? 'Verifying on Horizon...' : 'Verify transaction hash'}
+                {isVerifying ? 'Checking payment...' : 'Check payment ID'}
               </Button>
               <button
                 type="button"
@@ -206,7 +206,7 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
                 onClick={() => verifyPayment(undefined, 'scan')}
                 className="app-btn btn-outline disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <FiSearch aria-hidden="true" className="h-4 w-4" /> Scan Horizon by memo
+                <FiSearch aria-hidden="true" className="h-4 w-4" /> Search by receipt note
               </button>
             </div>
           </form>

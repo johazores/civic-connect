@@ -13,15 +13,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const memo = String(req.body?.memo || '').trim();
 
   if (!isValidStellarPublicKey(destinationPublicKey)) {
-    return res.status(400).json({ error: 'Destination public key must be a valid G... address.' });
+    return res.status(400).json({ error: 'Enter a valid wallet address.' });
   }
 
   if (!transactionHash) {
-    return res.status(400).json({ error: 'Transaction hash is required.' });
+    return res.status(400).json({ error: 'Payment ID is required.' });
   }
 
   if (!memo) {
-    return res.status(400).json({ error: 'Memo is required so the payment can be matched to the intent.' });
+    return res.status(400).json({ error: 'Receipt note is required so the payment can be matched.' });
   }
 
   const config = resolveStellarNetworkConfig({ network: 'TESTNET' });

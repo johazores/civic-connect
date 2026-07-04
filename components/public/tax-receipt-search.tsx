@@ -159,7 +159,7 @@ export function TaxReceiptSearch({ tenantSlug }: { tenantSlug: string }) {
                 <div className="mt-3 flex items-center justify-between gap-3 border-t border-[var(--line)] pt-3">
                   <p className="min-w-0 truncate text-[12px] font-semibold text-[var(--muted)]">
                     FY {receipt.taxYear} &middot; {receipt.amount} {receipt.assetCode} &middot;{' '}
-                    {receipt.transactionHash ? 'Stellar proof' : 'No proof yet'}
+                    {receipt.transactionHash ? 'Public proof' : 'No proof yet'}
                   </p>
                   <FiChevronRight aria-hidden="true" className="h-4 w-4 shrink-0 text-[var(--muted)]" />
                 </div>

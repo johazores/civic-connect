@@ -15,7 +15,7 @@ export default async function LedgerPage({ params }: { params: Promise<{ tenant:
   const ledger = await getCivicLedger(tenant.slug);
 
   return (
-    <PublicShell tenant={tenant} title="Civic ledger" subtitle="Every Stellar-backed civic record" backHref={`/${tenant.slug}`}>
+    <PublicShell tenant={tenant} title="Public records" subtitle="Civic payments, rewards, and receipts" backHref={`/${tenant.slug}`}>
       <main className="page-section">
         <LedgerExplorer ledger={ledger} />
       </main>

@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import { AboutClient } from '@/components/about/about-client';
 
 export const metadata: Metadata = {
-  title: 'How CivicTrust Works — Verifiable Civic Services on Stellar',
+  title: 'How CivicTrust Works - Civic Services With Public Proof',
   description:
-    'CivicTrust is a civic services platform where every service payment produces a permanent, publicly verifiable Stellar receipt. See how citizens, staff, and organizations use it, and why Stellar replaces opaque traditional payment records.'
+    'CivicTrust is a civic services platform where service payments can produce permanent public receipts. See how citizens, staff, and organizations use it.'
 };
 
 export default function AboutPage() {

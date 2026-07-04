@@ -12,6 +12,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   return res.status(200).json({
     publicKey: keypair.publicKey,
     secretKey: keypair.secretKey,
-    warning: 'Testnet only. Never use this playground to create or store Mainnet wallets.'
+    warning: 'Practice only. Never use this page to create or store real wallets.'
   });
 }

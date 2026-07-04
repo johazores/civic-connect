@@ -12,7 +12,7 @@ export default async function WalletSetupPage({ params }: { params: Promise<{ te
   }
 
   return (
-    <PublicShell tenant={tenant} title="Set up a wallet" subtitle="Receive civic rewards on Stellar" backHref={`/${tenant.slug}`}>
+    <PublicShell tenant={tenant} title="Set up a wallet" subtitle="Receive civic rewards" backHref={`/${tenant.slug}`}>
       <main className="page-section">
         <WalletOnboarding tenantSlug={tenant.slug} />
       </main>

@@ -5,7 +5,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const uri = String(req.query.uri || '').trim();
 
   if (!uri || !uri.startsWith('web+stellar:pay?')) {
-    return res.status(400).json({ error: 'Valid SEP-7 URI is required.' });
+    return res.status(400).json({ error: 'Valid payment link is required.' });
   }
 
   const png = await QRCode.toBuffer(uri, {

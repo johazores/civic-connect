@@ -20,9 +20,9 @@ export default async function TenantHomePage({ params }: { params: Promise<{ ten
   const base = `/${data.tenant.slug}`;
 
   const trustLinks: Array<{ href: string; title: string; description: string; Icon: IconType }> = [
-    { href: `${base}/payments`, title: 'Proof-of-payment', description: 'Fees generate permanent transaction receipts', Icon: FiCreditCard },
+    { href: `${base}/payments`, title: 'Payment receipts', description: 'Fees create public payment receipts', Icon: FiCreditCard },
     { href: `${base}/civic-actions`, title: 'Civic rewards', description: 'Verified participation can be rewarded', Icon: FiAward },
-    { href: `${base}/transparency`, title: 'Budget transparency', description: 'Disbursements linked to ledger records', Icon: FiHash },
+    { href: `${base}/transparency`, title: 'Budget transparency', description: 'Disbursements linked to public records', Icon: FiHash },
     { href: `${base}/tax-receipts`, title: 'Tax receipts', description: 'Property tax records with payment proof', Icon: FiFileText }
   ];
 
@@ -41,11 +41,11 @@ export default async function TenantHomePage({ params }: { params: Promise<{ ten
         />
 
         <div className="section-head">
-          <h2>Stellar civic trust</h2>
+          <h2>Civic trust</h2>
         </div>
         <div className="menu-group">
           <p className="border-b border-[var(--line)] px-4 py-3 text-[13px] font-medium leading-[1.5] text-[var(--muted)]">
-            Stellar adds proof: verifiable receipts for payments, rewards, records, and taxes.
+            CivicTrust adds public proof for payments, rewards, records, and taxes.
           </p>
           {trustLinks.map(({ Icon, ...item }) => (
             <Link key={item.href} href={item.href} className="menu-item">

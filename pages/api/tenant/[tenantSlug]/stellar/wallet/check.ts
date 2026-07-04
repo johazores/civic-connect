@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const wallet = await checkTenantStellarWallet(tenantSlug);
     return ok(res, wallet);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unable to check Stellar wallet.';
+    const message = error instanceof Error ? error.message : 'Unable to check wallet.';
     return badRequest(res, message);
   }
 }

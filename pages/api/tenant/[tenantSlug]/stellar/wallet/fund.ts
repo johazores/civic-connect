@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const wallet = await fundTenantTestnetWallet(tenantSlug);
     return ok(res, wallet);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unable to fund Stellar Testnet wallet.';
+    const message = error instanceof Error ? error.message : 'Unable to add play money.';
     return badRequest(res, message);
   }
 }

@@ -244,6 +244,7 @@ Start with:
 - `docs/admin-guide.md`
 - `docs/developer-guide.md`
 - `docs/deployment-guide.md`
+- `docs/demo-day-real-world-examples.md`
 - `docs/product-review.md`
 - `docs/stellarx-fit-review.md`
 - `docs/stellarx-implementation-plan.md`

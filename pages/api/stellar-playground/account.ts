@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const publicKey = String(req.body?.publicKey || '').trim();
 
   if (!isValidStellarPublicKey(publicKey)) {
-    return res.status(400).json({ error: 'Enter a valid Stellar public key that starts with G.' });
+    return res.status(400).json({ error: 'Enter a valid wallet address.' });
   }
 
   const config = resolveStellarNetworkConfig({ network: 'TESTNET' });

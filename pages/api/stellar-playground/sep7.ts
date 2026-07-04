@@ -10,10 +10,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const destination = String(req.body?.destination || '').trim();
   const amount = normalizeStellarAmount(String(req.body?.amount || '1'));
   const memo = String(req.body?.memo || `PLAY-${Date.now()}`).trim().slice(0, 28);
-  const message = String(req.body?.message || 'CivicTrust Testnet payment').trim().slice(0, 300);
+  const message = String(req.body?.message || 'CivicTrust practice payment').trim().slice(0, 300);
 
   if (!isValidStellarPublicKey(destination)) {
-    return res.status(400).json({ error: 'Enter a valid receiving public key that starts with G.' });
+    return res.status(400).json({ error: 'Enter a valid receiving wallet address.' });
   }
 
   if (amount === '0.0000000') {

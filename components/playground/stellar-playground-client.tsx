@@ -102,7 +102,7 @@ function KeyRow({ label, value, onCopy }: { label: string; value: string; onCopy
 function RawJson({ data }: { data: Record<string, unknown> }) {
   return (
     <details className="rounded-2xl bg-[var(--surface-2)] px-4 py-3">
-      <summary className="cursor-pointer text-[13px] font-bold text-[var(--navy)]">View raw JSON</summary>
+      <summary className="cursor-pointer text-[13px] font-bold text-[var(--navy)]">Show technical details</summary>
       <pre className="mt-2 max-h-64 overflow-auto rounded-xl bg-[var(--navy-900)] p-3 text-[11px] leading-4 text-[#cfe0f2]">
         {JSON.stringify(data, null, 2)}
       </pre>
@@ -113,8 +113,8 @@ function RawJson({ data }: { data: Record<string, unknown> }) {
 function SecretWarning() {
   return (
     <div className="rounded-2xl bg-[var(--ember-soft)] px-4 py-3 text-[13px] font-semibold leading-5 text-[var(--ember-600)]">
-      <strong>Testnet only:</strong> secret keys are shown here so you can learn how accounts work. Never paste a
-      Mainnet secret key into a browser UI.
+      <strong>Practice only:</strong> this screen shows a private key so you can learn. Never paste a real wallet
+      private key into a website.
     </div>
   );
 }
@@ -163,7 +163,7 @@ export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref
       setReceiver(result.publicKey);
       setAccountStatus(null);
       setVerification(null);
-    }, 'Generated a real Stellar Testnet keypair locally through the backend.');
+    }, 'Practice wallet created.');
   }
 
   async function fundWallet() {
@@ -171,7 +171,7 @@ export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref
     await runAction(async () => {
       const result = await postJson<{ account: Record<string, unknown> }>('/api/stellar-playground/fund-wallet', { publicKey });
       setAccountStatus(result.account);
-    }, 'Friendbot funding request completed.');
+    }, 'Play money added.');
   }
 
   async function checkWallet() {
@@ -179,7 +179,7 @@ export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref
     await runAction(async () => {
       const result = await postJson<{ account: Record<string, unknown> }>('/api/stellar-playground/account', { publicKey });
       setAccountStatus(result.account);
-    }, 'Loaded the account from Horizon Testnet.');
+    }, 'Wallet balance checked.');
   }
 
   async function createSep7() {
@@ -188,11 +188,11 @@ export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref
         destination: receiver,
         amount,
         memo,
-        message: 'CivicTrust Testnet payment playground'
+        message: 'CivicTrust practice payment'
       });
       setSep7(result);
       setVerification(null);
-    }, 'Created a real SEP-7 payment request.');
+    }, 'Payment request created.');
   }
 
   async function verifyTransaction() {
@@ -204,7 +204,7 @@ export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref
         memo: sep7?.memo || memo
       });
       setVerification(result.result);
-    }, 'Verification request completed through Horizon.');
+    }, 'Payment check completed.');
   }
 
   async function copy(value: string) {
@@ -213,10 +213,10 @@ export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref
   }
 
   const steps = [
-    { n: 1, label: 'Create', done: Boolean(wallet) },
-    { n: 2, label: 'Fund', done: Boolean(accountStatus) },
+    { n: 1, label: 'Wallet', done: Boolean(wallet) },
+    { n: 2, label: 'Add money', done: Boolean(accountStatus) },
     { n: 3, label: 'Pay', done: Boolean(sep7) },
-    { n: 4, label: 'Verify', done: Boolean(verification) }
+    { n: 4, label: 'Check', done: Boolean(verification) }
   ];
   const currentStep = steps.find((step) => !step.done)?.n ?? 4;
 
@@ -233,8 +233,8 @@ export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref
               <FiChevronLeft aria-hidden="true" className="h-5 w-5" />
             </Link>
             <div className="min-w-0">
-              <p className="appbar-title truncate">Stellar Testnet Lab</p>
-              <p className="app-subtitle truncate">SEP-7 · Horizon · receipts</p>
+              <p className="appbar-title truncate">Practice Payments</p>
+              <p className="app-subtitle truncate">Try a safe wallet payment</p>
             </div>
           </div>
         </header>
@@ -258,19 +258,19 @@ export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref
           <section className="card p-5">
             <StepHead
               icon={<FiShield className="h-5 w-5" />}
-              title="1. Create a Testnet wallet"
-              desc="Generate a learning keypair with public and secret keys."
-              more="A Stellar account has a public key that receives funds and a secret key that signs transactions. This button creates a learning wallet only."
+              title="1. Create a practice wallet"
+              desc="Make a safe wallet for testing. It is not real money."
+              more="A wallet has a shareable address for receiving money and a private key for approving payments. Keep private keys secret."
             />
             <div className="mt-4 grid gap-3">
               <button onClick={generateWallet} disabled={state.loading} className="btn btn-primary btn-block disabled:opacity-60">
-                <FiZap className="h-4 w-4" /> Generate Testnet wallet
+                <FiZap className="h-4 w-4" /> Create practice wallet
               </button>
               <SecretWarning />
               {wallet ? (
                 <div className="grid gap-3">
-                  <KeyRow label="Public key / address" value={wallet.publicKey} onCopy={() => copy(wallet.publicKey)} />
-                  <KeyRow label="Secret key / signer" value={wallet.secretKey} onCopy={() => copy(wallet.secretKey)} />
+                  <KeyRow label="Wallet address" value={wallet.publicKey} onCopy={() => copy(wallet.publicKey)} />
+                  <KeyRow label="Private key" value={wallet.secretKey} onCopy={() => copy(wallet.secretKey)} />
                 </div>
               ) : null}
             </div>
@@ -279,12 +279,12 @@ export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref
           <section className="card p-5">
             <StepHead
               icon={<FiRefreshCw className="h-5 w-5" />}
-              title="2. Fund and inspect the wallet"
-              desc="Friendbot sends fake XLM; Horizon reads the account."
-              more="Friendbot funds Testnet accounts with fake XLM. Horizon lets the backend read account balances and transaction history."
+              title="2. Add play money"
+              desc="Add free test money and check the wallet balance."
+              more="This uses a practice network, so the money has no real-world value."
             />
             <div className="field mb-0 mt-4">
-              <label className="input-label" htmlFor="pg-receiver">Receiving public key</label>
+              <label className="input-label" htmlFor="pg-receiver">Wallet address</label>
               <input
                 id="pg-receiver"
                 value={receiver}
@@ -295,10 +295,10 @@ export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2">
               <button onClick={fundWallet} disabled={state.loading || !receiver} className="btn btn-primary disabled:opacity-60">
-                Fund
+                Add money
               </button>
               <button onClick={checkWallet} disabled={state.loading || !receiver} className="btn btn-outline disabled:opacity-60">
-                Check
+                Check balance
               </button>
             </div>
             {accountStatus && account ? (
@@ -306,15 +306,15 @@ export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref
                 <div className="stat-grid">
                   <div className="stat">
                     <p className="sv">{account.balance ?? '—'}</p>
-                    <p className="sl">Balance (XLM)</p>
+                    <p className="sl">Balance</p>
                   </div>
                   <div className="stat">
                     <p className="sv" style={{ fontSize: '14px', lineHeight: '20px' }}>{account.sequence ?? '—'}</p>
-                    <p className="sl">Sequence</p>
+                    <p className="sl">Account step</p>
                   </div>
                 </div>
                 {account.accountId ? (
-                  <KeyRow label="Account" value={account.accountId} onCopy={() => copy(account.accountId as string)} />
+                  <KeyRow label="Wallet account" value={account.accountId} onCopy={() => copy(account.accountId as string)} />
                 ) : null}
                 <RawJson data={accountStatus} />
               </div>
@@ -324,16 +324,16 @@ export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref
           <section className="card p-5">
             <StepHead
               icon={<FiSend className="h-5 w-5" />}
-              title="3. Create a SEP-7 payment"
-              desc="Build a web+stellar:pay request a wallet can scan."
-              more="The backend creates a web+stellar:pay URI. A wallet reads the URI, signs the payment, and submits it to Testnet."
+              title="3. Make a payment request"
+              desc="Create a QR code that a wallet can scan."
+              more="A wallet scans the code, shows the payment details, and asks the user to approve."
             />
             <div className="field mb-0 mt-4">
-              <label className="input-label" htmlFor="pg-amount">Amount XLM</label>
+              <label className="input-label" htmlFor="pg-amount">Amount</label>
               <input id="pg-amount" value={amount} onChange={(event) => setAmount(event.target.value)} className="input" />
             </div>
             <div className="field mb-0 mt-4">
-              <label className="input-label" htmlFor="pg-memo">Memo</label>
+              <label className="input-label" htmlFor="pg-memo">Receipt note</label>
               <input
                 id="pg-memo"
                 value={memo}
@@ -347,28 +347,28 @@ export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref
               disabled={state.loading || !receiver}
               className="btn btn-primary btn-block mt-4 disabled:opacity-60"
             >
-              Create SEP-7 QR
+              Create payment QR
             </button>
             {sep7 ? (
               <div className="mt-4 grid gap-3">
                 {qrSrc ? (
                   <div className="mx-auto rounded-2xl border border-[var(--line)] bg-[var(--surface)] p-3 shadow-sm">
-                    <img src={qrSrc} alt="SEP-7 payment QR code" className="h-[200px] w-[200px]" />
+                    <img src={qrSrc} alt="Payment QR code" className="h-[200px] w-[200px]" />
                   </div>
                 ) : null}
                 <div className="rounded-2xl bg-[var(--surface-2)] p-4">
                   <p className="section-eyebrow">Payment request</p>
                   <p className="mt-2 text-[13px] font-medium leading-5 text-[var(--muted)]">
-                    Scan with a Stellar wallet in Testnet mode, or copy the URI.
+                    Scan this with a practice wallet, or copy the payment link.
                   </p>
                   <div className="mt-3 grid gap-1.5 font-mono text-xs leading-5 text-[var(--ink-2)]">
                     <p className="break-all"><strong>To:</strong> {shortKey(sep7.destination)}</p>
                     <p className="break-all"><strong>Amount:</strong> {sep7.amount} XLM</p>
-                    <p className="break-all"><strong>Memo:</strong> {sep7.memo}</p>
+                    <p className="break-all"><strong>Receipt note:</strong> {sep7.memo}</p>
                   </div>
                 </div>
                 <button onClick={() => copy(sep7.sep7Uri)} className="btn btn-outline btn-block">
-                  <FiCopy className="h-4 w-4" /> Copy URI
+                  <FiCopy className="h-4 w-4" /> Copy payment link
                 </button>
               </div>
             ) : null}
@@ -377,17 +377,17 @@ export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref
           <section className="card p-5">
             <StepHead
               icon={<FiCheckCircle className="h-5 w-5" />}
-              title="4. Verify the transaction"
-              desc="Paste the transaction hash to confirm it on Horizon."
-              more="After payment, paste the transaction hash. The backend checks Horizon for destination, amount, asset, memo, and success status."
+              title="4. Check the payment"
+              desc="Paste the payment ID to confirm that it went through."
+              more="After a wallet sends the payment, it gives a long payment ID. Paste it here so CivicTrust can check the amount, address, and receipt note."
             />
             <div className="field mb-0 mt-4">
-              <label className="input-label" htmlFor="pg-hash">Transaction hash</label>
+              <label className="input-label" htmlFor="pg-hash">Payment ID</label>
               <input
                 id="pg-hash"
                 value={transactionHash}
                 onChange={(event) => setTransactionHash(event.target.value)}
-                placeholder="64-character transaction hash"
+                placeholder="Paste payment ID"
                 className="input break-all font-mono"
               />
             </div>
@@ -396,7 +396,7 @@ export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref
               disabled={state.loading || !transactionHash}
               className="btn btn-primary btn-block mt-4 disabled:opacity-60"
             >
-              <FiExternalLink className="h-4 w-4" /> Verify with Horizon
+              <FiExternalLink className="h-4 w-4" /> Check payment
             </button>
             {verification && verified ? (
               <div className="mt-4 grid gap-3">
@@ -408,7 +408,7 @@ export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref
                   }`}
                 >
                   {verified.verified ? <FiCheckCircle className="h-3.5 w-3.5" /> : <FiAlertTriangle className="h-3.5 w-3.5" />}
-                  {verified.verified ? 'Payment verified' : 'Not verified'}
+                  {verified.verified ? 'Payment confirmed' : 'Payment not found'}
                 </span>
                 {verified.failureReason ? (
                   <p className="rounded-2xl bg-[var(--ember-soft)] px-4 py-3 text-[13px] font-semibold leading-5 text-[var(--ember-600)]">
@@ -416,15 +416,15 @@ export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref
                   </p>
                 ) : null}
                 {verified.transactionHash ? (
-                  <KeyRow label="Transaction hash" value={verified.transactionHash} onCopy={() => copy(verified.transactionHash as string)} />
+                  <KeyRow label="Payment ID" value={verified.transactionHash} onCopy={() => copy(verified.transactionHash as string)} />
                 ) : null}
                 {verified.payerPublicKey ? (
-                  <KeyRow label="Payer" value={verified.payerPublicKey} onCopy={() => copy(verified.payerPublicKey as string)} />
+                  <KeyRow label="Paid from" value={verified.payerPublicKey} onCopy={() => copy(verified.payerPublicKey as string)} />
                 ) : null}
                 {verified.ledger || verified.paidAt ? (
                   <div className="rounded-2xl bg-[var(--surface-2)] p-4 text-[13px] font-medium leading-6 text-[var(--ink-2)]">
-                    {verified.ledger ? <p><strong>Ledger:</strong> {verified.ledger}</p> : null}
-                    {verified.paidAt ? <p className="break-all"><strong>Paid at:</strong> {verified.paidAt}</p> : null}
+                    {verified.ledger ? <p><strong>Public record number:</strong> {verified.ledger}</p> : null}
+                    {verified.paidAt ? <p className="break-all"><strong>Paid on:</strong> {verified.paidAt}</p> : null}
                   </div>
                 ) : null}
                 <RawJson data={verification} />
@@ -433,10 +433,10 @@ export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref
           </section>
 
           <section className="card p-5">
-            <h2 className="font-display text-[17px] font-bold tracking-[-0.01em] text-[var(--ink)]">Where smart contracts fit</h2>
+            <h2 className="font-display text-[17px] font-bold tracking-[-0.01em] text-[var(--ink)]">What comes next</h2>
             <p className="mt-2 text-[13px] font-medium leading-5 text-[var(--muted)]">
-              CivicTrust uses Stellar payments and Horizon receipts today. Soroban smart contracts come later for
-              programmable rewards, budget rules, or claim windows.
+              CivicTrust already checks payments and receipts. Later, it can add automatic rules for rewards, budgets,
+              and claim windows.
             </p>
             <a
               href="https://developers.stellar.org/docs/build/smart-contracts/getting-started/hello-world"
@@ -444,7 +444,7 @@ export function StellarPlaygroundClient({ backHref = '/metro-city' }: { backHref
               rel="noreferrer"
               className="btn btn-outline btn-block mt-4"
             >
-              Smart contract quickstart <FiExternalLink className="h-4 w-4" />
+              Learn about future automation <FiExternalLink className="h-4 w-4" />
             </a>
           </section>
         </main>

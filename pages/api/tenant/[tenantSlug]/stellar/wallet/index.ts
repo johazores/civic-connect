@@ -36,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     return methodNotAllowed(res);
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unable to manage Stellar wallet.';
+    const message = error instanceof Error ? error.message : 'Unable to manage wallet.';
     return badRequest(res, message);
   }
 }

@@ -38,7 +38,7 @@ export function HeroSection({
           </h2>
           <p className="mt-1.5 line-clamp-2 text-[13px] font-medium leading-[1.5] text-[#b9d0ea]">{tenant.description}</p>
           <div className="mt-4 flex gap-[18px] border-t border-[rgba(255,255,255,.14)] pt-4">
-            <PulseStat value="SEP-7" label="Wallet pay" />
+            <PulseStat value="QR" label="Wallet pay" />
             <PulseStat value="24/7" label="Tracking" />
             <PulseStat value={String(categoriesCount)} label="Services" />
           </div>

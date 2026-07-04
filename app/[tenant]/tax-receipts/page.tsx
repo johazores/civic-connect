@@ -15,7 +15,7 @@ export default async function TaxReceiptsPage({ params }: { params: Promise<{ te
     <PublicShell
       tenant={tenant}
       title="Tax receipts"
-      subtitle="Verify property tax records on Stellar"
+      subtitle="Check property tax records"
       backHref={`/${tenant.slug}`}
     >
       <main className="page-section">

@@ -266,7 +266,7 @@ export function CitizenDashboard({
           </span>
           <span className="mi-tx">
             <b>Pay service fee</b>
-            <span>Stellar-verifiable payment receipts</span>
+            <span>Payment receipts with public proof</span>
           </span>
           <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
         </Link>

@@ -238,13 +238,13 @@ const adminTabMeta: Record<MainTab, { label: string; title: string; description:
   },
   payments: {
     label: 'Payments',
-    title: 'Stellar payments',
+    title: 'Service payments',
     description: 'Verify fee intents and receipts'
   },
   'stellar-programs': {
     label: 'Civic trust',
     title: 'Civic programs',
-    description: 'Rewards, ledger, and tax receipts'
+    description: 'Rewards, public records, and tax receipts'
   },
   content: {
     label: 'Content',
@@ -948,7 +948,7 @@ function PaymentDashboard({ tenantSlug }: { tenantSlug: string }) {
         return;
       }
 
-      setError(payload.error || 'Unable to load Stellar payments.');
+      setError(payload.error || 'Unable to load payments.');
       setIsLoading(false);
       return;
     }
@@ -993,7 +993,7 @@ function PaymentDashboard({ tenantSlug }: { tenantSlug: string }) {
           <input
             value={filters.search}
             onChange={(event) => updateFilters('search', event.target.value)}
-            placeholder="Search payer, reference, hash"
+            placeholder="Search payer, reference, or payment ID"
             aria-label="Search payments"
           />
         </div>
@@ -1115,7 +1115,7 @@ function PaymentDashboard({ tenantSlug }: { tenantSlug: string }) {
           <div className="menu-group mt-4">
             <InfoRow label="Payer" value={selectedPayment.payerName} note={selectedPayment.payerEmail || 'No email'} />
             <InfoRow label="Amount" value={`${selectedPayment.amount} ${selectedPayment.assetCode}`} note="Service fee" />
-            <InfoRow label="Ledger" value={selectedPayment.ledger ? String(selectedPayment.ledger) : 'Pending'} note="Horizon verification" />
+            <InfoRow label="Public record" value={selectedPayment.ledger ? String(selectedPayment.ledger) : 'Pending'} note="Payment check" />
             <InfoRow
               label="Created"
               value={formatDate(selectedPayment.createdAt)}
@@ -1125,7 +1125,7 @@ function PaymentDashboard({ tenantSlug }: { tenantSlug: string }) {
 
           {selectedPayment.transactionHash ? (
             <div className="rounded-[16px] bg-[var(--surface-2)] p-4">
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[var(--muted)]">Transaction hash</p>
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[var(--muted)]">Payment ID</p>
               <p className="mt-2 break-all font-mono text-xs font-semibold leading-5 text-[var(--ink-2)]">{selectedPayment.transactionHash}</p>
             </div>
           ) : null}
@@ -1516,7 +1516,7 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
     const payload = await response.json();
 
     if (!response.ok) {
-      setError(payload.error || 'Unable to load Stellar wallet settings.');
+      setError(payload.error || 'Unable to load wallet settings.');
       return;
     }
 
@@ -1541,7 +1541,7 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
     const payload = await response.json();
 
     if (!response.ok) {
-      setError(payload.error || 'Unable to update Stellar wallet.');
+      setError(payload.error || 'Unable to update wallet.');
       setIsBusy(false);
       return;
     }
@@ -1569,13 +1569,13 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
 
   return (
     <div>
-      <p className="group-label">Stellar wallet</p>
+      <p className="group-label">LGU wallet</p>
       <Card className="mb-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="font-display text-[15px] font-bold text-[var(--ink)]">Receiving wallet</h3>
+            <h3 className="font-display text-[15px] font-bold text-[var(--ink)]">LGU receiving wallet</h3>
             <p className="mt-1 text-xs font-medium leading-5 text-[var(--muted)]">
-              {wallet ? `${niceLabel(wallet.network)} · Secret ${wallet.hasStoredSecret ? 'encrypted' : 'not stored'}` : 'Official payment address for this tenant.'}
+              {wallet ? `${wallet.network === 'TESTNET' ? 'Practice network' : 'Live network'} - Private key ${wallet.hasStoredSecret ? 'protected' : 'not stored'}` : 'Official payment address for this LGU.'}
             </p>
           </div>
           <span className="status-pill shrink-0 whitespace-nowrap bg-[var(--surface-2)] text-[var(--ink-2)]">
@@ -1600,7 +1600,7 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
             {wallet?.receivingPublicKey || 'Not configured yet.'}
           </p>
           {hasWallet ? (
-            <button type="button" onClick={copyKey} className="app-icon-btn" aria-label="Copy receiving public key">
+            <button type="button" onClick={copyKey} className="app-icon-btn" aria-label="Copy wallet address">
               {copied ? <FiCheck aria-hidden="true" className="h-5 w-5 text-[#0f806d]" /> : <FiCopy aria-hidden="true" className="h-5 w-5" />}
             </button>
           ) : null}
@@ -1617,15 +1617,15 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
         {!hasWallet ? (
           <>
             <p className="mt-4 text-[13px] font-medium leading-5 text-[var(--muted)]">
-              Creates a real Testnet account, encrypts the secret key server-side, and funds it with Friendbot.
+              Creates a practice wallet and adds play money for testing.
             </p>
             <Button
               type="button"
               disabled={isBusy}
-              onClick={() => walletAction('/generate', { fund: true }, 'Generated and funded a real Stellar Testnet receiving wallet.')}
+              onClick={() => walletAction('/generate', { fund: true }, 'Practice wallet created and funded.')}
               className="btn-block mt-4"
             >
-              Generate Testnet Wallet
+              Create practice wallet
             </Button>
           </>
         ) : null}
@@ -1636,22 +1636,22 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
               <FiSettings aria-hidden="true" className="h-5 w-5" />
             </span>
             <span className="mi-tx">
-              <b>Advanced configuration</b>
-              <span>Import keys, network, Horizon endpoints</span>
+              <b>Advanced wallet settings</b>
+              <span>Import a wallet or change network services</span>
             </span>
             <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
           </button>
           <button
             type="button"
             disabled={isBusy}
-            onClick={() => walletAction('/check', {}, 'Wallet status checked on Horizon.')}
+            onClick={() => walletAction('/check', {}, 'Wallet checked.')}
             className="menu-item disabled:opacity-50"
           >
             <span className="mi-ic">
               <FiRefreshCw aria-hidden="true" className="h-5 w-5" />
             </span>
             <span className="mi-tx">
-              <b>Check Horizon status</b>
+              <b>Check wallet</b>
               <span>{wallet?.lastCheckedAt ? `Last checked ${formatDate(wallet.lastCheckedAt)}` : 'Not checked yet'}</span>
             </span>
             <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
@@ -1659,15 +1659,15 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
           <button
             type="button"
             disabled={isBusy || !hasWallet}
-            onClick={() => walletAction('/fund', {}, 'Friendbot funding request completed.')}
+            onClick={() => walletAction('/fund', {}, 'Play money added.')}
             className="menu-item disabled:opacity-50"
           >
             <span className="mi-ic">
               <FiDroplet aria-hidden="true" className="h-5 w-5" />
             </span>
             <span className="mi-tx">
-              <b>Fund with Friendbot</b>
-              <span>{wallet?.lastFundedAt ? `Funded ${formatDate(wallet.lastFundedAt)}` : 'Request Testnet XLM'}</span>
+              <b>Add play money</b>
+              <span>{wallet?.lastFundedAt ? `Added ${formatDate(wallet.lastFundedAt)}` : 'Add test funds'}</span>
             </span>
             <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
           </button>
@@ -1675,7 +1675,7 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
       </Card>
 
       {advancedSheet.isOpen ? (
-        <BottomSheet title="Advanced configuration" sub="Import wallet and network endpoints" anim={advancedSheet.anim} onClose={advancedSheet.close}>
+        <BottomSheet title="Advanced wallet settings" sub="Import wallet and network services" anim={advancedSheet.anim} onClose={advancedSheet.close}>
           {error || success ? (
             <div className="mb-4 grid gap-3">
               <ErrorBanner message={error} />
@@ -1684,43 +1684,43 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
           ) : null}
 
           <div className="field">
-            <label className="input-label" htmlFor="wallet-public-key">Existing public key import</label>
+            <label className="input-label" htmlFor="wallet-public-key">Wallet address</label>
             <Input
               id="wallet-public-key"
               value={publicKey}
               onChange={(event) => setPublicKey(event.target.value)}
-              placeholder="G... account address"
+              placeholder="Wallet address"
             />
             <p className="mt-2 text-xs font-medium leading-4 text-[var(--muted)]">Normal setup fills this automatically after generation.</p>
           </div>
           <div className="field">
-            <label className="input-label" htmlFor="wallet-secret-key">Existing secret key import</label>
+            <label className="input-label" htmlFor="wallet-secret-key">Private key import</label>
             <Input
               id="wallet-secret-key"
               type="password"
               value={secretKey}
               onChange={(event) => setSecretKey(event.target.value)}
-              placeholder="Optional S... secret seed"
+              placeholder="Optional private key"
             />
-            <p className="mt-2 text-xs font-medium leading-4 text-[var(--muted)]">Encrypted server-side and never returned by the API.</p>
+            <p className="mt-2 text-xs font-medium leading-4 text-[var(--muted)]">Stored privately and never shown after saving.</p>
           </div>
           <div className="field">
             <label className="input-label" htmlFor="wallet-network">Network</label>
             <Select id="wallet-network" value={network} onChange={(event) => setNetwork(event.target.value)}>
-              <option value="TESTNET">Testnet</option>
-              <option value="MAINNET">Mainnet-ready config</option>
+              <option value="TESTNET">Practice network</option>
+              <option value="MAINNET">Live network setup</option>
             </Select>
           </div>
           <div className="field">
-            <label className="input-label" htmlFor="wallet-passphrase">Network passphrase</label>
+            <label className="input-label" htmlFor="wallet-passphrase">Network safety phrase</label>
             <Input id="wallet-passphrase" value={networkPassphrase} onChange={(event) => setNetworkPassphrase(event.target.value)} />
           </div>
           <div className="field">
-            <label className="input-label" htmlFor="wallet-horizon">Horizon URL</label>
+            <label className="input-label" htmlFor="wallet-horizon">Public record service URL</label>
             <Input id="wallet-horizon" value={horizonUrl} onChange={(event) => setHorizonUrl(event.target.value)} />
           </div>
           <div className="field">
-            <label className="input-label" htmlFor="wallet-friendbot">Friendbot URL</label>
+            <label className="input-label" htmlFor="wallet-friendbot">Test funding service URL</label>
             <Input id="wallet-friendbot" value={friendbotUrl} onChange={(event) => setFriendbotUrl(event.target.value)} />
           </div>
 
@@ -1728,17 +1728,17 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
             <Button
               type="button"
               disabled={isBusy}
-              onClick={() => walletAction('', { publicKey, secretKey, network, horizonUrl, friendbotUrl, networkPassphrase }, 'Stellar wallet settings saved.')}
+              onClick={() => walletAction('', { publicKey, secretKey, network, horizonUrl, friendbotUrl, networkPassphrase }, 'Wallet settings saved.')}
             >
-              Save advanced config
+              Save advanced settings
             </Button>
             <button
               type="button"
               disabled={isBusy}
-              onClick={() => walletAction('/generate', { fund: true }, 'Generated and funded a real Stellar Testnet receiving wallet.')}
+              onClick={() => walletAction('/generate', { fund: true }, 'Practice wallet created and funded.')}
               className="app-btn btn-outline disabled:opacity-60"
             >
-              Generate new Testnet wallet
+              Create new practice wallet
             </button>
           </div>
         </BottomSheet>

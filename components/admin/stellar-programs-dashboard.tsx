@@ -320,7 +320,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
     ]);
 
     if (!actionsResponse.ok || !transparencyResponse.ok || !taxResponse.ok) {
-      setError(actionsPayload.error || transparencyPayload.error || taxPayload.error || 'Unable to load Stellar civic programs.');
+      setError(actionsPayload.error || transparencyPayload.error || taxPayload.error || 'Unable to load civic programs.');
       setIsLoading(false);
       return;
     }
@@ -376,7 +376,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
     const payload = await response.json();
 
     if (!response.ok) {
-      setError(payload.error || 'Unable to send Stellar reward.');
+      setError(payload.error || 'Unable to send reward.');
       return;
     }
 
@@ -458,7 +458,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
 
     setSuccess(
       payload.data.transactionHash
-        ? `Disbursement published on Stellar · ${shortHash(String(payload.data.transactionHash || ''))}`
+        ? `Disbursement sent - ${shortHash(String(payload.data.transactionHash || ''))}`
         : approvalSuccess(payload.data.approvalSummary)
     );
     await loadAll();
@@ -561,7 +561,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
       <div className="stat-grid">
         <StatCard label="Submitted actions" value={actions.length} />
         <StatCard label="Approved rewards" value={approvedActions} />
-        <StatCard label="Ledger records" value={verifiedTransparency} />
+        <StatCard label="Public records" value={verifiedTransparency} />
         <StatCard label="Tax receipts" value={stellarTaxReceipts} />
       </div>
 
@@ -569,7 +569,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
         {(
           [
             ['actions', 'Rewards'],
-            ['transparency', 'Ledger'],
+            ['transparency', 'Public records'],
             ['tax', 'Receipts']
           ] as Array<['actions' | 'transparency' | 'tax', string]>
         ).map(([key, label]) => (
@@ -695,7 +695,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
               <div className="eart">
                 <FiHash aria-hidden="true" className="h-9 w-9" />
               </div>
-              <h3>No ledger records</h3>
+              <h3>No public records</h3>
               <p>Create the first public transparency record.</p>
             </div>
           ) : null}
@@ -802,21 +802,21 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
             <div className="mt-4 rounded-[16px] bg-[color-mix(in_srgb,var(--heat-1)_14%,var(--surface))] p-4">
               {selectedAction.rewardTransactionHash ? (
                 <div className="min-w-0">
-                  <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#0f806d]">Reward transaction</p>
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#0f806d]">Reward payment ID</p>
                   <p className="mt-2 break-all font-mono text-xs font-semibold leading-5 text-[#0f806d]">{selectedAction.rewardTransactionHash}</p>
                 </div>
               ) : null}
 
               {selectedAction.rewardClaimableBalanceId ? (
                 <div className="mt-3 min-w-0">
-                  <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#0f806d]">Claimable balance ID</p>
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#0f806d]">Claim code</p>
                   <p className="mt-2 break-all font-mono text-xs font-semibold leading-5 text-[#0f806d]">{selectedAction.rewardClaimableBalanceId}</p>
                 </div>
               ) : null}
 
               {selectedAction.proofDigest ? (
                 <div className="mt-3 min-w-0">
-                  <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#0f806d]">Proof digest</p>
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#0f806d]">Record check code</p>
                   <p className="mt-2 break-all font-mono text-xs font-semibold leading-5 text-[#0f806d]">{selectedAction.proofDigest}</p>
                 </div>
               ) : null}
@@ -829,7 +829,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
                   className="app-btn btn-outline btn-compact mt-3"
                 >
                   <FiExternalLink aria-hidden="true" className="h-4 w-4" />
-                  View on Stellar Expert
+                  Open public proof
                 </a>
               ) : null}
             </div>
@@ -846,7 +846,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
                 />
               </div>
               <div className="field">
-                <label className="input-label" htmlFor="action-reward-asset">Asset code</label>
+                <label className="input-label" htmlFor="action-reward-asset">Currency code</label>
                 <Input
                   id="action-reward-asset"
                   value={selectedAction.rewardAssetCode}
@@ -855,14 +855,14 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
               </div>
             </div>
             <div className="field">
-              <label className="input-label" htmlFor="action-reward-issuer">Asset issuer</label>
+              <label className="input-label" htmlFor="action-reward-issuer">Token issuer address</label>
               <Input
                 id="action-reward-issuer"
                 value={selectedAction.rewardAssetIssuer || ''}
                 onChange={(event) => patchAction(selectedAction.id, 'rewardAssetIssuer', event.target.value)}
                 placeholder="Required for non-XLM assets"
               />
-              <p className="mt-2 text-xs font-medium leading-4 text-[var(--muted)]">Needed for USDC or other custom assets.</p>
+              <p className="mt-2 text-xs font-medium leading-4 text-[var(--muted)]">Needed for USDC or another token.</p>
             </div>
             <div className="field">
               <label className="input-label" htmlFor="action-reward-wallet">Reward wallet</label>
@@ -879,7 +879,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
                 {(
                   [
                     ['DIRECT', 'Direct payment'],
-                    ['CLAIMABLE', 'Claimable balance']
+                    ['CLAIMABLE', 'Reserved reward']
                   ] as Array<[PayoutMethod, string]>
                 ).map(([key, label]) => (
                   <button
@@ -894,7 +894,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
                 ))}
               </div>
               <p className="mt-2 text-xs font-medium leading-4 text-[var(--muted)]">
-                Reward waits on-chain until the citizen claims it — good when they don&apos;t have a wallet yet.
+                Reward is reserved until the citizen claims it. Good when they are still setting up a wallet.
               </p>
             </div>
             <div className="field">
@@ -937,7 +937,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
       {transparencySheet.isOpen ? (
         <BottomSheet
           title={editingTransparencyId ? 'Edit record' : 'Create record'}
-          sub="Transparency ledger"
+          sub="Public spending record"
           anim={transparencySheet.anim}
           onClose={transparencySheet.close}
         >
@@ -1008,14 +1008,14 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
               />
             </div>
             <div className="field">
-              <label className="input-label" htmlFor="ledger-recipient-key">Recipient public key</label>
+              <label className="input-label" htmlFor="ledger-recipient-key">Recipient wallet address</label>
               <Input
                 id="ledger-recipient-key"
                 value={transparencyForm.recipientPublicKey}
                 onChange={(event) => setTransparencyForm({ ...transparencyForm, recipientPublicKey: event.target.value })}
                 placeholder="G... address"
               />
-              <p className="mt-2 text-xs font-medium leading-4 text-[var(--muted)]">Used for the Stellar disbursement.</p>
+              <p className="mt-2 text-xs font-medium leading-4 text-[var(--muted)]">Used for this payment.</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="field">
@@ -1027,7 +1027,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
                 />
               </div>
               <div className="field">
-                <label className="input-label" htmlFor="ledger-asset">Asset code</label>
+                <label className="input-label" htmlFor="ledger-asset">Currency code</label>
                 <Input
                   id="ledger-asset"
                   value={transparencyForm.assetCode}
@@ -1036,7 +1036,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
               </div>
             </div>
             <div className="field">
-              <label className="input-label" htmlFor="ledger-issuer">Asset issuer</label>
+              <label className="input-label" htmlFor="ledger-issuer">Token issuer address</label>
               <Input
                 id="ledger-issuer"
                 value={transparencyForm.assetIssuer}
@@ -1045,12 +1045,12 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
               />
             </div>
             <div className="field">
-              <label className="input-label" htmlFor="ledger-hash">Transaction hash</label>
+              <label className="input-label" htmlFor="ledger-hash">Payment ID</label>
               <Input
                 id="ledger-hash"
                 value={transparencyForm.transactionHash}
                 onChange={(event) => setTransparencyForm({ ...transparencyForm, transactionHash: event.target.value })}
-                placeholder="Optional existing hash"
+                placeholder="Optional payment ID"
               />
             </div>
             <div className="field">
@@ -1065,7 +1065,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
 
             {editingTransparencyEntry?.transactionHash ? (
               <div className="mb-4 rounded-[16px] bg-[var(--surface-2)] p-4">
-                <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[var(--muted)]">On-chain transaction</p>
+                <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[var(--muted)]">Public payment ID</p>
                 <p className="mt-2 break-all font-mono text-xs font-semibold leading-5 text-[var(--ink-2)]">{editingTransparencyEntry.transactionHash}</p>
               </div>
             ) : null}
@@ -1089,7 +1089,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
                       ? editingTransparencyEntry.approvalSummary.approvedByCurrentUser && editingTransparencyEntry.approvalSummary.remainingApprovals > 0
                         ? 'Approved by you'
                         : 'Approve release'
-                      : 'Send Stellar disbursement'}
+                      : 'Send public release'}
                   </button>
                   <button
                     type="button"
@@ -1174,7 +1174,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
               </div>
             </div>
             <div className="field">
-              <label className="input-label" htmlFor="tax-asset">Asset code</label>
+              <label className="input-label" htmlFor="tax-asset">Currency code</label>
               <Input
                 id="tax-asset"
                 value={taxForm.assetCode}
@@ -1182,7 +1182,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
               />
             </div>
             <div className="field">
-              <label className="input-label" htmlFor="tax-ledger">Ledger number</label>
+              <label className="input-label" htmlFor="tax-ledger">Public record number</label>
               <Input
                 id="tax-ledger"
                 value={taxForm.ledger}
@@ -1190,14 +1190,14 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
               />
             </div>
             <div className="field">
-              <label className="input-label" htmlFor="tax-hash">Transaction hash</label>
+              <label className="input-label" htmlFor="tax-hash">Payment ID</label>
               <Input
                 id="tax-hash"
                 value={taxForm.transactionHash}
                 onChange={(event) => setTaxForm({ ...taxForm, transactionHash: event.target.value })}
-                placeholder="Verified Stellar hash"
+                placeholder="Verified payment ID"
               />
-              <p className="mt-2 text-xs font-medium leading-4 text-[var(--muted)]">Links this receipt to an on-chain payment.</p>
+              <p className="mt-2 text-xs font-medium leading-4 text-[var(--muted)]">Links this receipt to a confirmed public payment.</p>
             </div>
 
             <div className="grid gap-2.5 pb-2">

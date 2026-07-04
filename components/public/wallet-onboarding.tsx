@@ -77,12 +77,11 @@ export function WalletOnboarding({ tenantSlug }: { tenantSlug: string }) {
         <p className="section-eyebrow">Why a wallet</p>
         <h2 className="mt-3 font-display text-xl font-bold text-[var(--ink)]">Your wallet is how you receive rewards</h2>
         <p className="mt-2 text-sm font-medium leading-6 text-[var(--ink-2)]">
-          Civic rewards and disbursements are paid on Stellar. You share your <b>public key</b> (starts with G…) to receive
-          funds. Your <b>secret key</b> (starts with S…) signs transactions and must never be shared — not even with the city.
+          Share your wallet address so rewards can reach you. Never share your private key; anyone with it can move your money.
         </p>
         <div className="mt-4 grid gap-3">
-          <KeyExplainer icon={<FiKey className="h-4 w-4" />} tone="navy" title="Public key (G…)" body="Safe to share. This is where rewards arrive." />
-          <KeyExplainer icon={<FiAlertTriangle className="h-4 w-4" />} tone="ember" title="Secret key (S…)" body="Never share it. Anyone with it controls your funds." />
+          <KeyExplainer icon={<FiKey className="h-4 w-4" />} tone="navy" title="Wallet address" body="Safe to share. This is where rewards arrive." />
+          <KeyExplainer icon={<FiAlertTriangle className="h-4 w-4" />} tone="ember" title="Private key" body="Never share it. Anyone with it controls your money." />
         </div>
       </Card>
 
@@ -92,31 +91,30 @@ export function WalletOnboarding({ tenantSlug }: { tenantSlug: string }) {
             <FiZap className="h-5 w-5" />
           </span>
           <div className="min-w-0">
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">Step 1 · Learn</p>
-            <h3 className="font-display text-lg font-bold text-[var(--ink)]">Create a practice Testnet wallet</h3>
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">Step 1</p>
+            <h3 className="font-display text-lg font-bold text-[var(--ink)]">Create a practice wallet</h3>
           </div>
         </div>
         <p className="mt-3 text-[13px] font-medium leading-6 text-[var(--muted)]">
-          This generates a free Stellar <b>Testnet</b> wallet for learning. For real use, install a wallet app like Freighter or
-          Lobstr and keep your secret key offline.
+          This creates a free practice wallet. For real money, use a trusted wallet app and keep your private key offline.
         </p>
         <Button onClick={generate} disabled={loading === 'gen'} className="btn-block mt-4">
-          <FiKey className="h-4 w-4" /> {loading === 'gen' ? 'Creating…' : wallet ? 'Create another wallet' : 'Create Testnet wallet'}
+          <FiKey className="h-4 w-4" /> {loading === 'gen' ? 'Creating...' : wallet ? 'Create another wallet' : 'Create practice wallet'}
         </Button>
 
         {wallet ? (
           <div className="mt-4 grid gap-3">
             <div className="rounded-[16px] bg-[var(--surface-2)] p-4">
-              <p className="text-[10.5px] font-extrabold uppercase tracking-[0.12em] text-[var(--muted)]">Public key · share this</p>
+              <p className="text-[10.5px] font-extrabold uppercase tracking-[0.12em] text-[var(--muted)]">Wallet address - safe to share</p>
               <p className="mt-1 break-all font-mono text-[12.5px] font-semibold text-[var(--ink)]">{wallet.publicKey}</p>
               <button type="button" onClick={() => copy(wallet.publicKey, 'pub')} className="app-btn btn-outline btn-compact mt-3">
-                {copied === 'pub' ? <FiCheckCircle className="h-4 w-4 text-[#0f806d]" /> : <FiCopy className="h-4 w-4" />} Copy public key
+                {copied === 'pub' ? <FiCheckCircle className="h-4 w-4 text-[#0f806d]" /> : <FiCopy className="h-4 w-4" />} Copy address
               </button>
             </div>
 
             <div className="rounded-[16px] border border-[color-mix(in_srgb,var(--ember)_30%,transparent)] bg-[var(--ember-soft)] p-4">
               <p className="flex items-center gap-1.5 text-[10.5px] font-extrabold uppercase tracking-[0.12em] text-[var(--ember-600)]">
-                <FiAlertTriangle className="h-3.5 w-3.5" /> Secret key · keep private
+                <FiAlertTriangle className="h-3.5 w-3.5" /> Private key - keep private
               </p>
               <p className="mt-1 break-all font-mono text-[12.5px] font-semibold text-[var(--ink)]">
                 {showSecret ? wallet.secretKey : '•'.repeat(56)}
@@ -141,15 +139,15 @@ export function WalletOnboarding({ tenantSlug }: { tenantSlug: string }) {
               <FiDroplet className="h-5 w-5" />
             </span>
             <div className="min-w-0">
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">Step 2 · Activate</p>
-              <h3 className="font-display text-lg font-bold text-[var(--ink)]">Fund it with Friendbot</h3>
+              <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">Step 2</p>
+              <h3 className="font-display text-lg font-bold text-[var(--ink)]">Add play money</h3>
             </div>
           </div>
           <p className="mt-3 text-[13px] font-medium leading-6 text-[var(--muted)]">
-            Friendbot gives free Testnet XLM so your wallet becomes active and can hold assets.
+            This adds free test money so the practice wallet can be used.
           </p>
           <Button onClick={fund} disabled={loading === 'fund'} variant="secondary" className="btn-block mt-4">
-            <FiDroplet className="h-4 w-4" /> {loading === 'fund' ? 'Funding…' : 'Fund with Friendbot'}
+            <FiDroplet className="h-4 w-4" /> {loading === 'fund' ? 'Adding...' : 'Add play money'}
           </Button>
           {balances ? (
             <div className="mt-4 rounded-[16px] bg-[color-mix(in_srgb,var(--heat-1)_10%,var(--surface))] p-4">
@@ -174,9 +172,9 @@ export function WalletOnboarding({ tenantSlug }: { tenantSlug: string }) {
 
       <Card>
         <p className="section-eyebrow">Next step</p>
-        <h3 className="mt-3 font-display text-lg font-bold text-[var(--ink)]">Use your public key for rewards</h3>
+        <h3 className="mt-3 font-display text-lg font-bold text-[var(--ink)]">Use your wallet address for rewards</h3>
         <p className="mt-2 text-[13px] font-medium leading-6 text-[var(--ink-2)]">
-          Paste your G… public key when you submit a civic action so approved rewards land in your wallet.
+          Paste your wallet address when you submit a civic action so approved rewards land in your wallet.
         </p>
         <Link href={`/${tenantSlug}/civic-actions`} className="app-btn btn-primary mt-4">
           Submit a civic action

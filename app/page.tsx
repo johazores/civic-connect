@@ -40,11 +40,11 @@ export default function RootPage() {
                 Verifiable civic services
               </h1>
               <p className="mt-1.5 text-[13px] font-medium leading-5 text-[#b9d0ea]">
-                Reports, payments, and receipts backed by public Stellar proof.
+                Reports, payments, and receipts with public proof anyone can check.
               </p>
               <div className="mt-[18px] flex gap-[18px] border-t border-white/15 pt-4">
-                <MiniMetric value="SEP-7" label="Pay" />
-                <MiniMetric value="Hash" label="Proof" />
+                <MiniMetric value="QR" label="Pay" />
+                <MiniMetric value="ID" label="Proof" />
                 <MiniMetric value="LGU" label="Ready" />
               </div>
             </div>
@@ -81,7 +81,7 @@ export default function RootPage() {
             </span>
             <span className="min-w-0 flex-1">
               <span className="block font-display text-base font-bold tracking-[-0.02em] text-[var(--ink)]">How it works</span>
-              <span className="mt-0.5 block truncate text-[13px] font-medium text-[var(--muted)]">Why Stellar powers verifiable civic services</span>
+              <span className="mt-0.5 block truncate text-[13px] font-medium text-[var(--muted)]">How public proof helps civic services</span>
             </span>
             <FiArrowRight className="h-4 w-4 shrink-0 text-[var(--ember)]" />
           </Link>

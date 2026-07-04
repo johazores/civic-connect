@@ -12,7 +12,7 @@ export default async function CivicActionsPage({ params }: { params: Promise<{ t
   }
 
   return (
-    <PublicShell tenant={tenant} title="Civic rewards" subtitle="Verified actions, Stellar-paid" backHref={`/${tenant.slug}`}>
+    <PublicShell tenant={tenant} title="Civic rewards" subtitle="Submit actions and receive rewards" backHref={`/${tenant.slug}`}>
       <main className="page-section">
         <CivicActionForm tenantSlug={tenant.slug} />
       </main>

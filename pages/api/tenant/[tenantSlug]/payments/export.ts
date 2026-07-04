@@ -33,7 +33,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       orderBy: { createdAt: 'desc' }
     });
 
-    const header = ['Reference', 'Service', 'Payer', 'Email', 'Amount', 'Asset', 'Status', 'Transaction Hash', 'Ledger', 'Created At', 'Verified At'];
+    const header = ['Reference', 'Service', 'Payer', 'Email', 'Amount', 'Currency', 'Status', 'Payment ID', 'Public Record', 'Created At', 'Confirmed At'];
     const rows = payments.map((payment: any) => [
       payment.referenceCode,
       payment.service.title,

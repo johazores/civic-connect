@@ -1,8 +1,8 @@
 import { StellarPlaygroundClient } from '@/components/playground/stellar-playground-client';
 
 export const metadata = {
-  title: 'Stellar Testnet Playground | CivicTrust',
-  description: 'Beginner-friendly Stellar Testnet playground for SEP-7 payments, Horizon verification, and transaction learning.'
+  title: 'Practice Payments | CivicTrust',
+  description: 'Beginner-friendly practice page for wallet payments, QR codes, and public receipts.'
 };
 
 const allowedTenants = new Set(['metro-city', 'laguna-province']);

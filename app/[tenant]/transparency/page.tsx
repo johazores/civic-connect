@@ -22,18 +22,18 @@ export default async function TransparencyPage({ params }: { params: Promise<{ t
   const verified = entries.filter((entry: any) => entry.transactionHash).length;
 
   return (
-    <PublicShell tenant={tenant} title="Transparency" subtitle="Public spending, ledger-verified" backHref={`/${tenant.slug}`}>
+    <PublicShell tenant={tenant} title="Transparency" subtitle="Public spending with proof" backHref={`/${tenant.slug}`}>
       <main className="page-section pb-6">
         <Link href={`/${tenant.slug}/ledger`} className="app-btn btn-primary mb-4 w-full">
-          View the full civic ledger
+          View all public records
           <FiArrowRight aria-hidden="true" className="h-4 w-4" />
         </Link>
 
         <div className="stat-grid">
           <StatCard label="Published records" value={entries.length} />
-          <StatCard label="Stellar verified" value={verified} />
+          <StatCard label="With public proof" value={verified} />
           <StatCard label="Tracked amount" value={`${total.toFixed(2)} XLM`} />
-          <StatCard label="Ledger model" value="Horizon" />
+          <StatCard label="Proof source" value="Public record" />
         </div>
 
         <div className="section-head mt-6">

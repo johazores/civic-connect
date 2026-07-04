@@ -64,9 +64,9 @@ export function PublicShell({
     {
       label: 'Civic trust',
       items: [
-        { href: `${base}/ledger`, label: 'Civic ledger', description: 'Every Stellar-backed record', icon: 'transparency' },
+        { href: `${base}/ledger`, label: 'Public records', description: 'Payments, rewards, and receipts', icon: 'transparency' },
         { href: `${base}/civic-actions`, label: 'Civic rewards', description: 'Verified participation actions', icon: 'rewards' },
-        { href: `${base}/wallet`, label: 'Set up a wallet', description: 'Receive rewards on Stellar', icon: 'account' },
+        { href: `${base}/wallet`, label: 'Set up a wallet', description: 'Receive rewards', icon: 'account' },
         { href: `${base}/transparency`, label: 'Budget transparency', description: 'Public disbursements', icon: 'transparency' }
       ]
     },
