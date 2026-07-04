@@ -6,7 +6,6 @@ import { FiChevronRight, FiFileText, FiSearch } from 'react-icons/fi';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 
 type Receipt = {
   id: string;
@@ -61,17 +60,13 @@ export function TaxReceiptSearch({ tenantSlug }: { tenantSlug: string }) {
             <label className="input-label" htmlFor="tax-receipt-search">
               Receipt reference or taxpayer
             </label>
-            <div className="relative">
-              <FiSearch
-                aria-hidden="true"
-                className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--muted)]"
-              />
-              <Input
+            <div className="searchbar">
+              <FiSearch aria-hidden="true" />
+              <input
                 id="tax-receipt-search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="e.g. TAX-2025-000123"
-                className="pl-12"
+                placeholder="Reference, taxpayer, or property index"
               />
             </div>
           </div>

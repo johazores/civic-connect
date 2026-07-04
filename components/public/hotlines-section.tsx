@@ -44,19 +44,18 @@ export function HotlinesSection({ hotlines, tenantSlug }: { hotlines: Hotline[];
               <span className="mi-tx">
                 <b className="truncate">{hotline.name}</b>
                 <span className="truncate">
-                  {hotline.phone}
-                  {hotline.description ? ` — ${hotline.description}` : ''}
+                  {hotline.description ? `${hotline.phone} - ${hotline.description}` : hotline.phone}
                 </span>
               </span>
               {hotline.isEmergency ? <span className="heat-pill shrink-0 px-2 py-0.5 text-[10px]">Emergency</span> : null}
               <a
                 href={`tel:${hotline.phone}`}
                 aria-label={`Call ${hotline.name}`}
-                className={`grid h-11 w-11 shrink-0 place-items-center rounded-full text-[#fff] shadow-sm ${
+                className={`grid h-11 w-11 shrink-0 place-items-center rounded-full text-white shadow-sm ${
                   hotline.isEmergency ? 'bg-[var(--ember)]' : 'bg-[var(--navy)]'
                 }`}
               >
-                <FiPhoneCall aria-hidden="true" className="h-5 w-5" />
+                <FiPhoneCall aria-hidden="true" className="h-5 w-5 text-white" />
               </a>
             </div>
           ))}

@@ -69,7 +69,9 @@ export function ReportForm({ tenantSlug, categories }: { tenantSlug: string; cat
   const [selectedCategoryId, setSelectedCategoryId] = useState(categories[0]?.id || '');
   const [photo, setPhoto] = useState<SelectedPhoto | null>(null);
   const [copied, setCopied] = useState(false);
+  const stepTopRef = useRef<HTMLDivElement>(null);
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const didMountStepRef = useRef(false);
   const [form, setForm] = useState({
     reporterName: '',
     reporterEmail: '',
@@ -118,6 +120,17 @@ export function ReportForm({ tenantSlug, categories }: { tenantSlug: string; cat
 
   const progress = Math.round(((step + 1) / steps.length) * 100);
   const CurrentIcon = steps[step].icon;
+
+  useEffect(() => {
+    if (!didMountStepRef.current) {
+      didMountStepRef.current = true;
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      stepTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [step]);
 
   function updateField(name: string, value: string) {
     setForm((current) => ({ ...current, [name]: value }));
@@ -304,6 +317,7 @@ export function ReportForm({ tenantSlug, categories }: { tenantSlug: string; cat
 
   return (
     <form onSubmit={handleSubmit}>
+      <div ref={stepTopRef} className="scroll-mt-4" />
       <Card>
         <div className="flex items-center gap-3">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[13px] bg-[var(--surface-2)] text-[var(--navy)]">

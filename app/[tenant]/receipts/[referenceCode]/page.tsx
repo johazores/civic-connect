@@ -78,7 +78,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ tenant
 
         <div className="stat-grid">
           <div className="stat">
-            <p className="sv">{payment.ledger || '—'}</p>
+            <p className="sv">{payment.ledger || 'Pending'}</p>
             <p className="sl">Public record</p>
           </div>
           <div className="stat">

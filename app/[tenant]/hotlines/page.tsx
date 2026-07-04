@@ -24,7 +24,7 @@ export default async function HotlinesPage({ params }: { params: Promise<{ tenan
       subtitle="Emergency and city contacts"
       backHref={`/${tenant.slug}`}
     >
-      <main>
+      <main className="pt-[18px]">
         <HotlinesSection hotlines={hotlines} />
       </main>
     </PublicShell>

@@ -33,7 +33,7 @@ export function HeroSection({
       <div className="app-pulse-card p-[22px]">
         <div className="relative z-10">
           <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#9fc0e6]">CivicTrust</p>
-          <h2 className="mt-2 line-clamp-2 font-display text-[22px] font-bold leading-[1.2] tracking-[-0.02em] text-[#fff]">
+          <h2 className="mt-2 line-clamp-2 font-display text-[22px] font-bold leading-[1.2] tracking-[-0.02em] text-white">
             {tenant.tagline}
           </h2>
           <p className="mt-1.5 line-clamp-2 text-[13px] font-medium leading-[1.5] text-[#b9d0ea]">{tenant.description}</p>
@@ -48,7 +48,7 @@ export function HeroSection({
       <div className="mt-4 grid grid-cols-2 gap-3">
         {quickActions.map(({ Icon, ...action }) => (
           <Link key={action.href} href={action.href} className="app-tile-card">
-            <span className={`grid h-11 w-11 place-items-center rounded-[15px] bg-gradient-to-br ${action.tone} text-[#fff] shadow-[0_10px_20px_rgba(18,40,72,.16)]`}>
+            <span className={`grid h-11 w-11 place-items-center rounded-[15px] bg-gradient-to-br ${action.tone} text-white shadow-[0_10px_20px_rgba(18,40,72,.16)]`}>
               <Icon aria-hidden="true" className="h-5 w-5" />
             </span>
             <p className="mt-3 text-sm font-bold text-[var(--ink)]">{action.label}</p>
@@ -63,7 +63,7 @@ export function HeroSection({
 function PulseStat({ value, label }: { value: string; label: string }) {
   return (
     <div className="text-[11.5px] text-[#9fc0e6]">
-      <b className="block font-display text-[17px] font-bold text-[#fff]">{value}</b>
+      <b className="block font-display text-[17px] font-bold text-white">{value}</b>
       {label}
     </div>
   );
