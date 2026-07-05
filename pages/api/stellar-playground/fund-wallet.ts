@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { fetchHorizonAccount, fundTestnetAccount, isValidStellarPublicKey, resolveStellarNetworkConfig } from '@/lib/stellar/index';
+import { fetchHorizonAccount, fundTestnetAccount, isValidStellarPublicKey, resolveStellarNetworkConfigFromRuntime } from '@/lib/stellar/index';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Enter a valid wallet address.' });
   }
 
-  const config = resolveStellarNetworkConfig({ network: 'TESTNET' });
+  const config = await resolveStellarNetworkConfigFromRuntime({ network: 'TESTNET' });
 
   if (!config.friendbotUrl) {
     return res.status(400).json({ error: 'Test funding is only available on the practice network.' });

@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import {
   isValidStellarPublicKey,
   normalizeStellarAmount,
-  resolveStellarNetworkConfig,
+  resolveStellarNetworkConfigFromRuntime,
   stellarExpertTxUrl,
   verifyStellarPaymentByHash
 } from '@/lib/stellar/index';
@@ -34,7 +34,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Expected memo is required.' });
   }
 
-  const config = resolveStellarNetworkConfig({ network: 'TESTNET' });
+  const config = await resolveStellarNetworkConfigFromRuntime({ network: 'TESTNET' });
 
   try {
     const result = await verifyStellarPaymentByHash({

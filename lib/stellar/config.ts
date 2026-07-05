@@ -36,3 +36,19 @@ export function resolveStellarNetworkConfig(input?: {
 export function defaultTestnetConfig(): StellarNetworkConfig {
   return resolveStellarNetworkConfig({ network: 'TESTNET' });
 }
+
+export async function resolveStellarNetworkConfigFromRuntime(input?: {
+  network?: string | null;
+  horizonUrl?: string | null;
+  friendbotUrl?: string | null;
+  networkPassphrase?: string | null;
+}): Promise<StellarNetworkConfig> {
+  const { getRuntimeSettingValue } = await import('@/lib/runtime-settings');
+
+  return resolveStellarNetworkConfig({
+    network: input?.network || (await getRuntimeSettingValue('STELLAR_NETWORK')),
+    horizonUrl: input?.horizonUrl || (await getRuntimeSettingValue('STELLAR_HORIZON_URL')),
+    friendbotUrl: input?.friendbotUrl || (await getRuntimeSettingValue('STELLAR_FRIENDBOT_URL')),
+    networkPassphrase: input?.networkPassphrase || (await getRuntimeSettingValue('STELLAR_NETWORK_PASSPHRASE'))
+  });
+}

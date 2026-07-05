@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/db';
 import { safeTenantSelect } from '@/lib/auth';
 import { createPaymentReferenceCode } from '@/lib/payment-reference';
+import { getRuntimeSettingValue } from '@/lib/runtime-settings';
 import {
   buildSep7PayUri,
   findAndVerifyStellarPayment,
@@ -92,7 +93,7 @@ export async function createPaymentIntent(input: CreatePaymentIntentInput) {
   const referenceCode = await createUniquePaymentReferenceCode();
   const memo = referenceCode;
   const normalizedAmount = normalizeStellarAmount(amount);
-  const baseUrl = (input.appUrl || process.env.NEXT_PUBLIC_APP_URL || '').replace(/\/$/, '');
+  const baseUrl = (input.appUrl || (await getRuntimeSettingValue('NEXT_PUBLIC_APP_URL')) || '').replace(/\/$/, '');
   const receiptUrl = baseUrl ? `${baseUrl}/${tenant.slug}/receipts/${referenceCode}` : undefined;
   const originDomain = baseUrl ? new URL(baseUrl).host : undefined;
   const sep7Uri = buildSep7PayUri({

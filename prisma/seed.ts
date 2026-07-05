@@ -4,6 +4,45 @@ const { PrismaClient } = require('@prisma/client') as { PrismaClient: new () => 
 
 const prisma = new PrismaClient();
 
+const runtimeSettings = [
+  {
+    key: 'NEXT_PUBLIC_APP_URL',
+    value: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    category: 'APP',
+    description: 'Canonical deployed app URL used for links, callbacks, and metadata.'
+  },
+  {
+    key: 'NEXT_PUBLIC_AUTH_PROVIDER',
+    value: process.env.NEXT_PUBLIC_AUTH_PROVIDER || 'custom',
+    category: 'AUTH',
+    description: 'Authentication provider flag. Keep custom until Clerk migration is active.'
+  },
+  {
+    key: 'STELLAR_NETWORK',
+    value: process.env.STELLAR_NETWORK || 'TESTNET',
+    category: 'STELLAR',
+    description: 'Default Stellar network for non-tenant playground and fallback flows.'
+  },
+  {
+    key: 'STELLAR_HORIZON_URL',
+    value: process.env.STELLAR_HORIZON_URL || 'https://horizon-testnet.stellar.org',
+    category: 'STELLAR',
+    description: 'Default Stellar Horizon endpoint.'
+  },
+  {
+    key: 'STELLAR_FRIENDBOT_URL',
+    value: process.env.STELLAR_FRIENDBOT_URL || 'https://friendbot.stellar.org',
+    category: 'STELLAR',
+    description: 'Default Stellar Testnet Friendbot endpoint.'
+  },
+  {
+    key: 'STELLAR_NETWORK_PASSPHRASE',
+    value: process.env.STELLAR_NETWORK_PASSPHRASE || 'Test SDF Network ; September 2015',
+    category: 'STELLAR',
+    description: 'Default Stellar network passphrase.'
+  }
+] as const;
+
 const tenantConfigs = [
   {
     slug: 'metro-city',
@@ -153,6 +192,22 @@ async function main() {
     update: { name: 'Platform Root Admin', isActive: true },
     create: { name: 'Platform Root Admin', email: 'root@civictrust.local', passwordHash: platformPasswordHash, isActive: true }
   });
+
+  for (const setting of runtimeSettings) {
+    await prisma.runtimeSetting.upsert({
+      where: { key: setting.key },
+      update: {
+        value: setting.value,
+        category: setting.category,
+        description: setting.description,
+        isSecret: false
+      },
+      create: {
+        ...setting,
+        isSecret: false
+      }
+    });
+  }
 
   await prisma.tenant.deleteMany({
     where: {

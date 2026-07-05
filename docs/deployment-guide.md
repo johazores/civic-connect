@@ -50,6 +50,42 @@ STELLAR_NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
 NEXT_PUBLIC_APP_URL="https://your-vercel-domain.vercel.app"
 ```
 
+## Runtime Settings In PostgreSQL
+
+After the database is migrated and seeded, root admins can manage safe env-like runtime values from the platform console:
+
+```text
+/root -> Runtime settings
+```
+
+These settings are stored in the `RuntimeSetting` table and can also be managed through:
+
+```text
+GET   /api/platform/settings
+PATCH /api/platform/settings
+```
+
+Database-managed keys:
+
+```text
+NEXT_PUBLIC_APP_URL
+NEXT_PUBLIC_AUTH_PROVIDER
+STELLAR_NETWORK
+STELLAR_HORIZON_URL
+STELLAR_FRIENDBOT_URL
+STELLAR_NETWORK_PASSPHRASE
+```
+
+Do not move bootstrap secrets into the database:
+
+```text
+DATABASE_URL
+ADMIN_JWT_SECRET
+STELLAR_WALLET_ENCRYPTION_KEY
+```
+
+Those must remain Vercel environment variables because the app needs them to connect to the database, sign sessions, and decrypt wallet secrets.
+
 After deploy, log in to each tenant admin portal and generate or import that tenant's receiving wallet under **Settings → Real Stellar Testnet wallet**.
 
 Do not set Mainnet values until the app has gone through policy, compliance, security, and accounting review.

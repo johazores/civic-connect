@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   FiArrowUpRight,
   FiCheckCircle,
+  FiDatabase,
   FiExternalLink,
   FiGlobe,
   FiKey,
@@ -17,6 +18,17 @@ import {
 import { Button } from '@/components/ui/button';
 
 type TenantStats = { reports: number; services: number; staff: number; citizens: number; payments: number; verifiedPayments: number; rewards: number; disbursements: number };
+type RuntimeSettingRow = {
+  key: string;
+  value: string;
+  databaseValue: string;
+  envValue: string;
+  defaultValue: string;
+  category: string;
+  description: string;
+  source: 'database' | 'environment' | 'default';
+  updatedAt: string | null;
+};
 type TenantRow = {
   id: string;
   slug: string;
@@ -53,8 +65,12 @@ export function PlatformDashboard() {
   const [sheet, setSheet] = useState<'create' | 'reset' | null>(null);
   const [activeTenant, setActiveTenant] = useState<TenantRow | null>(null);
   const [busyId, setBusyId] = useState('');
+  const [settings, setSettings] = useState<RuntimeSettingRow[] | null>(null);
+  const [settingsForm, setSettingsForm] = useState<Record<string, string>>({});
+  const [settingsError, setSettingsError] = useState('');
+  const [settingsSaving, setSettingsSaving] = useState(false);
 
-  async function load() {
+  const load = useCallback(async () => {
     const response = await fetch('/api/platform/tenants', { cache: 'no-store' });
 
     if (response.status === 401) {
@@ -68,12 +84,31 @@ export function PlatformDashboard() {
       return;
     }
     setTenants(payload.data);
-  }
+  }, []);
+
+  const loadSettings = useCallback(async () => {
+    const response = await fetch('/api/platform/settings', { cache: 'no-store' });
+
+    if (response.status === 401) {
+      window.location.href = '/root/login';
+      return;
+    }
+
+    const payload = await response.json();
+    if (!response.ok) {
+      setSettingsError(payload.error || 'Unable to load runtime settings.');
+      return;
+    }
+
+    const rows = payload.data.settings as RuntimeSettingRow[];
+    setSettings(rows);
+    setSettingsForm(Object.fromEntries(rows.map((setting) => [setting.key, setting.databaseValue || setting.value || ''])));
+  }, []);
 
   useEffect(() => {
     load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    loadSettings();
+  }, [load, loadSettings]);
 
   async function logout() {
     await fetch('/api/platform/logout', { method: 'POST' });
@@ -89,6 +124,27 @@ export function PlatformDashboard() {
     });
     setBusyId('');
     load();
+  }
+
+  async function saveSettings() {
+    setSettingsSaving(true);
+    setSettingsError('');
+    const response = await fetch('/api/platform/settings', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ settings: settingsForm })
+    });
+    const payload = await response.json();
+    setSettingsSaving(false);
+
+    if (!response.ok) {
+      setSettingsError(payload.error || 'Unable to save runtime settings.');
+      return;
+    }
+
+    const rows = payload.data.settings as RuntimeSettingRow[];
+    setSettings(rows);
+    setSettingsForm(Object.fromEntries(rows.map((setting) => [setting.key, setting.databaseValue || setting.value || ''])));
   }
 
   const totals = tenants
@@ -141,6 +197,59 @@ export function PlatformDashboard() {
             >
               <FiPlus aria-hidden="true" className="h-4 w-4" /> Create a new city tenant
             </button>
+
+            <section className="card mt-4">
+              <div className="flex items-start gap-3">
+                <span className="mi-ic">
+                  <FiDatabase aria-hidden="true" className="h-5 w-5" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-display text-[17px] font-bold tracking-[-0.01em] text-[var(--ink)]">Runtime settings</h2>
+                  <p className="mt-0.5 text-[13px] font-medium leading-5 text-[var(--muted)]">
+                    Manage safe env-like values from the database. Keep database URL, JWT secret, and wallet encryption key in Vercel env.
+                  </p>
+                </div>
+              </div>
+
+              {settingsError ? (
+                <p className="mt-3 rounded-[14px] bg-[var(--ember-soft)] p-3 text-sm font-semibold text-[var(--ember-600)]">{settingsError}</p>
+              ) : null}
+
+              {settings === null ? (
+                <div className="mt-4 grid gap-3">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i}>
+                      <div className="skeleton-line w-36" />
+                      <div className="mt-2 skeleton-line h-12 w-full" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-4 grid gap-3">
+                  {settings.map((setting) => (
+                    <div key={setting.key} className="grid gap-2 rounded-[16px] bg-[var(--surface-2)] p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <label className="min-w-0 truncate font-mono text-[12px] font-bold text-[var(--ink)]" htmlFor={`setting-${setting.key}`}>
+                          {setting.key}
+                        </label>
+                        <span className="status-pill shrink-0 bg-[var(--surface)] text-[var(--muted)]">{setting.source}</span>
+                      </div>
+                      <input
+                        id={`setting-${setting.key}`}
+                        className="input bg-[var(--surface)] font-mono text-[13px]"
+                        value={settingsForm[setting.key] || ''}
+                        onChange={(event) => setSettingsForm((current) => ({ ...current, [setting.key]: event.target.value }))}
+                      />
+                      <p className="text-[12px] font-medium leading-5 text-[var(--muted)]">{setting.description}</p>
+                    </div>
+                  ))}
+
+                  <button type="button" onClick={saveSettings} disabled={settingsSaving} className="btn btn-primary btn-block disabled:opacity-60">
+                    <FiCheckCircle aria-hidden="true" className="h-4 w-4" /> {settingsSaving ? 'Saving settings...' : 'Save runtime settings'}
+                  </button>
+                </div>
+              )}
+            </section>
 
             {error ? (
               <p className="mt-4 rounded-[14px] bg-[var(--ember-soft)] p-4 text-sm font-semibold text-[var(--ember-600)]">{error}</p>

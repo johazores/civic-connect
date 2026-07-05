@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="CivicTrust icon">
+  <rect width="512" height="512" rx="112" fill="#1a497b"/>
+  <path d="M128 174c0-22 18-40 40-40h176c22 0 40 18 40 40v164c0 22-18 40-40 40H168c-22 0-40-18-40-40V174Z" fill="#ffffff"/>
+  <path d="M162 210h188M162 256h188M162 302h108" stroke="#1a497b" stroke-width="24" stroke-linecap="round"/>
+  <circle cx="354" cy="322" r="58" fill="#ef3a52"/>
+  <path d="m329 322 17 17 35-41" fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M256 78 95 150v84c0 98 65 167 161 200 96-33 161-102 161-200v-84L256 78Z" fill="none" stroke="#ffffff" stroke-width="22" stroke-linejoin="round" opacity=".28"/>
+</svg>

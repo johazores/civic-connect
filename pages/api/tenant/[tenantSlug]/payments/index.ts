@@ -3,18 +3,9 @@ import { badRequest, created, methodNotAllowed, ok, serverError, unauthorized } 
 import { getCitizenAuthUser, requireTenantAdmin } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { asOptionalString, asString, hasRequiredStrings } from '@/lib/request';
+import { resolveAppBaseUrl } from '@/lib/runtime-settings';
 import { createPaymentIntent, getPaymentStats } from '@/services/payment-service';
 import { getTenantBySlug } from '@/services/tenant-service';
-
-function getAppUrl(req: NextApiRequest) {
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL;
-  }
-
-  const protocol = req.headers['x-forwarded-proto'] || 'http';
-  const host = req.headers.host;
-  return host ? `${protocol}://${host}` : null;
-}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const tenantSlug = String(req.query.tenantSlug || '');
@@ -90,7 +81,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         payerName: asString(body.payerName),
         payerEmail: asOptionalString(body.payerEmail),
         payerPhone: asOptionalString(body.payerPhone),
-        appUrl: getAppUrl(req)
+        appUrl: await resolveAppBaseUrl(req)
       });
 
       return created(res, intent);

@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { isValidStellarPublicKey, normalizeStellarAmount, resolveStellarNetworkConfig, verifyStellarPaymentByHash } from '@/lib/stellar/index';
+import { isValidStellarPublicKey, normalizeStellarAmount, resolveStellarNetworkConfigFromRuntime, verifyStellarPaymentByHash } from '@/lib/stellar/index';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -24,7 +24,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Receipt note is required so the payment can be matched.' });
   }
 
-  const config = resolveStellarNetworkConfig({ network: 'TESTNET' });
+  const config = await resolveStellarNetworkConfigFromRuntime({ network: 'TESTNET' });
   const result = await verifyStellarPaymentByHash({
     horizonUrl: config.horizonUrl,
     transactionHash,

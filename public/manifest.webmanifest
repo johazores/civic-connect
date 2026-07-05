@@ -1,0 +1,50 @@
+{
+  "id": "/",
+  "name": "CivicTrust Civic Connect",
+  "short_name": "CivicTrust",
+  "description": "Mobile-first civic services, public receipts, and Stellar Testnet payment proof.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "portrait",
+  "background_color": "#f5f7fb",
+  "theme_color": "#1a497b",
+  "categories": ["government", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Metro City",
+      "short_name": "Metro",
+      "description": "Open the Metro City civic portal.",
+      "url": "/metro-city",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Stellar Playground",
+      "short_name": "Stellar",
+      "description": "Open the Stellar Testnet learning playground.",
+      "url": "/stellar-playground",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
+  ]
+}

@@ -22,6 +22,17 @@ model PlatformAdmin {
   updatedAt    DateTime @updatedAt
 }
 
+model RuntimeSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  category    String   @default("APP")
+  description String?
+  isSecret    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 enum ReportStatus {
   SUBMITTED
   REVIEWING
@@ -146,6 +157,7 @@ model Tenant {
 model User {
   id           String   @id @default(cuid())
   tenantId     String
+  clerkUserId  String?
   name         String
   email        String
   passwordHash String
@@ -160,6 +172,7 @@ model User {
 
   @@unique([tenantId, email])
   @@index([tenantId])
+  @@index([clerkUserId])
 }
 
 model TenantApprovalPolicy {

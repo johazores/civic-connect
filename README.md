@@ -63,6 +63,7 @@ DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require"
 ADMIN_JWT_SECRET="replace-this-with-a-long-secure-random-value"
 STELLAR_WALLET_ENCRYPTION_KEY="replace-this-with-another-long-secure-random-value"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
+NEXT_PUBLIC_AUTH_PROVIDER="custom"
 STELLAR_NETWORK="TESTNET"
 STELLAR_HORIZON_URL="https://horizon-testnet.stellar.org"
 STELLAR_FRIENDBOT_URL="https://friendbot.stellar.org"
@@ -158,9 +159,10 @@ npm run verify
 3. Set `ADMIN_JWT_SECRET` in Vercel.
 4. Set `STELLAR_WALLET_ENCRYPTION_KEY` in Vercel.
 5. Set `NEXT_PUBLIC_APP_URL` to your deployed URL.
-6. Keep Stellar Testnet variables enabled while testing.
-7. Deploy the project.
-8. Run database setup from your local terminal or deployment workflow:
+6. Set `NEXT_PUBLIC_AUTH_PROVIDER="custom"` unless a Clerk migration is actively being tested.
+7. Keep Stellar Testnet variables enabled while testing.
+8. Deploy the project.
+9. Run database setup from your local terminal or deployment workflow:
 
 ```bash
 npm run db:push
@@ -168,6 +170,116 @@ npm run db:seed
 ```
 
 The app is PostgreSQL-first and no longer uses SQLite.
+
+## Database-Managed Runtime Settings
+
+Some env-like values can be managed from PostgreSQL after deployment. Open:
+
+```text
+/root
+```
+
+Sign in as the platform admin and use **Runtime settings**.
+
+Database-managed keys:
+
+```text
+NEXT_PUBLIC_APP_URL
+NEXT_PUBLIC_AUTH_PROVIDER
+STELLAR_NETWORK
+STELLAR_HORIZON_URL
+STELLAR_FRIENDBOT_URL
+STELLAR_NETWORK_PASSPHRASE
+```
+
+Protected API:
+
+```text
+GET   /api/platform/settings
+PATCH /api/platform/settings
+```
+
+Bootstrap secrets must stay in Vercel environment variables because the app needs them before it can safely read the database:
+
+```text
+DATABASE_URL
+ADMIN_JWT_SECRET
+STELLAR_WALLET_ENCRYPTION_KEY
+```
+
+## PWA and Mobile Demo Readiness
+
+CivicTrust is configured as an installable PWA for mobile-browser demos:
+
+- Web app manifest: `public/manifest.webmanifest`
+- App icons: `public/icons/`
+- Production service worker: `public/sw.js`
+- Offline fallback: `/offline`
+- Mobile viewport and iOS safe-area metadata in `app/layout.tsx`
+- Mobile app shell and bottom tabs already built into the UI
+
+For a phone demo, open the deployed Vercel URL on iPhone Safari or Android Chrome, then start with:
+
+```text
+/metro-city
+/metro-city/login
+/metro-city/admin/login
+/stellar-playground
+```
+
+Read:
+
+```text
+docs/mobile-demo-guide.md
+docs/pwa-setup-guide.md
+```
+
+## Installing as a PWA
+
+iPhone Safari:
+
+1. Open the deployed URL.
+2. Tap Share.
+3. Tap **Add to Home Screen**.
+4. Launch CivicTrust from the new icon.
+
+Android Chrome:
+
+1. Open the deployed URL.
+2. Tap the browser menu.
+3. Tap **Install app** or **Add to Home screen**.
+4. Launch CivicTrust from the launcher.
+
+The PWA is still the Next.js app. Server logic stays in `pages/api`, Prisma stays on the backend, and Stellar integrations continue to use hosted APIs.
+
+## Clerk Migration Status
+
+Clerk is not installed and does not replace current auth.
+
+Current status:
+
+- Custom cookie/JWT auth remains active.
+- `NEXT_PUBLIC_AUTH_PROVIDER` defaults to `custom`.
+- `User.clerkUserId` is optional preparation only.
+- No current admin or citizen session behavior has changed.
+
+Because `User.clerkUserId` is an additive Prisma schema field, run `npm run db:push` against the deployed PostgreSQL database before deploying this updated schema.
+
+Read the phased plan before adding Clerk:
+
+```text
+docs/clerk-migration-plan.md
+```
+
+## Native App Roadmap
+
+The recommended path is PWA-first. A Capacitor wrapper can be considered later if app store distribution or native device APIs become necessary.
+
+Read:
+
+```text
+docs/native-mobile-roadmap.md
+```
 
 ## Project Structure
 

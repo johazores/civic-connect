@@ -3,7 +3,7 @@ import {
   fetchHorizonAccount,
   fundTestnetAccount,
   isValidStellarPublicKey,
-  resolveStellarNetworkConfig,
+  resolveStellarNetworkConfigFromRuntime,
   stellarExpertAccountUrl
 } from '@/lib/stellar/index';
 
@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Enter a valid Stellar Testnet public key.' });
   }
 
-  const config = resolveStellarNetworkConfig({ network: 'TESTNET' });
+  const config = await resolveStellarNetworkConfigFromRuntime({ network: 'TESTNET' });
 
   if (config.network !== 'TESTNET' || !config.friendbotUrl) {
     return res.status(400).json({ error: 'Friendbot funding is available only on Stellar Testnet.' });

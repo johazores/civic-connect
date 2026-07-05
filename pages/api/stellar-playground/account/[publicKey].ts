@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { fetchHorizonAccount, isValidStellarPublicKey, resolveStellarNetworkConfig, stellarExpertAccountUrl } from '@/lib/stellar/index';
+import { fetchHorizonAccount, isValidStellarPublicKey, resolveStellarNetworkConfigFromRuntime, stellarExpertAccountUrl } from '@/lib/stellar/index';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -13,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: 'Enter a valid Stellar Testnet public key.' });
   }
 
-  const config = resolveStellarNetworkConfig({ network: 'TESTNET' });
+  const config = await resolveStellarNetworkConfigFromRuntime({ network: 'TESTNET' });
 
   try {
     const account = await fetchHorizonAccount({ horizonUrl: config.horizonUrl, publicKey });

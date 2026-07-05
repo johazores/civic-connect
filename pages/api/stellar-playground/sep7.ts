@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { buildSep7PayUri, isValidStellarPublicKey, normalizeStellarAmount, resolveStellarNetworkConfig } from '@/lib/stellar/index';
+import { buildSep7PayUri, isValidStellarPublicKey, normalizeStellarAmount, resolveStellarNetworkConfigFromRuntime } from '@/lib/stellar/index';
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method not allowed.' });
@@ -20,7 +20,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.status(400).json({ error: 'Amount must be greater than zero.' });
   }
 
-  const config = resolveStellarNetworkConfig({ network: 'TESTNET' });
+  const config = await resolveStellarNetworkConfigFromRuntime({ network: 'TESTNET' });
   const sep7Uri = buildSep7PayUri({
     destination,
     amount,
