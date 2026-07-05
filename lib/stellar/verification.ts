@@ -16,6 +16,11 @@ export type HorizonVerificationResult = {
   transactionHash?: string;
   paymentOperationId?: string;
   payerPublicKey?: string;
+  sourceAccount?: string;
+  destinationPublicKey?: string;
+  amount?: string;
+  assetCode?: string;
+  memo?: string;
   ledger?: number;
   paidAt?: string;
   transactionFound?: boolean;
@@ -40,6 +45,10 @@ async function inspectTransaction(transaction: HorizonTransaction, input: Horizo
       verified: false,
       transactionFound: true,
       transactionSuccessful: false,
+      transactionHash: transaction.hash,
+      ledger: Number(transaction.ledger),
+      paidAt: transaction.created_at,
+      memo: transaction.memo,
       failureReason: 'The Stellar transaction exists but was not successful.'
     };
   }
@@ -49,6 +58,10 @@ async function inspectTransaction(transaction: HorizonTransaction, input: Horizo
       verified: false,
       transactionFound: true,
       transactionSuccessful: true,
+      transactionHash: transaction.hash,
+      ledger: Number(transaction.ledger),
+      paidAt: transaction.created_at,
+      memo: transaction.memo,
       failureReason: 'Transaction memo does not match this payment intent.'
     };
   }
@@ -61,6 +74,10 @@ async function inspectTransaction(transaction: HorizonTransaction, input: Horizo
       verified: false,
       transactionFound: true,
       transactionSuccessful: true,
+      transactionHash: transaction.hash,
+      ledger: Number(transaction.ledger),
+      paidAt: transaction.created_at,
+      memo: transaction.memo,
       failureReason: 'No matching payment operation was found for the expected destination, amount, and asset.'
     };
   }
@@ -72,6 +89,11 @@ async function inspectTransaction(transaction: HorizonTransaction, input: Horizo
     transactionHash: transaction.hash,
     paymentOperationId: payment.id,
     payerPublicKey: payment.from,
+    sourceAccount: payment.from,
+    destinationPublicKey: payment.to,
+    amount: payment.amount,
+    assetCode: payment.asset_type === 'native' ? 'XLM' : payment.asset_code,
+    memo: transaction.memo,
     ledger: Number(transaction.ledger),
     paidAt: transaction.created_at || payment.created_at
   };

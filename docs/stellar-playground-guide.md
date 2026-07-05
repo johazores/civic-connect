@@ -1,33 +1,33 @@
 # Stellar Playground Guide
 
-The project includes a small beginner-friendly Stellar Testnet playground at:
+The Stellar Playground lives at:
 
 ```text
 /stellar-playground
 ```
 
-This playground is separate from the civic product. It is only for learning and testing how Stellar accounts, SEP-7 payment links, QR codes, Horizon verification, and transaction hashes work.
+It is a Testnet-only learning tool for the CivicTrust app. It is not a production wallet, does not support Mainnet funds, and must never be used with real wallet recovery phrases or real private keys.
 
-## Why this exists
+## What the playground does
 
-The production civic flow can feel confusing if you are new to Stellar. The playground lets a developer test each moving part without logging in as a tenant admin or creating a service payment first.
+The playground teaches the payment flow used by the civic product:
 
-It shows the same basic concepts used by the main app:
+1. Create or import a disposable Stellar Testnet learning wallet.
+2. Optionally save the Testnet secret key in browser storage encrypted with a local password.
+3. Fund the Testnet account with Friendbot.
+4. Generate a SEP-7 `web+stellar:pay` payment request.
+5. Open or copy the payment request for a wallet such as Freighter.
+6. Verify a real transaction hash through Horizon Testnet.
 
-1. A receiving wallet has a public key that starts with `G...`.
-2. A secret key starts with `S...` and signs transactions.
-3. The app can create a SEP-7 `web+stellar:pay` payment request.
-4. A Stellar-compatible wallet signs and submits the transaction.
-5. Horizon confirms whether the transaction exists and succeeded.
-6. The transaction hash becomes the permanent receipt reference.
+No mock transaction hashes are used. Verification depends on Horizon finding a real Testnet transaction.
 
-## Important safety note
+## Playground wallet vs Freighter
 
-The playground is **Testnet only**.
+The playground wallet is for education only. It helps beginners see what a `G...` public key and `S...` secret key look like.
 
-It intentionally displays the generated secret key so you can understand how Stellar accounts work. This is only acceptable for a learning sandbox.
+Freighter is still recommended for real signing tests because it keeps the payer wallet inside a dedicated wallet extension. The civic app should create payment requests and verify transaction hashes, not custody a user's wallet.
 
-Do not use the playground for Mainnet wallets. Do not paste real secret keys into the browser.
+In the production civic flow, the tenant wallet is the receiving wallet. The resident or payer uses their own wallet, usually Freighter, to sign and submit payment.
 
 ## Required environment variables
 
@@ -40,169 +40,113 @@ STELLAR_FRIENDBOT_URL="https://friendbot.stellar.org"
 STELLAR_NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
 ```
 
-The playground does not require a database because it does not store payment intents. The main civic payment module still requires PostgreSQL.
+## Backend APIs
 
-## Step-by-step playground test
-
-### 1. Start the app
-
-```bash
-npm install
-npm run dev
-```
-
-Open:
+The playground uses these endpoints:
 
 ```text
-http://localhost:3000/stellar-playground
+POST /api/stellar-playground/wallet/fund
+GET  /api/stellar-playground/account/[publicKey]
+POST /api/stellar-playground/verify-transaction
+POST /api/stellar-playground/sep7
+GET  /api/stellar-playground/qr?uri=...
 ```
 
-### 2. Generate a Testnet wallet
+The backend receives public keys, payment request fields, and transaction hashes. It does not receive the playground secret key.
 
-Click **Generate Testnet wallet**.
+## How to generate a Testnet learning wallet
 
-The backend creates a real Stellar keypair:
+1. Open `/stellar-playground`.
+2. Choose **Create new Testnet learning wallet**.
+3. Review the practice recovery phrase.
+4. Confirm the requested words.
+5. The browser creates a Stellar Testnet keypair.
+6. Copy the public key if you need it.
+7. Reveal the secret key only after typing the Testnet confirmation phrase.
 
-- `G...` public key: safe to share, used as the receiving address.
-- `S...` secret key: must stay private in real applications.
+Current implementation note: the UI is structured like mnemonic onboarding, but the Stellar keypair is generated with `Keypair.random()` after phrase confirmation. Full mnemonic derivation can be added later without changing the beginner flow.
 
-### 3. Fund the wallet
+## How to save locally
 
-Click **Fund**.
+1. Create or import a Testnet learning wallet.
+2. Go to the wallet tab.
+3. Enter a local password with at least 8 characters.
+4. Click **Save locally**.
 
-The backend calls Friendbot, which funds the Testnet account with fake XLM.
+The secret key is encrypted with Web Crypto using PBKDF2 and AES-GCM before being stored in browser `localStorage`. The password is not stored. The encrypted wallet is Testnet-only and can be cleared from the same screen.
 
-### 4. Check wallet status
+## How to fund with Friendbot
 
-Click **Check**.
+1. Create or import a Testnet learning wallet.
+2. Go to the wallet tab.
+3. Click **Fund with Friendbot**.
+4. The backend calls Stellar Friendbot using the public key.
+5. The app refreshes the balance through Horizon Testnet.
 
-The backend reads the account through Horizon and returns balances.
+Friendbot works only on Testnet. Testnet XLM has no real value.
 
-### 5. Generate a SEP-7 QR code
+## How to create a SEP-7 payment URI
 
-Enter:
+1. Go to the pay tab.
+2. Enter a destination public key. For a learning test, use the playground wallet public key.
+3. Enter an amount, memo/reference, and optional message.
+4. Keep asset type as XLM.
+5. Click **Generate SEP-7 URI**.
 
-```text
-Amount: 1
-Memo: PLAY-12345
-```
+The app creates a `web+stellar:pay` URI and QR code. SEP-7 does not send payment by itself. It asks a wallet to review, sign, and submit the transaction.
 
-Click **Create SEP-7 QR**.
+## How to pay using Freighter
 
-The backend creates a real URI like:
+1. Install the Freighter browser extension.
+2. Create or unlock a Freighter wallet.
+3. Switch Freighter to Testnet.
+4. Fund the Freighter Testnet account.
+5. Return to the playground.
+6. Generate a SEP-7 URI.
+7. Click **Open wallet** or copy the URI into a compatible wallet flow.
+8. Review the payment in Freighter and submit it.
+9. Copy the resulting transaction hash.
 
-```text
-web+stellar:pay?destination=G...&amount=1&memo=PLAY-12345&memo_type=MEMO_TEXT&msg=CivicTrust%20Testnet%20payment&network_passphrase=Test%20SDF%20Network%20%3B%20September%202015
-```
+The playground still shows the QR code and URI if Freighter is not installed.
 
-The QR code contains this URI.
+## How to verify a transaction hash
 
-### 6. Pay with a wallet
-
-Use a Stellar-compatible wallet that supports Testnet and SEP-7 links.
-
-Make sure the wallet is switched to **Testnet**.
-
-Scan the QR code or copy the URI if the wallet supports opening SEP-7 links.
-
-After the payment is submitted, the wallet should show a transaction hash.
-
-### 7. Verify the transaction
-
-Paste the transaction hash in the playground and click **Verify with Horizon**.
+1. Go to the verify tab.
+2. Paste the real Stellar Testnet transaction hash.
+3. Enter the expected destination public key.
+4. Enter the expected amount.
+5. Enter the expected memo.
+6. Click **Verify with Horizon**.
 
 The backend checks:
 
-- Transaction hash exists.
+- Transaction exists on Horizon Testnet.
 - Transaction succeeded.
-- Memo matches the expected memo.
-- Destination public key matches the receiving wallet.
-- Amount matches the requested amount.
+- Destination matches.
+- Amount matches.
+- Memo matches.
 - Asset is native XLM.
 
-If all checks pass, the result returns:
+The result shows the transaction hash, ledger number, created date, source account, destination account, amount, memo, and a Stellar Expert Testnet link.
 
-```json
-{
-  "verified": true,
-  "transactionHash": "...",
-  "ledger": 123456,
-  "paidAt": "..."
-}
-```
+## Common errors and fixes
 
-## How this maps to the civic payment module
+**Freighter is on Mainnet**
 
-The main civic app adds database records around the same flow:
+Switch Freighter to Testnet before opening or signing the SEP-7 request.
 
-| Playground concept | Civic app equivalent |
-| --- | --- |
-| Receiving public key | Tenant Stellar receiving wallet |
-| SEP-7 URI | Service payment request |
-| Memo | Payment intent reference code |
-| Horizon verification | Payment verification endpoint |
-| Transaction hash | Permanent public receipt |
+**Friendbot says the account already exists**
 
-## How Stellar smart contracts fit later
+Use **Refresh** to read the current account balance. Friendbot may refuse repeat funding for an already funded account.
 
-The current civic product does not need smart contracts for simple government service receipts. A normal Stellar payment plus Horizon verification is enough for proof-of-payment.
+**Horizon cannot find the account**
 
-Smart contracts on Stellar are built with Soroban. They become useful later if the app needs programmable rules, such as:
+Fund the public key with Friendbot, confirm the key starts with `G`, and make sure all Stellar environment variables point to Testnet.
 
-- Reward claim windows
-- Budget release conditions
-- Multi-step civic incentive programs
-- Automated disbursement rules
+**Verification fails**
 
-For smart contract development, start with the official Stellar smart contract quickstart:
+Check the hash, destination public key, amount, memo, and network. A Mainnet transaction cannot verify against Horizon Testnet.
 
-```text
-https://developers.stellar.org/docs/build/smart-contracts/getting-started/hello-world
-```
+**QR code does not open a wallet**
 
-## Official Stellar docs
-
-Use these as the source of truth:
-
-```text
-SEP-7 delegated signing:
-https://developers.stellar.org/docs/build/apps/wallet/sep7
-
-Networks, Testnet, and Friendbot:
-https://developers.stellar.org/docs/networks
-
-Build a payment app with the JS SDK:
-https://developers.stellar.org/docs/build/apps/example-application-tutorial
-
-Horizon API:
-https://developers.stellar.org/docs/data/apis/horizon
-
-Smart contracts / Soroban:
-https://developers.stellar.org/docs/build/smart-contracts
-```
-
-## Troubleshooting
-
-### Friendbot says the account already exists
-
-That is okay. Friendbot usually funds new accounts. If the account already exists, use **Check** to inspect the balance.
-
-### Horizon cannot find the account
-
-The account has not been funded yet, or the wallet is on the wrong network.
-
-Make sure you are using Testnet values.
-
-### Payment verification fails
-
-Check all of these:
-
-- The wallet submitted on Testnet, not Mainnet.
-- The transaction hash is from the payment transaction.
-- The memo is exactly the same as the SEP-7 request.
-- The destination public key matches the receiver.
-- The amount matches.
-
-### QR code opens nothing
-
-Not every wallet/browser handles `web+stellar:` links the same way. Copy the URI manually or use a wallet that supports SEP-7 payment links.
+Not every browser handles `web+stellar:` links the same way. Copy the URI manually or use Freighter/Testnet-compatible tooling.
