@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { badRequest, created, methodNotAllowed, ok, serverError, unauthorized } from '@/lib/api-response';
 import { requireTenantAdmin, requireTenantCitizen } from '@/lib/auth';
-import { createCivicAction, listCivicActions } from '@/services/civic-stellar-service';
+import { createCivicAction, listCivicActions } from '@/services/civic-actions';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const tenantSlug = String(req.query.tenantSlug || '');

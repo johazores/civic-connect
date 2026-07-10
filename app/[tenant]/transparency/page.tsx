@@ -6,7 +6,7 @@ import { StellarProof } from '@/components/stellar/stellar-proof';
 import { Card } from '@/components/ui/card';
 import { StatCard } from '@/components/ui/stat-card';
 import { formatDate } from '@/lib/format';
-import { listTransparencyEntries } from '@/services/civic-stellar-service';
+import { listTransparencyEntries } from '@/services/transparency';
 import { getTenantBySlug } from '@/services/tenant-service';
 
 export default async function TransparencyPage({ params }: { params: Promise<{ tenant: string }> }) {

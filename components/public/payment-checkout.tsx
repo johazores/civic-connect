@@ -75,7 +75,7 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
       : 'bg-[color-mix(in_srgb,var(--heat-2)_18%,var(--surface))] text-[#9a6b00]';
 
   return (
-    <div className="grid gap-4">
+    <div className="payment-checkout">
       <Card>
         <div className="flex items-center justify-between gap-3">
           <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">Payment request</p>
@@ -112,6 +112,7 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
         </div>
       </Card>
 
+      <div className="grid gap-4">
       <Card>
         <h3 className="font-display text-[17px] font-bold text-[var(--ink)]">Pay with your wallet</h3>
         <p className="mt-1 text-[13px] font-medium leading-5 text-[var(--muted)]">
@@ -212,6 +213,7 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
           </form>
         </Card>
       )}
+      </div>
     </div>
   );
 }

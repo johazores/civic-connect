@@ -1,13 +1,12 @@
-import Link from 'next/link';
-import { notFound } from 'next/navigation';
-import { FiAward, FiChevronRight, FiCreditCard, FiFileText, FiHash } from 'react-icons/fi';
-import type { IconType } from 'react-icons';
 import { HeroSection } from '@/components/public/hero-section';
 import { HotlinesSection } from '@/components/public/hotlines-section';
 import { NewsGrid } from '@/components/public/news-grid';
 import { ServicesGrid } from '@/components/public/services-grid';
+import { StellarExplainer } from '@/components/public/stellar-explainer';
 import { PublicShell } from '@/components/layout/public-shell';
 import { getTenantHomeData } from '@/services/tenant-service';
+import { notFound } from 'next/navigation';
+import Link from 'next/link';
 
 export default async function TenantHomePage({ params }: { params: Promise<{ tenant: string }> }) {
   const { tenant: tenantSlug } = await params;
@@ -19,58 +18,34 @@ export default async function TenantHomePage({ params }: { params: Promise<{ ten
 
   const base = `/${data.tenant.slug}`;
 
-  const trustLinks: Array<{ href: string; title: string; description: string; Icon: IconType }> = [
-    { href: `${base}/payments`, title: 'Payment receipts', description: 'Fees create public payment receipts', Icon: FiCreditCard },
-    { href: `${base}/civic-actions`, title: 'Civic rewards', description: 'Verified participation can be rewarded', Icon: FiAward },
-    { href: `${base}/transparency`, title: 'Budget transparency', description: 'Disbursements linked to public records', Icon: FiHash },
-    { href: `${base}/tax-receipts`, title: 'Tax receipts', description: 'Property tax records with payment proof', Icon: FiFileText }
-  ];
-
   return (
     <PublicShell tenant={data.tenant}>
-      <HeroSection tenant={data.tenant} categoriesCount={data.categories.length} />
+      <div className="home-page">
+        <HeroSection tenant={data.tenant} categoriesCount={data.categories.length} />
+        <StellarExplainer tenantSlug={data.tenant.slug} />
 
-      <section className="px-5">
-        <div className="section-head">
-          <h2>Services</h2>
-          <Link href={`${base}/services`}>View all</Link>
-        </div>
-        <ServicesGrid
-          services={data.services.map((service: any) => ({ ...service, feeAmount: service.feeAmount ? String(service.feeAmount) : null }))}
-          tenantSlug={data.tenant.slug}
-        />
+        <section className="home-section">
+          <div className="section-head">
+            <h2>Services</h2>
+            <Link href={`${base}/services`}>View all</Link>
+          </div>
+          <ServicesGrid
+            services={data.services.map((service: any) => ({ ...service, feeAmount: service.feeAmount ? String(service.feeAmount) : null }))}
+            tenantSlug={data.tenant.slug}
+          />
+        </section>
 
-        <div className="section-head">
-          <h2>Civic trust</h2>
+        <div className="home-split">
+          <HotlinesSection hotlines={data.hotlines} tenantSlug={data.tenant.slug} />
+          <section className="home-section">
+            <div className="section-head">
+              <h2>Latest updates</h2>
+              <Link href={`${base}/news`}>View all</Link>
+            </div>
+            <NewsGrid posts={data.newsPosts} tenantSlug={data.tenant.slug} />
+          </section>
         </div>
-        <div className="menu-group">
-          <p className="border-b border-[var(--line)] px-4 py-3 text-[13px] font-medium leading-[1.5] text-[var(--muted)]">
-            CivicTrust adds public proof for payments, rewards, records, and taxes.
-          </p>
-          {trustLinks.map(({ Icon, ...item }) => (
-            <Link key={item.href} href={item.href} className="menu-item">
-              <span className="mi-ic">
-                <Icon aria-hidden="true" className="h-4 w-4" />
-              </span>
-              <span className="mi-tx">
-                <b>{item.title}</b>
-                <span className="truncate">{item.description}</span>
-              </span>
-              <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <HotlinesSection hotlines={data.hotlines} tenantSlug={data.tenant.slug} />
-
-      <section className="px-5 pb-4">
-        <div className="section-head">
-          <h2>Latest updates</h2>
-          <Link href={`${base}/news`}>View all</Link>
-        </div>
-        <NewsGrid posts={data.newsPosts} tenantSlug={data.tenant.slug} />
-      </section>
+      </div>
     </PublicShell>
   );
 }

@@ -15,6 +15,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma db push --force-reset && tsx prisma/seed.ts",
     "db:studio": "prisma studio",
+    "validate:stellar": "tsx scripts/validate-stellar-e2e.ts",
     "vercel-build": "node scripts/prisma-generate.js && next build"
   },
   "dependencies": {

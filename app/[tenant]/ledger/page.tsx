@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { PublicShell } from '@/components/layout/public-shell';
 import { LedgerExplorer } from '@/components/public/ledger-explorer';
-import { getCivicLedger } from '@/services/civic-stellar-service';
+import { getCivicLedger } from '@/services/civic-ledger';
 import { getTenantBySlug } from '@/services/tenant-service';
 
 export default async function LedgerPage({ params }: { params: Promise<{ tenant: string }> }) {

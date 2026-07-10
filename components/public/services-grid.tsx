@@ -23,7 +23,7 @@ export function ServicesGrid({ services, tenantSlug }: { services: ServiceItem[]
   }
 
   return (
-    <div className="grid gap-3">
+    <div className="service-grid grid gap-3">
       {services.map((service) => {
         const hasFee = Boolean(service.paymentRequired && Number(service.feeAmount || 0) > 0);
 

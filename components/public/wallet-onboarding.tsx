@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
+import { Keypair } from '@stellar/stellar-sdk';
 import {
   FiAlertTriangle,
   FiCheckCircle,
@@ -9,17 +10,18 @@ import {
   FiDroplet,
   FiEye,
   FiEyeOff,
+  FiExternalLink,
   FiKey,
-  FiZap
+  FiSmartphone
 } from 'react-icons/fi';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
-type GeneratedWallet = { publicKey: string; secretKey: string };
 type Balance = { assetCode: string; balance: string };
 
 export function WalletOnboarding({ tenantSlug }: { tenantSlug: string }) {
-  const [wallet, setWallet] = useState<GeneratedWallet | null>(null);
+  const [publicKey, setPublicKey] = useState('');
+  const [secretKey, setSecretKey] = useState('');
   const [balances, setBalances] = useState<Balance[] | null>(null);
   const [showSecret, setShowSecret] = useState(false);
   const [error, setError] = useState('');
@@ -36,31 +38,24 @@ export function WalletOnboarding({ tenantSlug }: { tenantSlug: string }) {
     }
   }
 
-  async function generate() {
-    setLoading('gen');
+  function generate() {
     setError('');
     setBalances(null);
-    try {
-      const response = await fetch('/api/stellar-playground/generate-wallet', { method: 'POST' });
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || 'Could not create a wallet.');
-      setWallet({ publicKey: payload.publicKey, secretKey: payload.secretKey });
-      setShowSecret(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not create a wallet.');
-    }
-    setLoading(null);
+    const keypair = Keypair.random();
+    setPublicKey(keypair.publicKey());
+    setSecretKey(keypair.secret());
+    setShowSecret(false);
   }
 
   async function fund() {
-    if (!wallet) return;
+    if (!publicKey) return;
     setLoading('fund');
     setError('');
     try {
-      const response = await fetch('/api/stellar-playground/fund-wallet', {
+      const response = await fetch('/api/testnet/fund', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ publicKey: wallet.publicKey })
+        body: JSON.stringify({ publicKey })
       });
       const payload = await response.json();
       if (!response.ok) throw new Error(payload.error || 'Could not fund the wallet.');
@@ -74,127 +69,136 @@ export function WalletOnboarding({ tenantSlug }: { tenantSlug: string }) {
   return (
     <div className="grid gap-4">
       <Card>
-        <p className="section-eyebrow">Why a wallet</p>
-        <h2 className="mt-3 font-display text-xl font-bold text-[var(--ink)]">Your wallet is how you receive rewards</h2>
+        <p className="section-eyebrow">Your wallet</p>
+        <h2 className="mt-3 font-display text-xl font-bold text-[var(--ink)]">You need a wallet app — not an account here</h2>
         <p className="mt-2 text-sm font-medium leading-6 text-[var(--ink-2)]">
-          Share your wallet address so rewards can reach you. Never share your private key; anyone with it can move your money.
+          CivicTrust never stores your private key. To <strong>pay fees</strong>, open the payment QR in a wallet app like{' '}
+          <a href="https://www.freighter.app/" target="_blank" rel="noreferrer" className="font-bold text-[var(--navy)] underline">
+            Freighter
+          </a>
+          . To <strong>receive rewards</strong>, share your public address (starts with G) when submitting a civic action.
         </p>
-        <div className="mt-4 grid gap-3">
-          <KeyExplainer icon={<FiKey className="h-4 w-4" />} tone="navy" title="Wallet address" body="Safe to share. This is where rewards arrive." />
-          <KeyExplainer icon={<FiAlertTriangle className="h-4 w-4" />} tone="ember" title="Private key" body="Never share it. Anyone with it controls your money." />
+      </Card>
+
+      <Card>
+        <div className="flex items-start gap-3">
+          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-[var(--surface-2)] text-[var(--navy)]">
+            <FiSmartphone className="h-5 w-5" />
+          </span>
+          <div>
+            <h3 className="font-display text-base font-bold text-[var(--ink)]">Recommended for the demo</h3>
+            <p className="mt-1 text-sm font-medium leading-6 text-[var(--ink-2)]">
+              Install Freighter, create a wallet, fund it on testnet, then pay a service fee from{' '}
+              <Link href={`/${tenantSlug}/payments`} className="font-bold text-[var(--navy)] underline">
+                Pay a fee
+              </Link>
+              .
+            </p>
+            <a
+              href="https://www.freighter.app/"
+              target="_blank"
+              rel="noreferrer"
+              className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[var(--navy)]"
+            >
+              Get Freighter <FiExternalLink className="h-4 w-4" />
+            </a>
+          </div>
         </div>
       </Card>
 
       <Card>
-        <div className="flex items-center gap-3">
-          <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[13px] bg-[var(--surface-2)] text-[var(--navy)]">
-            <FiZap className="h-5 w-5" />
-          </span>
-          <div className="min-w-0">
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">Step 1</p>
-            <h3 className="font-display text-lg font-bold text-[var(--ink)]">Create a practice wallet</h3>
-          </div>
-        </div>
-        <p className="mt-3 text-[13px] font-medium leading-6 text-[var(--muted)]">
-          This creates a free practice wallet. For real money, use a trusted wallet app and keep your private key offline.
+        <p className="section-eyebrow">Testnet practice</p>
+        <h3 className="mt-2 font-display text-lg font-bold text-[var(--ink)]">Create a practice wallet (testnet only)</h3>
+        <p className="mt-2 text-sm font-medium leading-6 text-[var(--ink-2)]">
+          For demos without Freighter: generate a throwaway testnet wallet here. Never use this secret on mainnet or with real funds.
         </p>
-        <Button onClick={generate} disabled={loading === 'gen'} className="btn-block mt-4">
-          <FiKey className="h-4 w-4" /> {loading === 'gen' ? 'Creating...' : wallet ? 'Create another wallet' : 'Create practice wallet'}
-        </Button>
 
-        {wallet ? (
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button onClick={generate} disabled={loading !== null}>
+            <FiKey className="h-4 w-4" />
+            Generate testnet wallet
+          </Button>
+          {publicKey ? (
+            <Button variant="secondary" onClick={fund} disabled={loading === 'fund'}>
+              <FiDroplet className="h-4 w-4" />
+              {loading === 'fund' ? 'Funding…' : 'Fund with Friendbot'}
+            </Button>
+          ) : null}
+        </div>
+
+        {error ? (
+          <p className="mt-3 flex items-start gap-2 text-sm font-semibold text-[var(--ember-600)]">
+            <FiAlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            {error}
+          </p>
+        ) : null}
+
+        {publicKey ? (
           <div className="mt-4 grid gap-3">
-            <div className="rounded-[16px] bg-[var(--surface-2)] p-4">
-              <p className="text-[10.5px] font-extrabold uppercase tracking-[0.12em] text-[var(--muted)]">Wallet address - safe to share</p>
-              <p className="mt-1 break-all font-mono text-[12.5px] font-semibold text-[var(--ink)]">{wallet.publicKey}</p>
-              <button type="button" onClick={() => copy(wallet.publicKey, 'pub')} className="app-btn btn-outline btn-compact mt-3">
-                {copied === 'pub' ? <FiCheckCircle className="h-4 w-4 text-[#0f806d]" /> : <FiCopy className="h-4 w-4" />} Copy address
-              </button>
-            </div>
-
-            <div className="rounded-[16px] border border-[color-mix(in_srgb,var(--ember)_30%,transparent)] bg-[var(--ember-soft)] p-4">
-              <p className="flex items-center gap-1.5 text-[10.5px] font-extrabold uppercase tracking-[0.12em] text-[var(--ember-600)]">
-                <FiAlertTriangle className="h-3.5 w-3.5" /> Private key - keep private
-              </p>
-              <p className="mt-1 break-all font-mono text-[12.5px] font-semibold text-[var(--ink)]">
-                {showSecret ? wallet.secretKey : '•'.repeat(56)}
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button type="button" onClick={() => setShowSecret((v) => !v)} className="app-btn btn-outline btn-compact">
-                  {showSecret ? <FiEyeOff className="h-4 w-4" /> : <FiEye className="h-4 w-4" />} {showSecret ? 'Hide' : 'Reveal'}
+            <Field label="Public address (share this for rewards)" value={publicKey} copied={copied === 'pub'} onCopy={() => copy(publicKey, 'pub')} />
+            <Field
+              label="Secret key (never share — testnet practice only)"
+              value={secretKey}
+              hidden={!showSecret}
+              copied={copied === 'sec'}
+              onCopy={() => copy(secretKey, 'sec')}
+              action={
+                <button type="button" onClick={() => setShowSecret((v) => !v)} className="text-xs font-bold text-[var(--navy)]">
+                  {showSecret ? <FiEyeOff className="inline h-4 w-4" /> : <FiEye className="inline h-4 w-4" />}
+                  {showSecret ? ' Hide' : ' Show'}
                 </button>
-                <button type="button" onClick={() => copy(wallet.secretKey, 'sec')} className="app-btn btn-outline btn-compact">
-                  {copied === 'sec' ? <FiCheckCircle className="h-4 w-4 text-[#0f806d]" /> : <FiCopy className="h-4 w-4" />} Copy
-                </button>
+              }
+            />
+            {balances ? (
+              <div className="rounded-[14px] border border-[var(--line)] bg-[var(--surface-2)] p-4">
+                <p className="flex items-center gap-2 text-sm font-bold text-[#0f806d]">
+                  <FiCheckCircle className="h-4 w-4" />
+                  Wallet funded on testnet
+                </p>
+                <ul className="mt-2 text-sm font-medium text-[var(--ink-2)]">
+                  {balances.map((b) => (
+                    <li key={b.assetCode}>
+                      {b.balance} {b.assetCode}
+                    </li>
+                  ))}
+                </ul>
               </div>
-            </div>
+            ) : null}
           </div>
         ) : null}
-      </Card>
-
-      {wallet ? (
-        <Card>
-          <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[13px] bg-[var(--surface-2)] text-[var(--navy)]">
-              <FiDroplet className="h-5 w-5" />
-            </span>
-            <div className="min-w-0">
-              <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">Step 2</p>
-              <h3 className="font-display text-lg font-bold text-[var(--ink)]">Add play money</h3>
-            </div>
-          </div>
-          <p className="mt-3 text-[13px] font-medium leading-6 text-[var(--muted)]">
-            This adds free test money so the practice wallet can be used.
-          </p>
-          <Button onClick={fund} disabled={loading === 'fund'} variant="secondary" className="btn-block mt-4">
-            <FiDroplet className="h-4 w-4" /> {loading === 'fund' ? 'Adding...' : 'Add play money'}
-          </Button>
-          {balances ? (
-            <div className="mt-4 rounded-[16px] bg-[color-mix(in_srgb,var(--heat-1)_10%,var(--surface))] p-4">
-              <p className="flex items-center gap-1.5 text-[13px] font-extrabold text-[#0f806d]">
-                <FiCheckCircle className="h-4 w-4" /> Wallet active
-              </p>
-              <div className="mt-2 grid gap-1">
-                {balances.map((b) => (
-                  <p key={b.assetCode} className="font-mono text-[13px] font-semibold text-[var(--ink)]">
-                    {b.balance} {b.assetCode}
-                  </p>
-                ))}
-              </div>
-            </div>
-          ) : null}
-        </Card>
-      ) : null}
-
-      {error ? (
-        <p className="rounded-[16px] bg-[var(--ember-soft)] p-4 text-sm font-semibold leading-5 text-[var(--ember-600)]">{error}</p>
-      ) : null}
-
-      <Card>
-        <p className="section-eyebrow">Next step</p>
-        <h3 className="mt-3 font-display text-lg font-bold text-[var(--ink)]">Use your wallet address for rewards</h3>
-        <p className="mt-2 text-[13px] font-medium leading-6 text-[var(--ink-2)]">
-          Paste your wallet address when you submit a civic action so approved rewards land in your wallet.
-        </p>
-        <Link href={`/${tenantSlug}/civic-actions`} className="app-btn btn-primary mt-4">
-          Submit a civic action
-        </Link>
       </Card>
     </div>
   );
 }
 
-function KeyExplainer({ icon, title, body, tone }: { icon: React.ReactNode; title: string; body: string; tone: 'navy' | 'ember' }) {
-  const toneClass = tone === 'ember'
-    ? 'bg-[var(--ember-soft)] text-[var(--ember-600)]'
-    : 'bg-[color-mix(in_srgb,var(--navy)_10%,var(--surface))] text-[var(--navy)]';
+function Field({
+  label,
+  value,
+  hidden,
+  copied,
+  onCopy,
+  action
+}: {
+  label: string;
+  value: string;
+  hidden?: boolean;
+  copied: boolean;
+  onCopy: () => void;
+  action?: ReactNode;
+}) {
   return (
-    <div className="flex items-start gap-3 rounded-[16px] bg-[var(--surface-2)] p-3.5">
-      <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-[12px] ${toneClass}`}>{icon}</span>
-      <div className="min-w-0">
-        <p className="text-sm font-bold text-[var(--ink)]">{title}</p>
-        <p className="mt-0.5 text-[13px] font-medium leading-5 text-[var(--ink-2)]">{body}</p>
+    <div>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs font-bold uppercase tracking-wide text-[var(--muted)]">{label}</p>
+        {action}
       </div>
+      <div className="mt-1.5 flex items-center gap-2 rounded-[12px] border border-[var(--line)] bg-[var(--surface-2)] px-3 py-2.5">
+        <code className="min-w-0 flex-1 truncate text-xs font-semibold text-[var(--ink)]">{hidden ? '••••••••••••••••' : value}</code>
+        <button type="button" onClick={onCopy} className="shrink-0 text-[var(--navy)]" aria-label="Copy">
+          <FiCopy className="h-4 w-4" />
+        </button>
+      </div>
+      {copied ? <p className="mt-1 text-xs font-semibold text-[#0f806d]">Copied</p> : null}
     </div>
   );
 }

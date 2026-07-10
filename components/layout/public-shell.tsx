@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
 import { FiArrowLeft, FiUser } from 'react-icons/fi';
+import { DesktopSidebar } from '@/components/layout/desktop-sidebar';
 import { MobileMenu, Tabbar, type NavGroup, type NavItem } from '@/components/layout/mobile-menu';
 import { KeepWarm } from '@/components/layout/keep-warm';
 
@@ -33,109 +34,130 @@ export function PublicShell({
     phone?: string | null;
     primaryColor?: string;
   };
-  /** Screen title rendered in the app bar (reference .appbar pattern). Omit on Home for the brand row. */
   title?: string;
   subtitle?: string;
-  /** Renders a back button in the app bar. */
   backHref?: string;
-  /** Focused flow (wizard/checkout): hides the tab bar and menu so nothing covers the form. */
   flow?: boolean;
   children: ReactNode;
 }) {
   const base = `/${tenant.slug}`;
+  const pageTitle = title || tenant.cityName;
+  const pageSubtitle = subtitle || tenant.tagline;
 
   const navGroups: NavGroup[] = [
     {
-      label: 'Services',
+      label: 'Pay & prove',
       items: [
-        { href: `${base}/services`, label: 'Service directory', description: 'Permits, forms, and fees', icon: 'services' },
-        { href: `${base}/payments`, label: 'Service payments', description: 'Pay fees, verify receipts', icon: 'payments' },
-        { href: `${base}/tax-receipts`, label: 'Tax receipts', description: 'Digital property tax records', icon: 'tax' }
+        { href: `${base}/payments`, label: 'Pay a fee', icon: 'payments' },
+        { href: `${base}/ledger`, label: 'Public ledger', icon: 'transparency' }
       ]
     },
     {
-      label: 'Requests',
+      label: 'Citizen services',
       items: [
-        { href: `${base}/report`, label: 'Report an issue', description: 'Roads, waste, lights, safety', icon: 'report' },
-        { href: `${base}/track`, label: 'Track request', description: 'Follow status by reference', icon: 'track' },
-        { href: `${base}/dashboard`, label: 'My account', description: 'Reports, updates, receipts', icon: 'account' }
+        { href: `${base}/services`, label: 'Services', icon: 'services' },
+        { href: `${base}/report`, label: 'Report issue', icon: 'report' },
+        { href: `${base}/track`, label: 'Track request', icon: 'track' },
+        { href: `${base}/dashboard`, label: 'My account', icon: 'account' }
       ]
     },
     {
-      label: 'Civic trust',
+      label: 'Programs',
       items: [
-        { href: `${base}/ledger`, label: 'Public records', description: 'Payments, rewards, and receipts', icon: 'transparency' },
-        { href: `${base}/civic-actions`, label: 'Civic rewards', description: 'Verified participation actions', icon: 'rewards' },
-        { href: `${base}/wallet`, label: 'Set up a wallet', description: 'Receive rewards', icon: 'account' },
-        { href: `${base}/transparency`, label: 'Budget transparency', description: 'Public disbursements', icon: 'transparency' }
+        { href: `${base}/civic-actions`, label: 'Earn rewards', icon: 'rewards' },
+        { href: `${base}/wallet`, label: 'Your wallet', icon: 'account' },
+        { href: `${base}/transparency`, label: 'Transparency', icon: 'transparency' }
       ]
     },
     {
       label: 'Updates',
       items: [
-        { href: `${base}/news`, label: 'News', description: 'Official announcements', icon: 'news' },
-        { href: `${base}/hotlines`, label: 'Hotlines', description: 'Emergency contacts', icon: 'hotlines' }
+        { href: `${base}/news`, label: 'News', icon: 'news' },
+        { href: `${base}/hotlines`, label: 'Hotlines', icon: 'hotlines' }
       ]
     }
   ];
 
   const tabs: NavItem[] = [
     { href: base, label: 'Home', icon: 'home', exact: true },
-    { href: `${base}/track`, label: 'Track', icon: 'track' },
-    { href: `${base}/report`, label: 'Report', icon: 'report', center: true },
     { href: `${base}/payments`, label: 'Pay', icon: 'payments' },
+    { href: `${base}/report`, label: 'Report', icon: 'report', center: true },
+    { href: `${base}/ledger`, label: 'Ledger', icon: 'transparency' },
     { href: `${base}/dashboard`, label: 'Me', icon: 'account' }
   ];
 
   const primary = tenant.primaryColor || '#1a497b';
 
   return (
-    <div className="civic-device-shell">
+    <div className="app-shell">
       <KeepWarm />
       <div
-        className="civic-app-frame"
+        className={`app-shell-frame ${flow ? 'is-flow' : 'has-desktop-nav'}`.trim()}
         style={{
           '--tenant-primary': primary,
           '--brand': primary,
           '--brand-dark': `color-mix(in srgb, ${primary} 70%, #0f2d4d)`
         } as CSSProperties}
       >
-        <header className="civic-appbar">
-          {title ? (
-            <div className="flex min-w-0 items-center gap-3">
+        {!flow ? (
+          <DesktopSidebar
+            tenantSlug={tenant.slug}
+            tenantName={tenant.name}
+            cityName={tenant.cityName}
+            navGroups={navGroups}
+          />
+        ) : null}
+
+        <div className="app-shell-main">
+          <header className="app-topbar">
+            <div className="app-topbar-start">
               {backHref ? (
-                <Link href={backHref} className="app-icon-btn" aria-label="Back">
-                  <FiArrowLeft aria-hidden="true" className="h-5 w-5" />
+                <Link href={backHref} className="app-icon-btn mobile-only" aria-label="Back">
+                  <FiArrowLeft className="h-5 w-5" />
                 </Link>
               ) : null}
-              <div className="min-w-0">
-                <h1 className="appbar-title truncate">{title}</h1>
-                {subtitle ? <p className="app-subtitle truncate">{subtitle}</p> : null}
-              </div>
-            </div>
-          ) : (
-            <Link href={base} className="flex min-w-0 items-center gap-3" aria-label={`${tenant.name} home`}>
-              <div className="app-mark">{initials(tenant.cityName)}</div>
-              <div className="min-w-0">
-                <p className="app-title truncate">{tenant.name}</p>
-                <p className="app-subtitle truncate">{tenant.cityName} civic app</p>
-              </div>
-            </Link>
-          )}
 
-          {flow ? null : (
-            <div className="flex shrink-0 items-center gap-2">
-              <Link href={`${base}/login`} className="app-icon-btn" aria-label="Citizen sign in">
-                <FiUser aria-hidden="true" className="h-5 w-5" />
+              <Link href={base} className="app-topbar-brand mobile-only">
+                <div className="app-mark">{initials(tenant.cityName)}</div>
+                <div className="min-w-0">
+                  <p className="app-title truncate">{tenant.name}</p>
+                  <p className="app-subtitle truncate">{tenant.cityName}</p>
+                </div>
               </Link>
-              <MobileMenu tenantSlug={tenant.slug} tenantName={tenant.name} cityName={tenant.cityName} navGroups={navGroups} />
+
+              <div className="app-topbar-heading desktop-only">
+                <h1 className="app-topbar-title">{pageTitle}</h1>
+                {pageSubtitle ? <p className="app-topbar-subtitle">{pageSubtitle}</p> : null}
+              </div>
             </div>
-          )}
-        </header>
 
-        <div className={`civic-viewport ${flow ? 'viewport-flow' : ''}`.trim()}>{children}</div>
+            {!flow ? (
+              <div className="app-topbar-actions">
+                <Link href={`${base}/payments`} className="app-btn btn-primary btn-compact desktop-only">
+                  Pay a fee
+                </Link>
+                <Link href={`${base}/login`} className="app-topbar-action desktop-only">
+                  Sign in
+                </Link>
+                <Link href={`${base}/login`} className="app-icon-btn mobile-only" aria-label="Sign in">
+                  <FiUser className="h-5 w-5" />
+                </Link>
+                <MobileMenu
+                  tenantSlug={tenant.slug}
+                  tenantName={tenant.name}
+                  cityName={tenant.cityName}
+                  navGroups={navGroups}
+                />
+              </div>
+            ) : null}
+          </header>
 
-        {flow ? null : <Tabbar items={tabs} />}
+          <main className={`app-main ${flow ? 'is-flow' : ''}`.trim()}>
+            <div className={`app-main-inner ${flow ? 'is-narrow' : ''}`.trim()}>{children}</div>
+          </main>
+
+          {!flow ? <Tabbar items={tabs} /> : null}
+        </div>
       </div>
     </div>
   );

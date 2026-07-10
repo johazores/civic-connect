@@ -14,7 +14,7 @@ export function HotlinesSection({ hotlines, tenantSlug }: { hotlines: Hotline[];
   const sorted = [...hotlines].sort((a, b) => Number(b.isEmergency) - Number(a.isEmergency));
 
   return (
-    <section className="px-5">
+    <section className="hotlines-section">
       <div className="section-head">
         <h2>Hotlines</h2>
         {tenantSlug ? <Link href={`/${tenantSlug}/hotlines`}>View all</Link> : null}

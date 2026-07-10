@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { badRequest, created, methodNotAllowed, ok, serverError, unauthorized } from '@/lib/api-response';
 import { requireTenantAdmin } from '@/lib/auth';
-import { createPropertyTaxReceipt, listPropertyTaxReceipts } from '@/services/civic-stellar-service';
+import { createPropertyTaxReceipt, listPropertyTaxReceipts } from '@/services/tax-receipts';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const tenantSlug = String(req.query.tenantSlug || '');

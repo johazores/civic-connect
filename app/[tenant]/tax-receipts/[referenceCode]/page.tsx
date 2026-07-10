@@ -3,7 +3,7 @@ import { PublicShell } from '@/components/layout/public-shell';
 import { StellarProof } from '@/components/stellar/stellar-proof';
 import { Card } from '@/components/ui/card';
 import { formatDate } from '@/lib/format';
-import { getPropertyTaxReceiptByReference } from '@/services/civic-stellar-service';
+import { getPropertyTaxReceiptByReference } from '@/services/tax-receipts';
 
 export default async function TaxReceiptDetailPage({ params }: { params: Promise<{ tenant: string; referenceCode: string }> }) {
   const { tenant: tenantSlug, referenceCode } = await params;

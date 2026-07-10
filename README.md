@@ -222,15 +222,14 @@ For a phone demo, open the deployed Vercel URL on iPhone Safari or Android Chrom
 
 ```text
 /metro-city
-/metro-city/login
-/metro-city/admin/login
-/stellar-playground
+/metro-city/payments
+/about
 ```
 
 Read:
 
 ```text
-docs/mobile-demo-guide.md
+docs/demo-guide.md
 docs/pwa-setup-guide.md
 ```
 
@@ -320,27 +319,21 @@ Future Stellar modules:
 
 
 
-## Stellar Learning Playground
+## Stellar demo flow
 
-A beginner-friendly Stellar Testnet playground is available at:
+The product story is intentionally simple:
 
-```text
-/stellar-playground
-```
+1. **Citizens pay** from their own wallet (Freighter, etc.) via SEP-7 QR
+2. **The app verifies** the payment on Horizon and stores the transaction hash
+3. **Anyone can check** the receipt in the public ledger
 
-Use it to learn and test the raw Stellar pieces before using the tenant payment module:
-
-- Generate a Testnet keypair
-- Fund a Testnet account through Friendbot
-- Inspect balances through Horizon
-- Generate a SEP-7 payment URI and QR code
-- Verify a payment by transaction hash
+Practice wallet (testnet only): `/metro-city/wallet`
 
 Read:
 
 ```text
-docs/stellar-playground-guide.md
-docs/ui-mobile-navigation-fixes.md
+docs/demo-guide.md
+docs/stellar-architecture.md
 ```
 
 ## Documentation

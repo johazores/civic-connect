@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { FiAward, FiCreditCard, FiFlag, FiSearch } from 'react-icons/fi';
+import { FiAward, FiCreditCard, FiFlag, FiHash } from 'react-icons/fi';
 import type { IconType } from 'react-icons';
 
 export function HeroSection({
@@ -15,44 +15,35 @@ export function HeroSection({
   categoriesCount: number;
 }) {
   const quickActions: Array<{ label: string; href: string; Icon: IconType; text: string; tone: string }> = [
-    { label: 'Report', href: `/${tenant.slug}/report`, Icon: FiFlag, text: 'Send concern', tone: 'from-[#ef3a52] to-[#ff6f84]' },
-    { label: 'Track', href: `/${tenant.slug}/track`, Icon: FiSearch, text: 'Check status', tone: 'from-[#2f80ed] to-[#16a78b]' },
-    { label: 'Pay', href: `/${tenant.slug}/payments`, Icon: FiCreditCard, text: 'Verified receipt', tone: 'from-[#1a497b] to-[#2f80ed]' },
-    { label: 'Rewards', href: `/${tenant.slug}/civic-actions`, Icon: FiAward, text: 'Civic action', tone: 'from-[#16a78b] to-[#f2c94c]' }
+    { label: 'Pay a fee', href: `/${tenant.slug}/payments`, Icon: FiCreditCard, text: 'Wallet + QR', tone: 'action-navy' },
+    { label: 'Public ledger', href: `/${tenant.slug}/ledger`, Icon: FiHash, text: 'Verify receipts', tone: 'action-teal' },
+    { label: 'Report issue', href: `/${tenant.slug}/report`, Icon: FiFlag, text: 'Track by reference', tone: 'action-ember' },
+    { label: 'Earn rewards', href: `/${tenant.slug}/civic-actions`, Icon: FiAward, text: 'Civic programs', tone: 'action-gold' }
   ];
 
   return (
-    <section className="px-5 pt-2">
-      <div className="flex items-end justify-between gap-3 pb-3 pt-1">
-        <div className="min-w-0">
-          <p className="text-[13px] font-semibold text-[var(--muted)]">Welcome to</p>
-          <h1 className="truncate font-display text-[21px] font-bold tracking-[-0.01em] text-[var(--ink)]">{tenant.cityName}</h1>
+    <section className="home-hero">
+      <div className="home-hero-banner">
+        <div className="home-hero-copy">
+          <p className="home-hero-eyebrow">CivicTrust · {tenant.cityName}</p>
+          <h2 className="home-hero-title">{tenant.tagline}</h2>
+          <p className="home-hero-description">{tenant.description}</p>
+        </div>
+        <div className="home-hero-stats">
+          <HeroStat value="SEP-7" label="Wallet payments" />
+          <HeroStat value="Horizon" label="Verified on-chain" />
+          <HeroStat value={String(categoriesCount)} label="Services" />
         </div>
       </div>
 
-      <div className="app-pulse-card p-[22px]">
-        <div className="relative z-10">
-          <p className="text-[12px] font-bold uppercase tracking-[0.12em] text-[#9fc0e6]">CivicTrust</p>
-          <h2 className="mt-2 line-clamp-2 font-display text-[22px] font-bold leading-[1.2] tracking-[-0.02em] text-white">
-            {tenant.tagline}
-          </h2>
-          <p className="mt-1.5 line-clamp-2 text-[13px] font-medium leading-[1.5] text-[#b9d0ea]">{tenant.description}</p>
-          <div className="mt-4 flex gap-[18px] border-t border-[rgba(255,255,255,.14)] pt-4">
-            <PulseStat value="QR" label="Wallet pay" />
-            <PulseStat value="24/7" label="Tracking" />
-            <PulseStat value={String(categoriesCount)} label="Services" />
-          </div>
-        </div>
-      </div>
-
-      <div className="mt-4 grid grid-cols-2 gap-3">
+      <div className="home-hero-actions">
         {quickActions.map(({ Icon, ...action }) => (
-          <Link key={action.href} href={action.href} className="app-tile-card">
-            <span className={`grid h-11 w-11 place-items-center rounded-[15px] bg-gradient-to-br ${action.tone} text-white shadow-[0_10px_20px_rgba(18,40,72,.16)]`}>
+          <Link key={action.href} href={action.href} className={`home-action-card ${action.tone}`}>
+            <span className="home-action-icon">
               <Icon aria-hidden="true" className="h-5 w-5" />
             </span>
-            <p className="mt-3 text-sm font-bold text-[var(--ink)]">{action.label}</p>
-            <p className="mt-0.5 text-xs font-semibold text-[var(--muted)]">{action.text}</p>
+            <span className="home-action-label">{action.label}</span>
+            <span className="home-action-hint">{action.text}</span>
           </Link>
         ))}
       </div>
@@ -60,11 +51,11 @@ export function HeroSection({
   );
 }
 
-function PulseStat({ value, label }: { value: string; label: string }) {
+function HeroStat({ value, label }: { value: string; label: string }) {
   return (
-    <div className="text-[11.5px] text-[#9fc0e6]">
-      <b className="block font-display text-[17px] font-bold text-white">{value}</b>
-      {label}
+    <div className="home-hero-stat">
+      <b>{value}</b>
+      <span>{label}</span>
     </div>
   );
 }

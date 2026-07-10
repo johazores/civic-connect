@@ -4,24 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import {
-  FiAward,
-  FiBell,
-  FiChevronRight,
-  FiCreditCard,
-  FiFileText,
-  FiFlag,
-  FiGrid,
-  FiHash,
-  FiHome,
-  FiMenu,
-  FiPhoneCall,
-  FiSearch,
-  FiShield,
-  FiUser,
-  FiX
-} from 'react-icons/fi';
-import type { IconType } from 'react-icons';
+import { FiChevronRight, FiHome, FiMenu, FiShield, FiUser, FiX } from 'react-icons/fi';
+import { NavIcon } from '@/components/layout/nav-icon';
 
 export type NavIconKey =
   | 'home'
@@ -50,25 +34,6 @@ export type NavGroup = {
   items: NavItem[];
 };
 
-const iconMap: Record<NavIconKey, IconType> = {
-  home: FiHome,
-  services: FiGrid,
-  payments: FiCreditCard,
-  tax: FiFileText,
-  report: FiFlag,
-  track: FiSearch,
-  account: FiUser,
-  rewards: FiAward,
-  transparency: FiHash,
-  news: FiBell,
-  hotlines: FiPhoneCall
-};
-
-function NavIcon({ name, className }: { name?: NavIconKey; className?: string }) {
-  const Icon = name ? iconMap[name] : FiShield;
-  return <Icon aria-hidden="true" className={className} />;
-}
-
 const CLOSE_MS = 320;
 
 export function MobileMenu({
@@ -93,7 +58,7 @@ export function MobileMenu({
   // The sheet must be portaled into the phone frame: rendering it inside the
   // backdrop-filtered app bar would trap absolute positioning in the header box.
   useEffect(() => {
-    setFrameEl((triggerRef.current?.closest('.civic-app-frame') as HTMLElement) ?? null);
+    setFrameEl((triggerRef.current?.closest('.app-shell-frame, .civic-app-frame') as HTMLElement) ?? null);
   }, []);
 
   const close = useCallback(() => {

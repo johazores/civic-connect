@@ -1,107 +1,95 @@
 import Link from 'next/link';
-import { FiArrowRight, FiChevronRight, FiFlag, FiShield } from 'react-icons/fi';
+import { FiArrowRight, FiFlag, FiShield } from 'react-icons/fi';
 
 const tenantLinks = [
   {
     href: '/metro-city',
-    name: 'Metro City Services',
-    description: 'Citizen reports, service payments, rewards, and public transparency.'
+    name: 'Metro City',
+    description: 'Demo city — pay a fee, verify the receipt, explore the public ledger.'
   },
   {
     href: '/laguna-province',
-    name: 'Laguna Province Services',
-    description: 'Regional service requests, verifiable receipts, and civic records.'
+    name: 'Laguna Province',
+    description: 'Regional demo — service payments with on-chain proof.'
   }
 ];
 
 export default function RootPage() {
   return (
-    <main className="civic-device-shell">
-      <div className="civic-app-frame">
-        <header className="civic-appbar">
-          <div className="flex min-w-0 items-center gap-3">
+    <div className="marketing-shell">
+      <header className="marketing-header">
+        <div className="marketing-header-inner">
+          <div className="flex items-center gap-3">
             <div className="app-mark">CT</div>
-            <div className="min-w-0">
-              <p className="app-title truncate">CivicTrust</p>
-              <p className="app-subtitle truncate">Mobile civic operating system</p>
+            <div>
+              <p className="app-title">CivicTrust</p>
+              <p className="app-subtitle">Civic services with public proof</p>
             </div>
           </div>
-          <span className="app-icon-btn"><FiShield className="h-4 w-4" /></span>
-        </header>
+          <nav className="marketing-header-nav">
+            <Link href="/about">How it works</Link>
+            <Link href="/root" className="marketing-header-muted">Platform</Link>
+          </nav>
+        </div>
+      </header>
 
-        <div
-          className="civic-viewport viewport-flow px-5 pt-4"
-          style={{ paddingBottom: 'calc(var(--safe-bottom) + 26px)' }}
-        >
-          <section className="app-pulse-card p-[22px]">
-            <div className="relative z-10">
-              <p className="text-xs font-bold uppercase tracking-[0.12em] text-[#9fc0e6]">CivicTrust Platform</p>
-              <h1 className="mt-3 font-display text-[28px] font-extrabold leading-[1.08] tracking-[-0.02em] text-white">
-                Verifiable civic services
-              </h1>
-              <p className="mt-1.5 text-[13px] font-medium leading-5 text-[#b9d0ea]">
-                Reports, payments, and receipts with public proof anyone can check.
-              </p>
-              <div className="mt-[18px] flex gap-[18px] border-t border-white/15 pt-4">
-                <MiniMetric value="QR" label="Pay" />
-                <MiniMetric value="ID" label="Proof" />
-                <MiniMetric value="LGU" label="Ready" />
-              </div>
-            </div>
-          </section>
-
-          <div className="section-head">
-            <h2>Choose your city</h2>
+      <main className="marketing-main">
+        <section className="marketing-hero">
+          <p className="marketing-eyebrow">Stellar-powered civic trust</p>
+          <h1 className="marketing-title">Pay government fees. Get proof anyone can verify.</h1>
+          <p className="marketing-lead">
+            Citizens pay from their own wallet. The city keeps one wallet. Every verified payment becomes a permanent public receipt on the Stellar ledger.
+          </p>
+          <div className="marketing-hero-actions">
+            <Link href="/metro-city" className="app-btn btn-primary">
+              Open demo city <FiArrowRight className="h-4 w-4" />
+            </Link>
+            <Link href="/about" className="app-btn btn-secondary">
+              How Stellar works
+            </Link>
           </div>
+        </section>
 
-          <div className="grid gap-3">
+        <section className="marketing-section">
+          <h2 className="marketing-section-title">Choose a demo city</h2>
+          <div className="marketing-city-grid">
             {tenantLinks.map((tenant) => (
-              <Link key={tenant.href} href={tenant.href} className="app-feed-card">
-                <span className="flex items-center gap-3">
-                  <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[16px] bg-[var(--surface-2)] text-[var(--navy)]">
-                    <FiFlag className="h-5 w-5" />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate font-display text-base font-bold tracking-[-0.02em] text-[var(--ink)]">
-                      {tenant.name}
-                    </span>
-                    <span className="mt-0.5 block truncate text-[13px] font-medium text-[var(--muted)]">
-                      {tenant.description}
-                    </span>
-                  </span>
-                  <FiChevronRight className="h-4 w-4 shrink-0 text-[var(--muted)]" />
+              <Link key={tenant.href} href={tenant.href} className="marketing-city-card">
+                <span className="marketing-city-icon">
+                  <FiFlag className="h-5 w-5" />
                 </span>
+                <span className="marketing-city-name">{tenant.name}</span>
+                <span className="marketing-city-desc">{tenant.description}</span>
+                <FiArrowRight className="marketing-city-arrow h-4 w-4" />
               </Link>
             ))}
           </div>
+        </section>
 
-          <Link href="/about" className="app-tile-card mt-3 flex items-center gap-3">
-            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[16px] bg-[color-mix(in_srgb,var(--navy)_10%,var(--surface))] text-[var(--navy)]">
-              <FiShield className="h-5 w-5" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block font-display text-base font-bold tracking-[-0.02em] text-[var(--ink)]">How it works</span>
-              <span className="mt-0.5 block truncate text-[13px] font-medium text-[var(--muted)]">How public proof helps civic services</span>
-            </span>
-            <FiArrowRight className="h-4 w-4 shrink-0 text-[var(--ember)]" />
-          </Link>
-
-          <div className="mt-8 text-center">
-            <Link href="/root" className="text-[12px] font-semibold text-[var(--muted)] underline decoration-[var(--line-strong)] underline-offset-4">
-              Platform console
-            </Link>
+        <section className="marketing-steps">
+          <div className="marketing-step">
+            <b>1</b>
+            <div>
+              <h3>Pay</h3>
+              <p>Citizen opens a SEP-7 QR in Freighter or any Stellar wallet.</p>
+            </div>
           </div>
-        </div>
-      </div>
-    </main>
-  );
-}
-
-function MiniMetric({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="text-[11.5px] font-semibold text-[#9fc0e6]">
-      <b className="mb-0.5 block font-display text-[17px] font-bold text-white">{value}</b>
-      {label}
+          <div className="marketing-step">
+            <b>2</b>
+            <div>
+              <h3>Prove</h3>
+              <p>Horizon verifies amount, destination, and receipt note.</p>
+            </div>
+          </div>
+          <div className="marketing-step">
+            <b>3</b>
+            <div>
+              <h3>Check</h3>
+              <p>Transaction hash lives in the public ledger forever.</p>
+            </div>
+          </div>
+        </section>
+      </main>
     </div>
   );
 }

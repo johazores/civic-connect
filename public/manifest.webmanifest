@@ -40,10 +40,10 @@
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     },
     {
-      "name": "Stellar Playground",
-      "short_name": "Stellar",
-      "description": "Open the Stellar Testnet learning playground.",
-      "url": "/stellar-playground",
+      "name": "How Stellar works",
+      "short_name": "About",
+      "description": "Learn how CivicTrust uses Stellar for public payment proof.",
+      "url": "/about",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]

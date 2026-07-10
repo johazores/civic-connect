@@ -64,7 +64,7 @@ export function AboutClient() {
 
   return (
     <div className="civic-device-shell">
-      <div className="civic-app-frame">
+      <div className="civic-app-frame app-root-layout">
         <header className="civic-appbar">
           <div className="flex min-w-0 items-center gap-3">
             <div className="app-mark">CT</div>
@@ -311,11 +311,11 @@ export function AboutClient() {
                   Explore a live demo city, or open the practice payment page to try it yourself.
                 </p>
                 <div className="mt-5 grid gap-2.5">
-                  <Link href="/metro-city" className="app-btn btn-primary">
-                    Explore the demo city <FiArrowRight aria-hidden="true" className="h-4 w-4" />
+                  <Link href="/metro-city/payments" className="app-btn btn-primary">
+                    Try a demo payment <FiArrowRight aria-hidden="true" className="h-4 w-4" />
                   </Link>
-                  <Link href="/stellar-playground" className="app-btn btn-outline">
-                    <FiZap aria-hidden="true" className="h-4 w-4" /> Open practice payments
+                  <Link href="/metro-city/ledger" className="app-btn btn-outline">
+                    <FiHash aria-hidden="true" className="h-4 w-4" /> View the public ledger
                   </Link>
                 </div>
               </div>
