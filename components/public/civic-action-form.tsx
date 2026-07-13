@@ -30,8 +30,8 @@ type CivicAction = {
 };
 
 const howItWorks = [
-  { icon: FiSend, label: 'Submit action evidence', sub: 'Attendance, cleanups, volunteer work' },
-  { icon: FiClipboard, label: 'Staff reviews and approves', sub: 'The city team verifies your proof' },
+  { icon: FiSend, label: 'Submit activity evidence', sub: 'Volunteer hours, cleanups, event attendance' },
+  { icon: FiClipboard, label: 'Staff reviews and approves', sub: 'The organization verifies your proof' },
   { icon: FiAward, label: 'Reward is sent to your wallet', sub: 'Paid after staff approval' },
   { icon: FiHash, label: 'A public proof is saved', sub: 'Anyone can check the record' }
 ];
@@ -145,13 +145,14 @@ export function CivicActionForm({ tenantSlug }: { tenantSlug: string }) {
           <div className="field">
             <label className="input-label" htmlFor="action-type">Action type</label>
             <Select id="action-type" value={form.type} onChange={(event) => update('type', event.target.value)}>
-              <option value="PARTICIPATION">Civic participation / attendance</option>
-              <option value="CLEANUP">Environmental cleanup</option>
+              <option value="VOLUNTEER">Volunteer hours</option>
+              <option value="PARTICIPATION">Event participation / attendance</option>
+              <option value="CLEANUP">Community cleanup</option>
             </Select>
           </div>
           <div className="field">
             <label className="input-label" htmlFor="action-title">Title</label>
-            <Input id="action-title" required value={form.title} onChange={(event) => update('title', event.target.value)} placeholder="Barangay river cleanup, public hearing" />
+            <Input id="action-title" required value={form.title} onChange={(event) => update('title', event.target.value)} placeholder="Food drive shift, beach cleanup, league registration" />
           </div>
           <div className="field">
             <label className="input-label" htmlFor="action-details">Details</label>

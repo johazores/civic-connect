@@ -53,6 +53,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           linkUrl: asOptionalString(body.linkUrl),
           sortOrder: asNumber(body.sortOrder, 0),
           paymentRequired: asBoolean(body.paymentRequired, false),
+          serviceKind: ['STANDARD', 'DONATION', 'MEMBERSHIP', 'CAMPAIGN'].includes(String(body.serviceKind || ''))
+            ? String(body.serviceKind)
+            : 'STANDARD',
+          campaignGoalAmount: asNumber(body.campaignGoalAmount, 0) > 0 ? asNumber(body.campaignGoalAmount, 0).toFixed(7) : null,
           feeAmount: asNumber(body.feeAmount, 0) > 0 ? asNumber(body.feeAmount, 0).toFixed(7) : null,
           feeAssetCode: asString(body.feeAssetCode, 'XLM') || 'XLM',
           feeAssetIssuer: asOptionalString(body.feeAssetIssuer),

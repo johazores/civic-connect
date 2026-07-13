@@ -1,18 +1,45 @@
 import Link from 'next/link';
-import { FiArrowRight, FiFlag, FiShield } from 'react-icons/fi';
+import { FiArrowRight, FiFlag, FiHeart, FiShield, FiUsers } from 'react-icons/fi';
 
 const tenantLinks = [
   {
+    href: '/bayanihan-ngo',
+    name: 'Bayanihan NGO',
+    orgType: 'NGO',
+    description: 'Community aid, cleanup rewards, and transparent disbursements.'
+  },
+  {
+    href: '/liga-sports',
+    name: 'Liga Sports Club',
+    orgType: 'Community',
+    description: 'League dues, prize pools, and verifiable payments.'
+  },
+  {
+    href: '/freelancer-guild',
+    name: 'Freelancer Guild',
+    orgType: 'Business',
+    description: 'Client payment receipts as portable income proof.'
+  },
+  {
     href: '/metro-city',
     name: 'Metro City',
+    orgType: 'Government',
     description: 'Demo city — pay a fee, verify the receipt, explore the public ledger.'
   },
   {
     href: '/laguna-province',
     name: 'Laguna Province',
+    orgType: 'Government',
     description: 'Regional demo — service payments with on-chain proof.'
   }
 ];
+
+const orgIcon = {
+  NGO: FiHeart,
+  Community: FiUsers,
+  Business: FiShield,
+  Government: FiFlag
+} as const;
 
 export default function RootPage() {
   return (
@@ -23,7 +50,7 @@ export default function RootPage() {
             <div className="app-mark">CT</div>
             <div>
               <p className="app-title">CivicTrust</p>
-              <p className="app-subtitle">Civic services with public proof</p>
+              <p className="app-subtitle">Verifiable payments for communities and organizations</p>
             </div>
           </div>
           <nav className="marketing-header-nav">
@@ -35,14 +62,15 @@ export default function RootPage() {
 
       <main className="marketing-main">
         <section className="marketing-hero">
-          <p className="marketing-eyebrow">Stellar-powered civic trust</p>
-          <h1 className="marketing-title">Pay government fees. Get proof anyone can verify.</h1>
+          <p className="marketing-eyebrow">Stellar-powered trust layer</p>
+          <h1 className="marketing-title">Collect payments. Release funds. Prove it in public.</h1>
           <p className="marketing-lead">
-            Citizens pay from their own wallet. The city keeps one wallet. Every verified payment becomes a permanent public receipt on the Stellar ledger.
+            NGOs, community groups, freelancers, and small businesses use CivicTrust to collect wallet-signed payments,
+            reward volunteers, and publish transparent disbursements — without depending on government programs.
           </p>
           <div className="marketing-hero-actions">
-            <Link href="/metro-city" className="app-btn btn-primary">
-              Open demo city <FiArrowRight className="h-4 w-4" />
+            <Link href="/bayanihan-ngo" className="app-btn btn-primary">
+              Open NGO demo <FiArrowRight className="h-4 w-4" />
             </Link>
             <Link href="/about" className="app-btn btn-secondary">
               How Stellar works
@@ -51,18 +79,21 @@ export default function RootPage() {
         </section>
 
         <section className="marketing-section">
-          <h2 className="marketing-section-title">Choose a demo city</h2>
+          <h2 className="marketing-section-title">Choose a demo organization</h2>
           <div className="marketing-city-grid">
-            {tenantLinks.map((tenant) => (
-              <Link key={tenant.href} href={tenant.href} className="marketing-city-card">
-                <span className="marketing-city-icon">
-                  <FiFlag className="h-5 w-5" />
-                </span>
-                <span className="marketing-city-name">{tenant.name}</span>
-                <span className="marketing-city-desc">{tenant.description}</span>
-                <FiArrowRight className="marketing-city-arrow h-4 w-4" />
-              </Link>
-            ))}
+            {tenantLinks.map((tenant) => {
+              const Icon = orgIcon[tenant.orgType as keyof typeof orgIcon] || FiFlag;
+              return (
+                <Link key={tenant.href} href={tenant.href} className="marketing-city-card">
+                  <span className="marketing-city-icon">
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <span className="marketing-city-name">{tenant.name}</span>
+                  <span className="marketing-city-desc">{tenant.description}</span>
+                  <FiArrowRight className="marketing-city-arrow h-4 w-4" />
+                </Link>
+              );
+            })}
           </div>
         </section>
 
@@ -70,8 +101,8 @@ export default function RootPage() {
           <div className="marketing-step">
             <b>1</b>
             <div>
-              <h3>Pay</h3>
-              <p>Citizen opens a SEP-7 QR in Freighter or any Stellar wallet.</p>
+              <h3>Pay or donate</h3>
+              <p>Members open a SEP-7 QR in Freighter or any Stellar wallet.</p>
             </div>
           </div>
           <div className="marketing-step">
@@ -84,8 +115,8 @@ export default function RootPage() {
           <div className="marketing-step">
             <b>3</b>
             <div>
-              <h3>Check</h3>
-              <p>Transaction hash lives in the public ledger forever.</p>
+              <h3>Share</h3>
+              <p>Receipts, rewards, and disbursements stay on the public ledger.</p>
             </div>
           </div>
         </section>

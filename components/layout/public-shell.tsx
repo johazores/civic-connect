@@ -48,15 +48,15 @@ export function PublicShell({
     {
       label: 'Pay & prove',
       items: [
-        { href: `${base}/payments`, label: 'Pay a fee', icon: 'payments' },
+        { href: `${base}/payments`, label: 'Pay or donate', icon: 'payments' },
         { href: `${base}/ledger`, label: 'Public ledger', icon: 'transparency' }
       ]
     },
     {
-      label: 'Citizen services',
+      label: 'Organization',
       items: [
         { href: `${base}/services`, label: 'Services', icon: 'services' },
-        { href: `${base}/report`, label: 'Report issue', icon: 'report' },
+        { href: `${base}/report`, label: 'Submit request', icon: 'report' },
         { href: `${base}/track`, label: 'Track request', icon: 'track' },
         { href: `${base}/dashboard`, label: 'My account', icon: 'account' }
       ]
@@ -64,9 +64,9 @@ export function PublicShell({
     {
       label: 'Programs',
       items: [
-        { href: `${base}/civic-actions`, label: 'Earn rewards', icon: 'rewards' },
+        { href: `${base}/civic-actions`, label: 'Volunteer & rewards', icon: 'rewards' },
         { href: `${base}/wallet`, label: 'Your wallet', icon: 'account' },
-        { href: `${base}/transparency`, label: 'Transparency', icon: 'transparency' }
+        { href: `${base}/transparency`, label: 'Fund transparency', icon: 'transparency' }
       ]
     },
     {

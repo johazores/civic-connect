@@ -38,6 +38,7 @@ function serializeAction(action: any) {
     createdAt: action.createdAt?.toISOString?.() || action.createdAt,
     updatedAt: action.updatedAt?.toISOString?.() || action.updatedAt,
     reviewedAt: action.reviewedAt?.toISOString?.() || action.reviewedAt,
-    rewardPaidAt: action.rewardPaidAt?.toISOString?.() || action.rewardPaidAt
+    rewardPaidAt: action.rewardPaidAt?.toISOString?.() || action.rewardPaidAt,
+    beneficiaryConfirmedAt: action.beneficiaryConfirmedAt?.toISOString?.() || action.beneficiaryConfirmedAt
   };
 }

@@ -94,7 +94,8 @@ export async function getCivicLedger(tenantSlug: string): Promise<CivicLedgerRes
     rows.push({
       id: reward.id,
       kind: 'REWARD',
-      kindLabel: reward.type === 'CLEANUP' ? 'Cleanup reward' : 'Civic reward',
+      kindLabel:
+        reward.type === 'CLEANUP' ? 'Cleanup reward' : reward.type === 'VOLUNTEER' ? 'Volunteer reward' : 'Participation reward',
       referenceCode: reward.rewardMemo || reward.id,
       title: reward.title,
       counterparty: reward.participantName || null,

@@ -7,4 +7,5 @@ export * from './utils';
 export * from './verification';
 export * from './transactions';
 export * from './explorer';
-export * from './proof';
+export * from './claimable-balances';
+export * from './sponsor-reserve';

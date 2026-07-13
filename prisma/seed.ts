@@ -46,6 +46,7 @@ const runtimeSettings = [
 const tenantConfigs = [
   {
     slug: 'metro-city',
+    orgType: 'GOVERNMENT',
     name: 'Metro City Services',
     cityName: 'Metro City',
     tagline: 'Trusted city services in one clear portal.',
@@ -126,6 +127,7 @@ const tenantConfigs = [
   },
   {
     slug: 'laguna-province',
+    orgType: 'GOVERNMENT',
     name: 'Laguna Province Services',
     cityName: 'Laguna Province',
     tagline: 'Coordinated public services for provincial communities.',
@@ -178,6 +180,127 @@ const tenantConfigs = [
         updates: ['The concern was routed to Engineering Coordination.', 'Field verification is scheduled with the maintenance team.']
       }
     ]
+  },
+  {
+    slug: 'bayanihan-ngo',
+    orgType: 'NGO',
+    name: 'Bayanihan Community NGO',
+    cityName: 'Bayanihan Network',
+    tagline: 'Transparent aid, volunteer rewards, and community cleanup.',
+    description:
+      'A community NGO portal for medical fundraisers, direct aid disbursements, volunteer hour credentials, and environmental cleanup rewards — all with public Stellar proof.',
+    address: 'Community Center, Quezon City, Philippines',
+    email: 'hello@bayanihan-ngo.local',
+    phone: '+63 917 555 0101',
+    primaryColor: '#0f766e',
+    stellarReceivingPublicKey: null,
+    admin: { name: 'NGO Program Director', email: 'admin@bayanihan.local' },
+    citizen: { name: 'Miguel Santos', email: 'miguel.santos@bayanihan.local', phone: '+63 917 555 0102' },
+    departments: [
+      { name: 'Volunteer Programs', email: 'volunteers@bayanihan.local', phone: '+63 917 555 0103' },
+      { name: 'Community Aid Desk', email: 'aid@bayanihan.local', phone: '+63 917 555 0104' }
+    ],
+    categories: [
+      ['Volunteer Support', 'Scheduling, credentials, and volunteer coordination.'],
+      ['Community Aid', 'Emergency and medical assistance requests.'],
+      ['Cleanup Drives', 'Environmental cleanup reporting and rewards.']
+    ],
+    services: [
+      { title: 'Medical Relief Fund', description: 'Contribute to the community medical relief wallet with a verifiable public receipt.', department: 'Community Aid Desk', linkUrl: '', sortOrder: 1, serviceKind: 'CAMPAIGN', campaignGoalAmount: '500.0000000', paymentRequired: true, feeAmount: '5.0000000', feeAssetCode: 'XLM' },
+      { title: 'General Donation', description: 'Support Bayanihan programs with a direct wallet donation and public proof.', department: 'Community Aid Desk', linkUrl: '', sortOrder: 2, serviceKind: 'DONATION', campaignGoalAmount: null, paymentRequired: true, feeAmount: '2.0000000', feeAssetCode: 'XLM' },
+      { title: 'Volunteer Orientation', description: 'Register for volunteer orientation and receive activity credentials after verified service.', department: 'Volunteer Programs', linkUrl: '', sortOrder: 3, serviceKind: 'STANDARD', campaignGoalAmount: null, paymentRequired: false, feeAmount: null, feeAssetCode: 'XLM' }
+    ],
+    hotlines: [
+      { name: 'Aid Coordination Hotline', description: 'Emergency community aid routing.', phone: '+63 917 555 0104', isEmergency: true, sortOrder: 1 },
+      { name: 'Volunteer Desk', description: 'Volunteer scheduling and credentials.', phone: '+63 917 555 0103', isEmergency: false, sortOrder: 2 }
+    ],
+    news: [
+      {
+        title: 'Medical relief campaign opens public donations',
+        excerpt: 'Every contribution receives a permanent Stellar receipt on the public ledger.',
+        content: 'Donors can give from their own wallet and verify that funds reached the NGO receiving address without platform fees.'
+      }
+    ],
+    reports: []
+  },
+  {
+    slug: 'liga-sports',
+    orgType: 'COMMUNITY',
+    name: 'Liga Sports Club',
+    cityName: 'Liga Sports',
+    tagline: 'League dues, transparent prizes, and community sports programs.',
+    description:
+      'A community sports club portal for membership dues, tournament fees, and transparent prize disbursements with public ledger proof.',
+    address: 'Municipal Sports Complex, Philippines',
+    email: 'treasurer@liga-sports.local',
+    phone: '+63 918 555 0201',
+    primaryColor: '#b45309',
+    stellarReceivingPublicKey: null,
+    admin: { name: 'League Treasurer', email: 'admin@liga.local' },
+    citizen: { name: 'Jessa Rivera', email: 'jessa.rivera@liga.local', phone: '+63 918 555 0202' },
+    departments: [
+      { name: 'League Operations', email: 'ops@liga.local', phone: '+63 918 555 0201' },
+      { name: 'Tournament Desk', email: 'tourney@liga.local', phone: '+63 918 555 0203' }
+    ],
+    categories: [
+      ['Facilities', 'Court bookings and facility concerns.'],
+      ['Tournament', 'Schedule, fees, and prize inquiries.']
+    ],
+    services: [
+      { title: 'Season Membership Dues', description: 'Pay league membership with a wallet-signed receipt for the treasurer.', department: 'League Operations', linkUrl: '', sortOrder: 1, serviceKind: 'MEMBERSHIP', campaignGoalAmount: null, paymentRequired: true, feeAmount: '10.0000000', feeAssetCode: 'XLM' },
+      { title: 'Tournament Registration', description: 'Register a team and pay entry fees with public proof.', department: 'Tournament Desk', linkUrl: '', sortOrder: 2, serviceKind: 'STANDARD', campaignGoalAmount: null, paymentRequired: true, feeAmount: '15.0000000', feeAssetCode: 'XLM' },
+      { title: 'Championship Prize Pool', description: 'Transparent community contributions toward the championship prize fund.', department: 'Tournament Desk', linkUrl: '', sortOrder: 3, serviceKind: 'CAMPAIGN', campaignGoalAmount: '200.0000000', paymentRequired: true, feeAmount: '3.0000000', feeAssetCode: 'XLM' }
+    ],
+    hotlines: [
+      { name: 'Tournament Desk', description: 'Game schedules and registration support.', phone: '+63 918 555 0203', isEmergency: false, sortOrder: 1 }
+    ],
+    news: [
+      {
+        title: 'Prize pool contributions now tracked on the public ledger',
+        excerpt: 'Members can verify every dues payment and prize disbursement.',
+        content: 'The league treasurer publishes disbursements with on-chain proof so teams can trust prize payouts.'
+      }
+    ],
+    reports: []
+  },
+  {
+    slug: 'freelancer-guild',
+    orgType: 'BUSINESS',
+    name: 'Freelancer Guild',
+    cityName: 'Freelancer Guild',
+    tagline: 'Portable payment proof for independent professionals.',
+    description:
+      'A freelancer collective portal where clients pay via Stellar and members export verifiable income certificates from the public ledger.',
+    address: 'Remote-first collective, Philippines',
+    email: 'billing@freelancer-guild.local',
+    phone: '+63 919 555 0301',
+    primaryColor: '#4338ca',
+    stellarReceivingPublicKey: null,
+    admin: { name: 'Guild Billing Admin', email: 'admin@freelancer.local' },
+    citizen: { name: 'Paolo Mendoza', email: 'paolo.mendoza@freelancer.local', phone: '+63 919 555 0302' },
+    departments: [
+      { name: 'Client Billing', email: 'billing@freelancer-guild.local', phone: '+63 919 555 0301' }
+    ],
+    categories: [
+      ['Billing Support', 'Invoice and payment receipt questions.'],
+      ['Member Services', 'Guild membership and credentials.']
+    ],
+    services: [
+      { title: 'Client Project Invoice', description: 'Clients pay a guild invoice with a permanent public receipt suitable for income verification.', department: 'Client Billing', linkUrl: '', sortOrder: 1, serviceKind: 'STANDARD', campaignGoalAmount: null, paymentRequired: true, feeAmount: '20.0000000', feeAssetCode: 'XLM' },
+      { title: 'Guild Membership', description: 'Annual freelancer guild membership with verifiable payment proof.', department: 'Member Services', linkUrl: '', sortOrder: 2, serviceKind: 'MEMBERSHIP', campaignGoalAmount: null, paymentRequired: true, feeAmount: '8.0000000', feeAssetCode: 'XLM' },
+      { title: 'Workshop Pass', description: 'Pay for guild workshops and training sessions.', department: 'Member Services', linkUrl: '', sortOrder: 3, serviceKind: 'STANDARD', campaignGoalAmount: null, paymentRequired: true, feeAmount: '5.0000000', feeAssetCode: 'XLM' }
+    ],
+    hotlines: [
+      { name: 'Billing Desk', description: 'Client payment and receipt support.', phone: '+63 919 555 0301', isEmergency: false, sortOrder: 1 }
+    ],
+    news: [
+      {
+        title: 'Income certificates now available from verified payments',
+        excerpt: 'Members can export wallet-verified payment history for loan or client applications.',
+        content: 'Every verified client payment on the public ledger can be exported as a portable income certificate.'
+      }
+    ],
+    reports: []
   }
 ] as const;
 
@@ -222,6 +345,7 @@ async function main() {
       where: { slug: config.slug },
       update: {
         name: config.name,
+        orgType: (config as any).orgType || 'GOVERNMENT',
         cityName: config.cityName,
         tagline: config.tagline,
         description: config.description,
@@ -234,6 +358,7 @@ async function main() {
       create: {
         slug: config.slug,
         name: config.name,
+        orgType: (config as any).orgType || 'GOVERNMENT',
         cityName: config.cityName,
         tagline: config.tagline,
         description: config.description,
@@ -289,7 +414,15 @@ async function main() {
     await prisma.newsPost.deleteMany({ where: { tenantId: tenant.id } });
 
     await prisma.service.createMany({
-      data: config.services.map((service) => ({ tenantId: tenant.id, ...service, isActive: true, feeAssetIssuer: null, receivingPublicKey: null }))
+      data: config.services.map((service) => ({
+        tenantId: tenant.id,
+        ...service,
+        isActive: true,
+        feeAssetIssuer: null,
+        receivingPublicKey: null,
+        serviceKind: (service as any).serviceKind || 'STANDARD',
+        campaignGoalAmount: (service as any).campaignGoalAmount || null
+      }))
     });
 
     await prisma.hotline.createMany({
@@ -309,14 +442,17 @@ async function main() {
         {
           tenantId: tenant.id,
           citizenId: citizen.id,
-          type: 'PARTICIPATION',
-          title: 'Public consultation attendance',
-          description: 'Resident attended a public consultation and submitted feedback for service improvements.',
+          type: config.slug === 'bayanihan-ngo' ? 'VOLUNTEER' : 'PARTICIPATION',
+          title: config.slug === 'bayanihan-ngo' ? 'Food drive volunteer shift' : 'Public consultation attendance',
+          description:
+            config.slug === 'bayanihan-ngo'
+              ? 'Volunteer completed a four-hour food packing shift with photo evidence attached.'
+              : 'Resident attended a public consultation and submitted feedback for service improvements.',
           locationText: `${config.cityName} Civic Hall`,
           participantName: citizen.name,
           participantEmail: citizen.email,
           participantPhone: citizen.phone,
-          rewardAmount: '1.0000000',
+          rewardAmount: config.slug === 'bayanihan-ngo' ? '1.5000000' : '1.0000000',
           rewardAssetCode: 'XLM',
           rewardMemo: `${config.slug.slice(0, 3).toUpperCase()}-ACT-0001`,
           status: 'APPROVED',
@@ -360,12 +496,22 @@ async function main() {
         {
           tenantId: tenant.id,
           referenceCode: `${config.slug.slice(0, 3).toUpperCase()}-LED-0002`,
-          entryType: 'GRANT',
+          entryType: config.slug === 'bayanihan-ngo' ? 'MEDICAL_AID' : config.slug === 'liga-sports' ? 'PRIZE_PAYOUT' : 'GRANT',
           status: 'PUBLISHED',
-          title: 'Community cleanup incentive pool',
-          description: 'Reward pool reserved for verified cleanup actions and environmental participation.',
-          department: config.departments[2]?.name || 'Environment Office',
-          recipientName: 'Civic Rewards Program',
+          title:
+            config.slug === 'bayanihan-ngo'
+              ? 'Emergency medical aid disbursement'
+              : config.slug === 'liga-sports'
+                ? 'Tournament prize reserve'
+                : 'Community cleanup incentive pool',
+          description:
+            config.slug === 'bayanihan-ngo'
+              ? 'Published medical aid release for a verified community beneficiary.'
+              : config.slug === 'liga-sports'
+                ? 'Prize pool reserved for championship winners with public disbursement proof.'
+                : 'Reward pool reserved for verified cleanup actions and environmental participation.',
+          department: config.departments[1]?.name || config.departments[0]?.name || 'Operations',
+          recipientName: config.slug === 'bayanihan-ngo' ? 'Aid Beneficiary' : config.slug === 'liga-sports' ? 'Championship Teams' : 'Civic Rewards Program',
           amount: '50.0000000',
           assetCode: 'XLM',
           memo: `${config.slug.slice(0, 3).toUpperCase()}-LED-0002`,

@@ -37,6 +37,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           linkUrl: asOptionalString(body.linkUrl),
           sortOrder: asNumber(body.sortOrder, existing.sortOrder),
           paymentRequired: asBoolean(body.paymentRequired, existing.paymentRequired),
+          serviceKind: ['STANDARD', 'DONATION', 'MEMBERSHIP', 'CAMPAIGN'].includes(String(body.serviceKind || ''))
+            ? String(body.serviceKind)
+            : existing.serviceKind,
+          campaignGoalAmount:
+            body.campaignGoalAmount != null
+              ? asNumber(body.campaignGoalAmount, 0) > 0
+                ? asNumber(body.campaignGoalAmount, 0).toFixed(7)
+                : null
+              : existing.campaignGoalAmount,
           feeAmount: asNumber(body.feeAmount, 0) > 0 ? asNumber(body.feeAmount, 0).toFixed(7) : null,
           feeAssetCode: asString(body.feeAssetCode, existing.feeAssetCode) || 'XLM',
           feeAssetIssuer: asOptionalString(body.feeAssetIssuer),

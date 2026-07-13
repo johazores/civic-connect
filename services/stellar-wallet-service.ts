@@ -228,3 +228,40 @@ export async function checkTenantStellarWallet(tenantSlug: string) {
 
   return getTenantStellarWallet(tenantSlug);
 }
+
+export async function sponsorMemberReserve(tenantSlug: string) {
+  const tenant = await getTenantBySlugForWallet(tenantSlug);
+
+  if (tenant.stellarNetwork !== 'TESTNET') {
+    throw new Error('Sponsored reserve onboarding is only enabled on Stellar Testnet.');
+  }
+
+  if (!tenant.stellarReceivingSecretEncrypted) {
+    throw new Error('Configure and store the organization wallet secret before sponsoring member reserves.');
+  }
+
+  const { decryptStellarSecret } = await import('@/lib/stellar/secure-secret');
+  const { sponsorNewMemberAccount } = await import('@/lib/stellar/sponsor-reserve');
+  const config = resolveStellarNetworkConfig({
+    network: tenant.stellarNetwork,
+    horizonUrl: tenant.stellarHorizonUrl,
+    friendbotUrl: tenant.stellarFriendbotUrl,
+    networkPassphrase: tenant.stellarNetworkPassphrase
+  });
+
+  const sponsorSecret = decryptStellarSecret(tenant.stellarReceivingSecretEncrypted);
+  const sponsored = await sponsorNewMemberAccount({
+    sponsorSecretKey: sponsorSecret,
+    horizonUrl: config.horizonUrl,
+    networkPassphrase: config.networkPassphrase
+  });
+
+  return {
+    publicKey: sponsored.publicKey,
+    secretKey: sponsored.secretKey,
+    transactionHash: sponsored.transactionHash,
+    ledger: sponsored.ledger,
+    network: config.network,
+    note: 'Testnet learning wallet only. Share the public key with the member; keep the secret key private until they import it into Freighter.'
+  };
+}

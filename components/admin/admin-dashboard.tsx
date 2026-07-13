@@ -143,6 +143,8 @@ const contentConfig: Record<ContentTab, { label: string; endpoint: string; listU
       { name: 'department', label: 'Department label' },
       { name: 'linkUrl', label: 'Link URL' },
       { name: 'sortOrder', label: 'Sort order', type: 'number' },
+      { name: 'serviceKind', label: 'Service kind (STANDARD, DONATION, MEMBERSHIP, CAMPAIGN)' },
+      { name: 'campaignGoalAmount', label: 'Campaign goal amount', type: 'number' },
       { name: 'paymentRequired', label: 'Collect online payment', type: 'checkbox' },
       { name: 'feeAmount', label: 'Service fee amount', type: 'number' },
       { name: 'feeAssetCode', label: 'Payment currency (XLM or USDC)' },
@@ -150,7 +152,7 @@ const contentConfig: Record<ContentTab, { label: string; endpoint: string; listU
       { name: 'receivingPublicKey', label: 'Where this service payment goes' },
       { name: 'isActive', label: 'Active', type: 'checkbox' }
     ],
-    empty: { id: '', title: '', description: '', department: '', linkUrl: '', sortOrder: 0, paymentRequired: false, feeAmount: 0, feeAssetCode: 'XLM', feeAssetIssuer: '', receivingPublicKey: '', isActive: true }
+    empty: { id: '', title: '', description: '', department: '', linkUrl: '', sortOrder: 0, serviceKind: 'STANDARD', campaignGoalAmount: 0, paymentRequired: false, feeAmount: 0, feeAssetCode: 'XLM', feeAssetIssuer: '', receivingPublicKey: '', isActive: true }
   },
   hotlines: {
     label: 'Hotlines',
@@ -1739,6 +1741,26 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
               className="app-btn btn-outline disabled:opacity-60"
             >
               Create new practice wallet
+            </button>
+            <button
+              type="button"
+              disabled={isBusy}
+              onClick={async () => {
+                setIsBusy(true);
+                setError('');
+                setSuccess('');
+                const response = await fetch(`/api/tenant/${tenantSlug}/stellar/sponsor-reserve`, { method: 'POST' });
+                const payload = await response.json();
+                setIsBusy(false);
+                if (!response.ok) {
+                  setError(payload.error || 'Unable to sponsor member reserve.');
+                  return;
+                }
+                setSuccess(`Member wallet sponsored · ${payload.data.publicKey}`);
+              }}
+              className="app-btn btn-outline disabled:opacity-60"
+            >
+              Sponsor member reserve (Testnet)
             </button>
           </div>
         </BottomSheet>

@@ -18,7 +18,7 @@ import {
 export type CivicActionInput = {
   tenantSlug: string;
   citizenId?: string | null;
-  type?: 'PARTICIPATION' | 'CLEANUP';
+  type?: 'PARTICIPATION' | 'CLEANUP' | 'VOLUNTEER';
   title: string;
   description: string;
   locationText: string;
@@ -66,13 +66,17 @@ export async function createCivicAction(input: CivicActionInput) {
     throw new Error('Reward wallet must be a valid Stellar public key that starts with G.');
   }
 
-  const memo = await createUniqueCivicReference(input.type === 'CLEANUP' ? 'CLN' : 'ACT');
+  const actionType = input.type === 'CLEANUP' ? 'CLEANUP' : input.type === 'VOLUNTEER' ? 'VOLUNTEER' : 'PARTICIPATION';
+  const memoPrefix = actionType === 'CLEANUP' ? 'CLN' : actionType === 'VOLUNTEER' ? 'VOL' : 'ACT';
+  const memo = await createUniqueCivicReference(memoPrefix);
+  const rewardAmount =
+    actionType === 'CLEANUP' ? '2.0000000' : actionType === 'VOLUNTEER' ? '1.5000000' : '1.0000000';
 
   return prisma.civicAction.create({
     data: {
       tenantId: tenant.id,
       citizenId: input.citizenId || null,
-      type: input.type === 'CLEANUP' ? 'CLEANUP' : 'PARTICIPATION',
+      type: actionType,
       title: input.title.trim(),
       description: input.description.trim(),
       locationText: input.locationText.trim(),
@@ -84,7 +88,7 @@ export async function createCivicAction(input: CivicActionInput) {
       participantPhone: input.participantPhone?.trim() || null,
       rewardDestinationPublicKey: input.rewardDestinationPublicKey?.trim() || null,
       rewardMemo: memo,
-      rewardAmount: input.type === 'CLEANUP' ? '2.0000000' : '1.0000000',
+      rewardAmount,
       rewardAssetCode: tenant.stellarDefaultAssetCode || 'XLM',
       rewardAssetIssuer: tenant.stellarDefaultAssetIssuer || null
     },
@@ -261,4 +265,73 @@ export async function payCivicActionReward(tenantSlug: string, id: string, userI
   });
 
   return attachActionApprovalSummary(updated, userId);
+}
+
+export async function confirmCivicActionBeneficiary(tenantSlug: string, id: string) {
+  const tenant = await getActiveTenant(tenantSlug);
+
+  if (!tenant) {
+    throw new Error('Tenant not found.');
+  }
+
+  const action = await prisma.civicAction.findFirst({ where: { id, tenantId: tenant.id }, include: civicActionInclude });
+
+  if (!action) {
+    throw new Error('Civic action not found.');
+  }
+
+  if (action.status !== 'REWARDED') {
+    throw new Error('Beneficiary confirmation is only available after the reward is paid.');
+  }
+
+  const updated = await prisma.civicAction.update({
+    where: { id: action.id },
+    data: { beneficiaryConfirmedAt: new Date() },
+    include: civicActionInclude
+  });
+
+  return updated;
+}
+
+export async function getCivicActionClaimStatus(tenantSlug: string, id: string) {
+  const tenant = await getActiveTenant(tenantSlug);
+
+  if (!tenant) {
+    throw new Error('Tenant not found.');
+  }
+
+  const action = await prisma.civicAction.findFirst({ where: { id, tenantId: tenant.id } });
+
+  if (!action) {
+    throw new Error('Civic action not found.');
+  }
+
+  if (!action.rewardClaimableBalanceId) {
+    return {
+      actionId: action.id,
+      payoutMethod: action.payoutMethod,
+      claimableBalanceId: null,
+      isClaimed: action.status === 'REWARDED' && action.payoutMethod === 'DIRECT',
+      status: action.status
+    };
+  }
+
+  const { fetchClaimableBalance } = await import('@/lib/stellar/claimable-balances');
+  const config = getTenantNetworkConfig(tenant);
+  const balance = await fetchClaimableBalance({
+    horizonUrl: config.horizonUrl,
+    balanceId: action.rewardClaimableBalanceId
+  });
+
+  return {
+    actionId: action.id,
+    payoutMethod: action.payoutMethod,
+    claimableBalanceId: action.rewardClaimableBalanceId,
+    isClaimed: balance?.isClaimed ?? false,
+    amount: balance?.amount || String(action.rewardAmount),
+    assetCode: balance?.assetCode || action.rewardAssetCode,
+    claimant: balance?.claimant || action.rewardDestinationPublicKey,
+    status: action.status,
+    rewardTransactionHash: action.rewardTransactionHash
+  };
 }

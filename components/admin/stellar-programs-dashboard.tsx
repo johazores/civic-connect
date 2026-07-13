@@ -42,6 +42,7 @@ type CivicAction = {
   proofDigest: string | null;
   payoutMethod: PayoutMethod;
   rewardClaimableBalanceId: string | null;
+  beneficiaryConfirmedAt?: string | null;
   approvalSummary?: ApprovalSummary;
   createdAt: string;
 };
@@ -84,8 +85,18 @@ type TaxReceipt = {
 };
 
 const actionStatuses = ['ALL', 'SUBMITTED', 'REVIEWING', 'APPROVED', 'REJECTED', 'REWARDED'];
-const actionTypes = ['ALL', 'PARTICIPATION', 'CLEANUP'];
-const entryTypes = ['BUDGET_ALLOCATION', 'PUBLIC_DISBURSEMENT', 'PROCUREMENT', 'GRANT', 'OPERATING_EXPENSE'];
+const actionTypes = ['ALL', 'PARTICIPATION', 'CLEANUP', 'VOLUNTEER'];
+const entryTypes = [
+  'BUDGET_ALLOCATION',
+  'PUBLIC_DISBURSEMENT',
+  'PROCUREMENT',
+  'GRANT',
+  'OPERATING_EXPENSE',
+  'COMMUNITY_AID',
+  'EMERGENCY_AID',
+  'MEDICAL_AID',
+  'PRIZE_PAYOUT'
+];
 const entryStatuses = ['DRAFT', 'PUBLISHED', 'VERIFIED_ON_STELLAR', 'ARCHIVED'];
 
 function nice(value: string) {
@@ -366,6 +377,21 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
     }
 
     setSuccess('Civic action updated.');
+    await loadAll();
+  }
+
+  async function confirmBeneficiary(action: CivicAction) {
+    setError('');
+    setSuccess('');
+    const response = await fetch(`/api/tenant/${tenantSlug}/civic-actions/${action.id}/confirm-beneficiary`, { method: 'POST' });
+    const payload = await response.json();
+
+    if (!response.ok) {
+      setError(payload.error || 'Unable to confirm beneficiary receipt.');
+      return;
+    }
+
+    setSuccess('Beneficiary impact confirmed on the public record.');
     await loadAll();
   }
 
@@ -930,6 +956,21 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
                   : 'Approve release'
                 : 'Send reward'}
             </button>
+            {selectedAction.rewardTransactionHash && !selectedAction.beneficiaryConfirmedAt ? (
+              <button type="button" onClick={() => confirmBeneficiary(selectedAction)} className="app-btn btn-outline">
+                Confirm beneficiary received aid
+              </button>
+            ) : null}
+            {selectedAction.status === 'REWARDED' || selectedAction.status === 'APPROVED' ? (
+              <a
+                href={`/${tenantSlug}/civic-actions/${selectedAction.id}/credential`}
+                target="_blank"
+                rel="noreferrer"
+                className="app-btn btn-outline"
+              >
+                Open public credential
+              </a>
+            ) : null}
           </div>
         </BottomSheet>
       ) : null}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FiCheck, FiCheckCircle, FiClipboard, FiCopy, FiCreditCard, FiSearch } from 'react-icons/fi';
+import { FiCheck, FiCheckCircle, FiClipboard, FiCopy, FiCreditCard, FiPrinter, FiSearch } from 'react-icons/fi';
 import { StellarProof } from '@/components/stellar/stellar-proof';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -144,6 +144,14 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
               </>
             )}
           </button>
+          <a
+            href={`/${tenantSlug}/payments/${payment.referenceCode}/print`}
+            target="_blank"
+            rel="noreferrer"
+            className="app-btn btn-outline"
+          >
+            <FiPrinter aria-hidden="true" className="h-4 w-4" /> Print QR for posters
+          </a>
           <p className="text-xs font-medium leading-5 text-[var(--muted)]">
             Created {formatDate(payment.createdAt)}. CivicTrust prepares the payment; your wallet approves and sends it.
           </p>

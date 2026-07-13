@@ -265,11 +265,21 @@ export function CitizenDashboard({
             <FiShield aria-hidden="true" className="h-4 w-4" />
           </span>
           <span className="mi-tx">
-            <b>Pay service fee</b>
-            <span>Payment receipts with public proof</span>
+            <b>Payments & donations</b>
+            <span>Receipts with public proof</span>
           </span>
           <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
         </Link>
+        <a href={`/api/tenant/${tenantSlug}/payments/income-certificate`} className="menu-item" target="_blank" rel="noreferrer">
+          <span className="mi-ic">
+            <FiFileText aria-hidden="true" className="h-4 w-4" />
+          </span>
+          <span className="mi-tx">
+            <b>Payment certificate</b>
+            <span>Export verified payment history</span>
+          </span>
+          <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
+        </a>
         <Link href={`/${tenantSlug}/track`} className="menu-item">
           <span className="mi-ic">
             <FiRefreshCw aria-hidden="true" className="h-4 w-4" />
