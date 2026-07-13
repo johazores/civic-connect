@@ -143,7 +143,12 @@ const contentConfig: Record<ContentTab, { label: string; endpoint: string; listU
       { name: 'department', label: 'Department label' },
       { name: 'linkUrl', label: 'Link URL' },
       { name: 'sortOrder', label: 'Sort order', type: 'number' },
-      { name: 'serviceKind', label: 'Service kind', type: 'select', options: ['STANDARD', 'DONATION', 'MEMBERSHIP', 'CAMPAIGN'] },
+      { name: 'serviceKind', label: 'Service kind', type: 'select', options: [
+        { label: 'Standard', value: 'STANDARD' },
+        { label: 'Donation', value: 'DONATION' },
+        { label: 'Membership', value: 'MEMBERSHIP' },
+        { label: 'Campaign', value: 'CAMPAIGN' }
+      ] },
       { name: 'campaignGoalAmount', label: 'Campaign goal amount', type: 'number' },
       { name: 'paymentRequired', label: 'Collect online payment', type: 'checkbox' },
       { name: 'feeAmount', label: 'Payment amount', type: 'number' },
