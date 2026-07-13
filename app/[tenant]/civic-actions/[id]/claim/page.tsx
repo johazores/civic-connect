@@ -31,7 +31,13 @@ export default async function ClaimRewardPage({ params }: { params: Promise<{ te
   return (
     <PublicShell tenant={tenant} flow title="Claim reward" subtitle={action.title} backHref={`/${tenant.slug}/civic-actions`}>
       <main className="page-section pb-6">
-        <ClaimableRewardGuide tenantSlug={tenant.slug} actionId={action.id} participantName={action.participantName} title={action.title} />
+        <ClaimableRewardGuide
+          tenantSlug={tenant.slug}
+          actionId={action.id}
+          participantName={action.participantName}
+          title={action.title}
+          stellarNetwork={tenant.stellarNetwork}
+        />
       </main>
     </PublicShell>
   );

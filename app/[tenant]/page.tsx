@@ -5,6 +5,7 @@ import { ServicesGrid } from '@/components/public/services-grid';
 import { StellarExplainer } from '@/components/public/stellar-explainer';
 import { PublicShell } from '@/components/layout/public-shell';
 import { listCampaignStats } from '@/services/campaign-service';
+import { getTenantCopy } from '@/lib/tenant-copy';
 import { getTenantHomeData } from '@/services/tenant-service';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -18,6 +19,7 @@ export default async function TenantHomePage({ params }: { params: Promise<{ ten
   }
 
   const base = `/${data.tenant.slug}`;
+  const copy = getTenantCopy(data.tenant.orgType);
   const campaigns = await listCampaignStats(tenantSlug).catch(() => []);
   const campaignMap = new Map(campaigns.map((campaign) => [campaign.serviceId, campaign]));
 
@@ -29,7 +31,7 @@ export default async function TenantHomePage({ params }: { params: Promise<{ ten
 
         <section className="home-section">
           <div className="section-head">
-            <h2>Services</h2>
+            <h2>{copy.servicesLabel}</h2>
             <Link href={`${base}/services`}>View all</Link>
           </div>
           <ServicesGrid

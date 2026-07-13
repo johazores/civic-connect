@@ -25,6 +25,8 @@ export default async function VolunteerCredentialPage({ params }: { params: Prom
       <main className="page-section pb-6">
         <VolunteerCredential
           tenantSlug={tenant.slug}
+          stellarNetwork={tenant.stellarNetwork}
+          payoutMethod={action.payoutMethod}
           credential={{
             id: action.id,
             type: action.type,

@@ -83,7 +83,9 @@ export function LedgerExplorer({ ledger, isGovernment = true }: { ledger: Ledger
         <div className="relative z-10">
           <p className="text-[11px] font-extrabold uppercase tracking-[0.14em] text-[#9fc0e6]">Public civic records</p>
           <p className="mt-2 text-[13px] font-medium leading-6 text-[#b9d0ea]">
-            Every payment, reward, disbursement, and tax receipt below has a public proof that anyone can check.
+            {isGovernment
+              ? 'Every payment, reward, disbursement, and tax receipt below has a public proof that anyone can check.'
+              : 'Every payment, reward, and disbursement below has a public proof that anyone can check.'}
           </p>
           <div className="mt-4 flex gap-5 border-t border-white/15 pt-4">
             <Metric value={String(ledger.metrics.totalRecords)} label="Records" />
@@ -97,7 +99,7 @@ export function LedgerExplorer({ ledger, isGovernment = true }: { ledger: Ledger
         <MiniStat value={ledger.metrics.payments} label="Service payments" />
         <MiniStat value={ledger.metrics.rewards} label="Civic rewards" />
         <MiniStat value={ledger.metrics.disbursements} label="Disbursements" />
-        <MiniStat value={ledger.metrics.taxReceipts} label="Tax receipts" />
+        {isGovernment ? <MiniStat value={ledger.metrics.taxReceipts} label="Tax receipts" /> : null}
       </div>
 
       <div className="hscroll mt-4" style={{ padding: '2px 0' }}>

@@ -23,8 +23,7 @@ export function HeroSection({
     { label: 'Public ledger', href: `/${tenant.slug}/ledger`, Icon: FiHash, text: 'Verify receipts', tone: 'action-teal' },
     ...(copy.isGovernment
       ? [{ label: 'Report issue', href: `/${tenant.slug}/report`, Icon: FiFlag, text: 'Track by reference', tone: 'action-ember' }]
-      : [{ label: 'Volunteer', href: `/${tenant.slug}/civic-actions`, Icon: FiAward, text: 'Earn verified rewards', tone: 'action-ember' }]),
-    { label: 'Programs', href: `/${tenant.slug}/civic-actions`, Icon: FiAward, text: copy.programsLabel, tone: 'action-gold' }
+      : [{ label: copy.programsLabel, href: `/${tenant.slug}/civic-actions`, Icon: FiAward, text: 'Volunteer & earn rewards', tone: 'action-ember' }])
   ];
 
   return (

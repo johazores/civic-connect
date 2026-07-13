@@ -23,12 +23,14 @@ export function ClaimableRewardGuide({
   tenantSlug,
   actionId,
   participantName,
-  title
+  title,
+  stellarNetwork = 'TESTNET'
 }: {
   tenantSlug: string;
   actionId: string;
   participantName: string;
   title: string;
+  stellarNetwork?: string;
 }) {
   const [status, setStatus] = useState<ClaimStatus | null>(null);
   const [error, setError] = useState('');
@@ -72,7 +74,7 @@ export function ClaimableRewardGuide({
   }
 
   const balanceUrl = status.claimableBalanceId
-    ? stellarExpertClaimableBalanceUrl(status.claimableBalanceId, 'TESTNET')
+    ? stellarExpertClaimableBalanceUrl(status.claimableBalanceId, stellarNetwork)
     : null;
 
   return (
@@ -125,7 +127,7 @@ export function ClaimableRewardGuide({
 
         {status.rewardTransactionHash ? (
           <div className="mt-4">
-            <StellarProof transactionHash={status.rewardTransactionHash} network="TESTNET" claimableBalanceId={status.claimableBalanceId} />
+            <StellarProof transactionHash={status.rewardTransactionHash} network={stellarNetwork} claimableBalanceId={status.claimableBalanceId} />
           </div>
         ) : null}
 

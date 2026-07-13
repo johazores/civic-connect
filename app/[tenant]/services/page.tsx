@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { PublicShell } from '@/components/layout/public-shell';
 import { ServicesGrid } from '@/components/public/services-grid';
 import { prisma } from '@/lib/db';
+import { getTenantCopy } from '@/lib/tenant-copy';
 import { listCampaignStats } from '@/services/campaign-service';
 import { getTenantBySlug } from '@/services/tenant-service';
 
@@ -23,11 +24,13 @@ export default async function ServicesPage({ params }: { params: Promise<{ tenan
 
   const campaignMap = new Map(campaigns.map((campaign) => [campaign.serviceId, campaign]));
 
+  const copy = getTenantCopy(tenant.orgType);
+
   return (
     <PublicShell
       tenant={tenant}
-      title="Services"
-      subtitle="Payments, donations, memberships, and programs"
+      title={copy.servicesLabel}
+      subtitle={copy.paymentsSubtitle}
       backHref={`/${tenant.slug}`}
     >
       <main className="page-section">

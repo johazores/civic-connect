@@ -3,10 +3,12 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import {
+  FiAward,
   FiCheckCircle,
   FiChevronRight,
   FiClock,
   FiFileText,
+  FiGift,
   FiLogOut,
   FiMail,
   FiMapPin,
@@ -49,9 +51,23 @@ type CitizenReport = {
   }>;
 };
 
+type CitizenAction = {
+  id: string;
+  type: string;
+  title: string;
+  description: string;
+  locationText: string;
+  status: string;
+  payoutMethod?: string;
+  rewardAmount: string;
+  rewardAssetCode: string;
+  createdAt: string;
+};
+
 type DashboardPayload = {
   citizen: Citizen;
   reports: CitizenReport[];
+  actions: CitizenAction[];
   stats: {
     total: number;
     active: number;
@@ -176,6 +192,45 @@ function ReportCard({ report, tenantSlug }: { report: CitizenReport; tenantSlug:
   );
 }
 
+function ActionCard({ action, tenantSlug }: { action: CitizenAction; tenantSlug: string }) {
+  const canClaim = action.status === 'REWARDED' && action.payoutMethod === 'CLAIMABLE';
+
+  return (
+    <article className="card">
+      <div className="flex items-start justify-between gap-3">
+        <p className="min-w-0 truncate pt-0.5 text-xs font-semibold text-[var(--muted)]">
+          {action.type.replaceAll('_', ' ')}
+        </p>
+        <Badge value={action.status} />
+      </div>
+
+      <h3 className="mt-2 font-display text-base font-bold tracking-[-0.01em] text-[var(--ink)]">{action.title}</h3>
+      <p className="mt-1.5 flex items-start gap-1.5 text-[13px] leading-5 text-[var(--ink-2)]">
+        <FiMapPin aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-[var(--muted)]" />
+        <span className="min-w-0">{action.locationText}</span>
+      </p>
+
+      {action.status === 'REWARDED' ? (
+        <p className="mt-3 text-xs font-semibold text-[#0f806d]">
+          Rewarded {action.rewardAmount} {action.rewardAssetCode}
+        </p>
+      ) : null}
+
+      <p className="mt-4 text-xs font-semibold text-[var(--muted)]">Submitted {formatDate(action.createdAt)}</p>
+      <div className="mt-3 grid gap-2">
+        <Link href={`/${tenantSlug}/civic-actions/${action.id}/credential`} className="app-btn btn-outline btn-compact btn-block">
+          View credential <FiChevronRight aria-hidden="true" className="h-4 w-4" />
+        </Link>
+        {canClaim ? (
+          <Link href={`/${tenantSlug}/civic-actions/${action.id}/claim`} className="app-btn btn-secondary btn-compact btn-block">
+            <FiGift aria-hidden="true" className="h-4 w-4" /> Claim reward
+          </Link>
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
 export function CitizenDashboard({
   tenantSlug,
   orgType,
@@ -210,7 +265,24 @@ export function CitizenDashboard({
       return;
     }
 
-    setData(payload.data);
+    let actions: CitizenAction[] = [];
+    let stats = payload.data.stats;
+
+    if (!copy.isGovernment) {
+      const actionsResponse = await fetch(`/api/tenant/${tenantSlug}/civic-actions`);
+      const actionsPayload = await actionsResponse.json();
+
+      if (actionsResponse.ok) {
+        actions = actionsPayload.data || [];
+        stats = {
+          total: actions.length,
+          active: actions.filter((action: CitizenAction) => !['REWARDED', 'REJECTED'].includes(action.status)).length,
+          resolved: actions.filter((action: CitizenAction) => action.status === 'REWARDED').length
+        };
+      }
+    }
+
+    setData({ ...payload.data, actions, stats });
     setIsLoading(false);
   }
 
@@ -251,9 +323,21 @@ export function CitizenDashboard({
       </div>
 
       <div className="stat-grid mt-4">
-        <StatCard label="Active reports" value={data.stats.active} icon={<FiClock />} />
-        <StatCard label="Resolved" value={data.stats.resolved} icon={<FiCheckCircle />} />
-        <StatCard label="Total reports" value={data.stats.total} icon={<FiFileText />} />
+        <StatCard
+          label={copy.isGovernment ? 'Active reports' : 'In progress'}
+          value={data.stats.active}
+          icon={<FiClock />}
+        />
+        <StatCard
+          label={copy.isGovernment ? 'Resolved' : 'Rewarded'}
+          value={data.stats.resolved}
+          icon={<FiCheckCircle />}
+        />
+        <StatCard
+          label={copy.isGovernment ? 'Total reports' : 'Submissions'}
+          value={data.stats.total}
+          icon={copy.isGovernment ? <FiFileText /> : <FiAward />}
+        />
       </div>
 
       <div className="section-head">
@@ -293,16 +377,16 @@ export function CitizenDashboard({
           </span>
           <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
         </Link>
-        <a href={`/api/tenant/${tenantSlug}/payments/income-certificate`} className="menu-item" target="_blank" rel="noreferrer">
+        <Link href={`/${tenantSlug}/payments/certificate`} className="menu-item">
           <span className="mi-ic">
             <FiFileText aria-hidden="true" className="h-4 w-4" />
           </span>
           <span className="mi-tx">
-            <b>Payment certificate</b>
-            <span>Export verified payment history</span>
+            <b>{copy.incomeCertificateLabel}</b>
+            <span>Print verified payment history</span>
           </span>
           <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
-        </a>
+        </Link>
         <Link href={`/${tenantSlug}/track`} className="menu-item">
           <span className="mi-ic">
             <FiRefreshCw aria-hidden="true" className="h-4 w-4" />
@@ -319,12 +403,22 @@ export function CitizenDashboard({
         <h3>{copy.isGovernment ? 'My reports' : 'My activity'}</h3>
         {copy.isGovernment ? <Link href={`/${tenantSlug}/report`}>New report</Link> : <Link href={`/${tenantSlug}/civic-actions`}>Programs</Link>}
       </div>
-      {data.reports.length === 0 ? (
+      {copy.isGovernment ? (
+        data.reports.length === 0 ? (
+          <EmptyReports tenantSlug={tenantSlug} orgType={orgType} />
+        ) : (
+          <div className="grid gap-3">
+            {data.reports.map((report) => (
+              <ReportCard key={report.id} report={report} tenantSlug={tenantSlug} />
+            ))}
+          </div>
+        )
+      ) : data.actions.length === 0 ? (
         <EmptyReports tenantSlug={tenantSlug} orgType={orgType} />
       ) : (
         <div className="grid gap-3">
-          {data.reports.map((report) => (
-            <ReportCard key={report.id} report={report} tenantSlug={tenantSlug} />
+          {data.actions.map((action) => (
+            <ActionCard key={action.id} action={action} tenantSlug={tenantSlug} />
           ))}
         </div>
       )}

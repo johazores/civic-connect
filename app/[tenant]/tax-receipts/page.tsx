@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { PublicShell } from '@/components/layout/public-shell';
 import { TaxReceiptSearch } from '@/components/public/tax-receipt-search';
+import { getTenantCopy } from '@/lib/tenant-copy';
 import { getTenantBySlug } from '@/services/tenant-service';
 
 export default async function TaxReceiptsPage({ params }: { params: Promise<{ tenant: string }> }) {
@@ -8,6 +9,10 @@ export default async function TaxReceiptsPage({ params }: { params: Promise<{ te
   const tenant = await getTenantBySlug(tenantSlug);
 
   if (!tenant) {
+    notFound();
+  }
+
+  if (!getTenantCopy(tenant.orgType).isGovernment) {
     notFound();
   }
 

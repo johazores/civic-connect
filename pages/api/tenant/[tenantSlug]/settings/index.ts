@@ -3,6 +3,7 @@ import { badRequest, methodNotAllowed, ok, serverError, unauthorized } from '@/l
 import { requireTenantAdmin, safeTenantSelect } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { asOptionalString, asString, hasRequiredStrings } from '@/lib/request';
+import { normalizeOrgType } from '@/lib/tenant-copy';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const tenantSlug = String(req.query.tenantSlug || '');
@@ -36,6 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           email: asOptionalString(body.email),
           phone: asOptionalString(body.phone),
           primaryColor: asString(body.primaryColor, auth.tenant.primaryColor),
+          orgType: normalizeOrgType(asString(body.orgType, auth.tenant.orgType)),
           stellarDefaultAssetCode: asString(body.stellarDefaultAssetCode, 'XLM') || 'XLM',
           stellarDefaultAssetIssuer: asOptionalString(body.stellarDefaultAssetIssuer)
         },

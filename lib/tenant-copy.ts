@@ -12,6 +12,10 @@ export type TenantCopy = {
   contactEmail: string;
   paymentsSubtitle: string;
   programsLabel: string;
+  servicesLabel: string;
+  incomeCertificateLabel: string;
+  adminTrustTab: string;
+  adminTrustTitle: string;
   isGovernment: boolean;
 };
 
@@ -26,7 +30,11 @@ const copyByOrg: Record<TenantOrgType, Omit<TenantCopy, 'orgType' | 'isGovernmen
     contactSection: 'City contact',
     contactEmail: 'Email the city',
     paymentsSubtitle: 'Pay fees and get a public receipt',
-    programsLabel: 'Civic programs'
+    programsLabel: 'Civic programs',
+    servicesLabel: 'Services',
+    incomeCertificateLabel: 'Payment certificate',
+    adminTrustTab: 'Civic trust',
+    adminTrustTitle: 'Civic programs'
   },
   NGO: {
     personLabel: 'Supporter',
@@ -38,7 +46,11 @@ const copyByOrg: Record<TenantOrgType, Omit<TenantCopy, 'orgType' | 'isGovernmen
     contactSection: 'Contact us',
     contactEmail: 'Email the organization',
     paymentsSubtitle: 'Donate and get a public receipt',
-    programsLabel: 'Programs & aid'
+    programsLabel: 'Programs & aid',
+    servicesLabel: 'Programs & donations',
+    incomeCertificateLabel: 'Donation certificate',
+    adminTrustTab: 'Programs',
+    adminTrustTitle: 'Programs & rewards'
   },
   COMMUNITY: {
     personLabel: 'Member',
@@ -50,7 +62,11 @@ const copyByOrg: Record<TenantOrgType, Omit<TenantCopy, 'orgType' | 'isGovernmen
     contactSection: 'Contact us',
     contactEmail: 'Email the club',
     paymentsSubtitle: 'Pay dues or contribute with a public receipt',
-    programsLabel: 'Programs & prizes'
+    programsLabel: 'Programs & prizes',
+    servicesLabel: 'Programs & dues',
+    incomeCertificateLabel: 'Payment certificate',
+    adminTrustTab: 'Programs',
+    adminTrustTitle: 'Programs & rewards'
   },
   BUSINESS: {
     personLabel: 'Member',
@@ -62,7 +78,11 @@ const copyByOrg: Record<TenantOrgType, Omit<TenantCopy, 'orgType' | 'isGovernmen
     contactSection: 'Contact us',
     contactEmail: 'Email the guild',
     paymentsSubtitle: 'Pay invoices and get verifiable income proof',
-    programsLabel: 'Member programs'
+    programsLabel: 'Member programs',
+    servicesLabel: 'Services & invoices',
+    incomeCertificateLabel: 'Income certificate',
+    adminTrustTab: 'Programs',
+    adminTrustTitle: 'Member programs'
   },
   COOPERATIVE: {
     personLabel: 'Member',
@@ -74,7 +94,11 @@ const copyByOrg: Record<TenantOrgType, Omit<TenantCopy, 'orgType' | 'isGovernmen
     contactSection: 'Contact us',
     contactEmail: 'Email the co-op',
     paymentsSubtitle: 'Pay and get a public receipt',
-    programsLabel: 'Co-op programs'
+    programsLabel: 'Co-op programs',
+    servicesLabel: 'Co-op services',
+    incomeCertificateLabel: 'Payment certificate',
+    adminTrustTab: 'Programs',
+    adminTrustTitle: 'Co-op programs'
   }
 };
 

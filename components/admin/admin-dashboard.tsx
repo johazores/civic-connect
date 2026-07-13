@@ -28,6 +28,7 @@ import { Select } from '@/components/ui/select';
 import { StatCard } from '@/components/ui/stat-card';
 import { StellarProgramsDashboard } from '@/components/admin/stellar-programs-dashboard';
 import { formatDate } from '@/lib/format';
+import { getTenantCopy } from '@/lib/tenant-copy';
 
 const reportStatuses = ['SUBMITTED', 'REVIEWING', 'ASSIGNED', 'IN_PROGRESS', 'RESOLVED', 'REJECTED'];
 const reportPriorities = ['LOW', 'NORMAL', 'HIGH', 'URGENT'];
@@ -41,6 +42,7 @@ type TenantSettings = {
   id: string;
   slug: string;
   name: string;
+  orgType: string;
   cityName: string;
   tagline: string;
   description: string;
@@ -264,6 +266,27 @@ const adminTabMeta: Record<MainTab, { label: string; title: string; description:
     description: 'Profile, wallet, and approvals'
   }
 };
+
+function getAdminTabMeta(orgType?: string | null) {
+  const copy = getTenantCopy(orgType);
+  return {
+    ...adminTabMeta,
+    reports: copy.isGovernment
+      ? adminTabMeta.reports
+      : { label: 'Requests', title: 'Member requests', description: 'Review submitted requests from members' },
+    payments: {
+      ...adminTabMeta.payments,
+      description: copy.isGovernment ? 'Verify fee intents and receipts' : 'Verify donations, dues, and campaign payments'
+    },
+    'stellar-programs': {
+      label: copy.adminTrustTab,
+      title: copy.adminTrustTitle,
+      description: copy.isGovernment
+        ? 'Rewards, public records, and tax receipts'
+        : 'Rewards, disbursements, and public records'
+    }
+  } satisfies Record<MainTab, { label: string; title: string; description: string }>;
+}
 
 function AdminTabIcon({ tab }: { tab: MainTab }) {
   const className = 'h-6 w-6 shrink-0';
@@ -558,6 +581,7 @@ export function AdminDashboard({ tenantSlug, initialTenantName }: { tenantSlug: 
   }
 
   const tenantName = tenant?.name || initialTenantName || 'CivicTrust';
+  const tabMeta = getAdminTabMeta(tenant?.orgType);
 
   const activeFilterChips = [
     filters.status !== 'ALL' ? { key: 'status', label: niceLabel(filters.status) } : null,
@@ -580,8 +604,8 @@ export function AdminDashboard({ tenantSlug, initialTenantName }: { tenantSlug: 
           <div className="flex min-w-0 items-center gap-3">
             <div className="app-mark">{tenantName.slice(0, 2).toUpperCase()}</div>
             <div className="min-w-0">
-              <h1 className="appbar-title truncate">{adminTabMeta[activeTab].title}</h1>
-              <p className="app-subtitle truncate">{adminTabMeta[activeTab].description}</p>
+              <h1 className="appbar-title truncate">{tabMeta[activeTab].title}</h1>
+              <p className="app-subtitle truncate">{tabMeta[activeTab].description}</p>
             </div>
           </div>
           <button type="button" onClick={handleLogout} className="app-icon-btn" aria-label="Sign out">
@@ -693,7 +717,7 @@ export function AdminDashboard({ tenantSlug, initialTenantName }: { tenantSlug: 
 
             {activeTab === 'payments' ? <PaymentDashboard tenantSlug={tenantSlug} /> : null}
 
-            {activeTab === 'stellar-programs' ? <StellarProgramsDashboard tenantSlug={tenantSlug} /> : null}
+            {activeTab === 'stellar-programs' ? <StellarProgramsDashboard tenantSlug={tenantSlug} orgType={tenant?.orgType} /> : null}
 
             {activeTab === 'content' ? (
               <ContentStudio tenantSlug={tenantSlug} activeTab={activeTab} setError={setError} setSuccess={setSuccess} />
@@ -715,7 +739,7 @@ export function AdminDashboard({ tenantSlug, initialTenantName }: { tenantSlug: 
               aria-current={activeTab === tab ? 'page' : undefined}
             >
               <AdminTabIcon tab={tab} />
-              {adminTabMeta[tab].label}
+              {tabMeta[tab].label}
             </button>
           ))}
         </nav>
@@ -1178,6 +1202,8 @@ function ContentStudio({
   const editingItem = items.find((item) => item.id === editingId) || null;
   const stellarFeeFields = ['feeAmount', 'feeAssetCode', 'feeAssetIssuer', 'receivingPublicKey'];
 
+  const [campaignStats, setCampaignStats] = useState<Record<string, { raisedAmount: string; progressPercent: number }>>({});
+
   async function loadItems(tab: ContentTab = activeContent) {
     setIsLoading(true);
     setError('');
@@ -1192,6 +1218,22 @@ function ContentStudio({
     }
 
     setItems(payload.data);
+
+    if (tab === 'services') {
+      const campaignResponse = await fetch(`/api/tenant/${tenantSlug}/services/campaigns`);
+      const campaignPayload = await campaignResponse.json();
+      if (campaignResponse.ok) {
+        const nextStats: Record<string, { raisedAmount: string; progressPercent: number }> = {};
+        for (const campaign of campaignPayload.data || []) {
+          nextStats[campaign.serviceId] = {
+            raisedAmount: campaign.raisedAmount,
+            progressPercent: campaign.progressPercent ?? 0
+          };
+        }
+        setCampaignStats(nextStats);
+      }
+    }
+
     setIsLoading(false);
   }
 
@@ -1359,12 +1401,15 @@ function ContentStudio({
             const title = String(item.title || item.name || 'Untitled');
             const description = String(item.description || item.excerpt || item.email || item.phone || item.role || 'No description');
             const isActive = item.isActive ?? item.isPublished ?? true;
+            const campaign = activeContent === 'services' && item.serviceKind === 'CAMPAIGN' ? campaignStats[item.id] : null;
 
             return (
               <button key={item.id} type="button" onClick={() => openEdit(item)} className="menu-item">
                 <span className="mi-tx">
                   <b className="truncate">{title}</b>
-                  <span className="truncate">{description}</span>
+                  <span className="truncate">
+                    {campaign ? `${campaign.raisedAmount} raised · ${campaign.progressPercent}% of goal` : description}
+                  </span>
                 </span>
                 <span
                   className={`status-pill shrink-0 whitespace-nowrap ${
@@ -1386,6 +1431,10 @@ function ContentStudio({
         <BottomSheet title={editingId ? 'Edit item' : 'Create item'} sub={config.label} anim={formSheet.anim} onClose={closeFormSheet}>
           <form onSubmit={saveItem}>
             {config.fields.map((field) => {
+              if (activeContent === 'services' && field.name === 'campaignGoalAmount' && form.serviceKind !== 'CAMPAIGN') {
+                return null;
+              }
+
               if (activeContent === 'services' && stellarFeeFields.includes(field.name) && !form.paymentRequired) {
                 return null;
               }
@@ -1493,7 +1542,7 @@ type ApprovalPolicy = {
   updatedAt: string;
 };
 
-function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
+function StellarWalletPanel({ tenantSlug, walletOrgLabel = 'Organization wallet' }: { tenantSlug: string; walletOrgLabel?: string }) {
   const [wallet, setWallet] = useState<StellarWallet | null>(null);
   const [publicKey, setPublicKey] = useState('');
   const [secretKey, setSecretKey] = useState('');
@@ -1580,9 +1629,9 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
       <Card className="mb-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h3 className="font-display text-[15px] font-bold text-[var(--ink)]">LGU receiving wallet</h3>
+            <h3 className="font-display text-[15px] font-bold text-[var(--ink)]">{walletOrgLabel}</h3>
             <p className="mt-1 text-xs font-medium leading-5 text-[var(--muted)]">
-              {wallet ? `${wallet.network === 'TESTNET' ? 'Practice network' : 'Live network'} - Private key ${wallet.hasStoredSecret ? 'protected' : 'not stored'}` : 'Official payment address for this LGU.'}
+              {wallet ? `${wallet.network === 'TESTNET' ? 'Practice network' : 'Live network'} - Private key ${wallet.hasStoredSecret ? 'protected' : 'not stored'}` : `Official payment address for this organization.`}
             </p>
           </div>
           <span className="status-pill shrink-0 whitespace-nowrap bg-[var(--surface-2)] text-[var(--ink-2)]">
@@ -1985,6 +2034,8 @@ function TenantSettingsPanel({
     );
   }
 
+  const settingsCopy = getTenantCopy(form.orgType);
+
   return (
     <section>
       <p className="group-label">Workspace</p>
@@ -2001,7 +2052,7 @@ function TenantSettingsPanel({
         </a>
       </div>
 
-      <StellarWalletPanel tenantSlug={tenantSlug} />
+      <StellarWalletPanel tenantSlug={tenantSlug} walletOrgLabel={settingsCopy.walletOrgLabel} />
       <ApprovalPolicyPanel tenantSlug={tenantSlug} />
 
       <form onSubmit={saveSettings}>
@@ -2010,6 +2061,16 @@ function TenantSettingsPanel({
           <div className="field">
             <label className="input-label" htmlFor="settings-name">Tenant name</label>
             <Input id="settings-name" required value={form.name} onChange={(event) => updateForm('name', event.target.value)} />
+          </div>
+          <div className="field">
+            <label className="input-label" htmlFor="settings-org-type">Organization type</label>
+            <Select id="settings-org-type" value={form.orgType || 'GOVERNMENT'} onChange={(event) => updateForm('orgType', event.target.value)}>
+              <option value="GOVERNMENT">Government</option>
+              <option value="NGO">NGO</option>
+              <option value="COMMUNITY">Community</option>
+              <option value="BUSINESS">Business</option>
+              <option value="COOPERATIVE">Cooperative</option>
+            </Select>
           </div>
           <div className="field">
             <label className="input-label" htmlFor="settings-city">Display name / region</label>

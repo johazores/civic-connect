@@ -26,12 +26,23 @@ export type VolunteerCredentialData = {
   tenantName: string;
 };
 
-export function VolunteerCredential({ tenantSlug, credential }: { tenantSlug: string; credential: VolunteerCredentialData }) {
+export function VolunteerCredential({
+  tenantSlug,
+  credential,
+  stellarNetwork = 'TESTNET',
+  payoutMethod
+}: {
+  tenantSlug: string;
+  credential: VolunteerCredentialData;
+  stellarNetwork?: string;
+  payoutMethod?: string | null;
+}) {
   function printCredential() {
     window.print();
   }
 
   const isVerified = credential.status === 'REWARDED' && Boolean(credential.rewardTransactionHash);
+  const canClaim = credential.status === 'REWARDED' && payoutMethod === 'CLAIMABLE';
 
   return (
     <div className="grid gap-4 print:gap-2">
@@ -77,7 +88,7 @@ export function VolunteerCredential({ tenantSlug, credential }: { tenantSlug: st
                 transactionHash={credential.rewardTransactionHash}
                 ledger={credential.rewardLedger}
                 proofDigest={credential.proofDigest}
-                network="TESTNET"
+                network={stellarNetwork}
               />
             </div>
           </div>
@@ -93,9 +104,11 @@ export function VolunteerCredential({ tenantSlug, credential }: { tenantSlug: st
           <button type="button" onClick={printCredential} className="app-btn btn-primary">
             <FiDownload aria-hidden="true" className="h-4 w-4" /> Print credential
           </button>
-          <a href={`/${tenantSlug}/civic-actions/${credential.id}/claim`} className="app-btn btn-outline">
-            <FiHash aria-hidden="true" className="h-4 w-4" /> View claim status
-          </a>
+          {canClaim ? (
+            <a href={`/${tenantSlug}/civic-actions/${credential.id}/claim`} className="app-btn btn-outline">
+              <FiHash aria-hidden="true" className="h-4 w-4" /> View claim status
+            </a>
+          ) : null}
         </div>
       </Card>
     </div>

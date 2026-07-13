@@ -5,10 +5,12 @@ import { useState } from 'react';
 import { FiLogIn, FiShield, FiUserPlus } from 'react-icons/fi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { getTenantCopy } from '@/lib/tenant-copy';
 
 type Mode = 'login' | 'register';
 
-export function CitizenAuthForm({ tenantSlug, mode }: { tenantSlug: string; mode: Mode }) {
+export function CitizenAuthForm({ tenantSlug, mode, orgType }: { tenantSlug: string; mode: Mode; orgType?: string | null }) {
+  const copy = getTenantCopy(orgType);
   const [form, setForm] = useState({ name: '', email: '', phone: '', password: '' });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -56,7 +58,13 @@ export function CitizenAuthForm({ tenantSlug, mode }: { tenantSlug: string; mode
           {isRegister ? 'Create your account.' : 'Welcome back.'}
         </h2>
         <p className="mt-2 text-[14.5px] leading-6 text-[var(--muted)]">
-          {isRegister ? 'Track reports, updates, and receipts in one place.' : 'Sign in to follow your reports and receipts.'}
+          {isRegister
+            ? copy.isGovernment
+              ? 'Track reports, updates, and receipts in one place.'
+              : 'Track activity, rewards, and receipts in one place.'
+            : copy.isGovernment
+              ? 'Sign in to follow your reports and receipts.'
+              : 'Sign in to follow your activity and receipts.'}
         </p>
       </div>
 

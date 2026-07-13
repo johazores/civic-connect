@@ -8,6 +8,7 @@ import { Input, Textarea } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { StatCard } from '@/components/ui/stat-card';
 import { formatDate } from '@/lib/format';
+import { getTenantCopy } from '@/lib/tenant-copy';
 import { stellarExpertTxUrl } from '@/lib/stellar/explorer';
 
 type PayoutMethod = 'DIRECT' | 'CLAIMABLE';
@@ -119,7 +120,7 @@ function approvalSuccess(summary?: ApprovalSummary) {
   return `Approval saved. ${summary.remainingApprovals} more needed before funds are released.`;
 }
 
-function ApprovalProgress({ summary }: { summary?: ApprovalSummary }) {
+function ApprovalProgress({ summary, walletOrgLabel = 'organization wallet' }: { summary?: ApprovalSummary; walletOrgLabel?: string }) {
   if (!summary?.enabled) {
     return null;
   }
@@ -133,7 +134,7 @@ function ApprovalProgress({ summary }: { summary?: ApprovalSummary }) {
         </span>
       </div>
       <p className="mt-1 text-xs font-medium leading-5 text-[var(--muted)]">
-        {summary.remainingApprovals === 0 ? 'The required staff approvals are complete.' : 'Money stays in the LGU wallet until enough staff approve.'}
+        {summary.remainingApprovals === 0 ? 'The required staff approvals are complete.' : `Money stays in the ${walletOrgLabel} until enough staff approve.`}
       </p>
       {summary.approvers.length ? (
         <div className="mt-3 grid gap-1.5">
@@ -288,7 +289,9 @@ function SuccessBanner({ message }: { message: string }) {
   );
 }
 
-export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string }) {
+export function StellarProgramsDashboard({ tenantSlug, orgType }: { tenantSlug: string; orgType?: string | null }) {
+  const copy = getTenantCopy(orgType);
+  const isGovernment = copy.isGovernment;
   const [activeProgram, setActiveProgram] = useState<'actions' | 'transparency' | 'tax'>('actions');
   const [actions, setActions] = useState<CivicAction[]>([]);
   const [transparencyEntries, setTransparencyEntries] = useState<TransparencyEntry[]>([]);
@@ -318,10 +321,16 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
     if (nextActionFilter.status !== 'ALL') params.set('status', nextActionFilter.status);
     if (nextActionFilter.type !== 'ALL') params.set('type', nextActionFilter.type);
 
-    const [actionsResponse, transparencyResponse, taxResponse] = await Promise.all([
+    const fetches: [Promise<Response>, Promise<Response>, Promise<Response> | null] = [
       fetch(`/api/tenant/${tenantSlug}/civic-actions?${params.toString()}`),
       fetch(`/api/tenant/${tenantSlug}/transparency?includeDrafts=true`),
-      fetch(`/api/tenant/${tenantSlug}/tax-receipts?includeVoided=true`)
+      isGovernment ? fetch(`/api/tenant/${tenantSlug}/tax-receipts?includeVoided=true`) : null
+    ];
+
+    const [actionsResponse, transparencyResponse, taxResponse] = await Promise.all([
+      fetches[0],
+      fetches[1],
+      fetches[2] || Promise.resolve(new Response(JSON.stringify({ data: [] }), { status: 200 }))
     ]);
 
     const [actionsPayload, transparencyPayload, taxPayload] = await Promise.all([
@@ -330,7 +339,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
       taxResponse.json()
     ]);
 
-    if (!actionsResponse.ok || !transparencyResponse.ok || !taxResponse.ok) {
+    if (!actionsResponse.ok || !transparencyResponse.ok || (isGovernment && !taxResponse.ok)) {
       setError(actionsPayload.error || transparencyPayload.error || taxPayload.error || 'Unable to load civic programs.');
       setIsLoading(false);
       return;
@@ -574,10 +583,18 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
   const verifiedTransparency = transparencyEntries.filter((item) => item.transactionHash).length;
   const stellarTaxReceipts = taxReceipts.filter((item) => item.transactionHash).length;
 
+  const programTabs = (
+    [
+      ['actions', 'Rewards'],
+      ['transparency', 'Public records'],
+      ...(isGovernment ? [['tax', 'Tax receipts'] as const] : [])
+    ] as Array<['actions' | 'transparency' | 'tax', string]>
+  );
+
   return (
     <section>
       <div className="section-head !mt-0">
-        <h2>Civic programs</h2>
+        <h2>{copy.adminTrustTitle}</h2>
         <button type="button" onClick={() => loadAll()} className="flex min-h-[44px] shrink-0 items-center gap-1.5 px-2 text-[13px] font-bold text-[var(--ember)]">
           <FiRefreshCw aria-hidden="true" className="h-4 w-4" />
           Refresh
@@ -588,17 +605,11 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
         <StatCard label="Submitted actions" value={actions.length} />
         <StatCard label="Approved rewards" value={approvedActions} />
         <StatCard label="Public records" value={verifiedTransparency} />
-        <StatCard label="Tax receipts" value={stellarTaxReceipts} />
+        {isGovernment ? <StatCard label="Tax receipts" value={stellarTaxReceipts} /> : null}
       </div>
 
       <div className="seg mt-4">
-        {(
-          [
-            ['actions', 'Rewards'],
-            ['transparency', 'Public records'],
-            ['tax', 'Receipts']
-          ] as Array<['actions' | 'transparency' | 'tax', string]>
-        ).map(([key, label]) => (
+        {programTabs.map(([key, label]) => (
           <button
             key={key}
             type="button"
@@ -822,7 +833,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
             </div>
           ) : null}
 
-          <ApprovalProgress summary={selectedAction.approvalSummary} />
+          <ApprovalProgress summary={selectedAction.approvalSummary} walletOrgLabel={copy.walletOrgLabel.toLowerCase()} />
 
           {selectedAction.rewardTransactionHash || selectedAction.rewardClaimableBalanceId || selectedAction.proofDigest ? (
             <div className="mt-4 rounded-[16px] bg-[color-mix(in_srgb,var(--heat-1)_14%,var(--surface))] p-4">
@@ -1111,7 +1122,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
               </div>
             ) : null}
 
-            <ApprovalProgress summary={editingTransparencyEntry?.approvalSummary} />
+            <ApprovalProgress summary={editingTransparencyEntry?.approvalSummary} walletOrgLabel={copy.walletOrgLabel.toLowerCase()} />
 
             <div className="grid gap-2.5 pb-2">
               <Button type="submit">{editingTransparencyId ? 'Save changes' : 'Create record'}</Button>

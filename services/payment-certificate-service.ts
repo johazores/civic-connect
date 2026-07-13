@@ -10,6 +10,11 @@ export type IncomeCertificateEntry = {
   verifiedAt: string | null;
 };
 
+export type IncomeCertificateTotal = {
+  assetCode: string;
+  totalAmount: string;
+};
+
 export type IncomeCertificate = {
   tenantName: string;
   payerName: string;
@@ -17,6 +22,7 @@ export type IncomeCertificate = {
   generatedAt: string;
   totalAmount: string;
   assetCode: string;
+  totalsByAsset: IncomeCertificateTotal[];
   paymentCount: number;
   entries: IncomeCertificateEntry[];
 };
@@ -48,8 +54,17 @@ export async function buildIncomeCertificate(input: {
     return null;
   }
 
-  const assetCode = payments[0]?.assetCode || 'XLM';
-  const total = payments.reduce((sum: number, payment: { amount: unknown }) => sum + Number(payment.amount || 0), 0);
+  const totalsByAssetMap = new Map<string, number>();
+  for (const payment of payments) {
+    const code = payment.assetCode || 'XLM';
+    totalsByAssetMap.set(code, (totalsByAssetMap.get(code) || 0) + Number(payment.amount || 0));
+  }
+
+  const totalsByAsset = Array.from(totalsByAssetMap.entries()).map(([assetCode, amount]) => ({
+    assetCode,
+    totalAmount: amount.toFixed(7)
+  }));
+  const primaryTotal = totalsByAsset[0];
   const payerName = input.payerName || payments[0]?.payerName || 'Contributor';
   const payerEmail = input.payerEmail || payments[0]?.payerEmail || null;
 
@@ -58,8 +73,9 @@ export async function buildIncomeCertificate(input: {
     payerName,
     payerEmail,
     generatedAt: new Date().toISOString(),
-    totalAmount: total.toFixed(7),
-    assetCode,
+    totalAmount: primaryTotal?.totalAmount || '0.0000000',
+    assetCode: primaryTotal?.assetCode || 'XLM',
+    totalsByAsset,
     paymentCount: payments.length,
     entries: payments.map((payment: {
       referenceCode: string;

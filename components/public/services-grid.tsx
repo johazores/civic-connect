@@ -33,6 +33,8 @@ export function ServicesGrid({ services, tenantSlug }: { services: ServiceItem[]
     <div className="service-grid grid gap-3">
       {services.map((service) => {
         const hasFee = Boolean(service.paymentRequired && Number(service.feeAmount || 0) > 0);
+        const isCampaign = service.serviceKind === 'CAMPAIGN' && service.paymentRequired;
+        const showPayCta = hasFee || isCampaign;
 
         return (
           <Card key={service.id} className="card-hover">
@@ -65,14 +67,14 @@ export function ServicesGrid({ services, tenantSlug }: { services: ServiceItem[]
               </div>
             ) : null}
 
-            {hasFee ? (
+            {showPayCta ? (
               <div className="mt-3 flex items-center justify-between gap-3 border-t border-[var(--line)] pt-3">
                 <div className="min-w-0">
                   <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[var(--muted)]">
                     {serviceAmountLabel(service.serviceKind)}
                   </p>
                   <p className="font-display text-[15px] font-bold text-[var(--ink)]">
-                    {String(service.feeAmount)} {service.feeAssetCode || 'XLM'}
+                    {hasFee ? `${String(service.feeAmount)} ${service.feeAssetCode || 'XLM'}` : 'Any amount'}
                   </p>
                 </div>
                 {tenantSlug ? (
@@ -83,7 +85,7 @@ export function ServicesGrid({ services, tenantSlug }: { services: ServiceItem[]
               </div>
             ) : null}
 
-            {!hasFee && service.linkUrl ? (
+            {!showPayCta && service.linkUrl ? (
               <a
                 href={service.linkUrl}
                 target="_blank"
