@@ -45,6 +45,10 @@ const FILTERS: Array<{ key: string; label: string }> = [
   { key: 'TAX_RECEIPT', label: 'Tax receipts' }
 ];
 
+function getFilters(isGovernment: boolean) {
+  return isGovernment ? FILTERS : FILTERS.filter((filter) => filter.key !== 'TAX_RECEIPT');
+}
+
 const kindTone: Record<string, string> = {
   PAYMENT: 'bg-[color-mix(in_srgb,var(--navy)_10%,var(--surface))] text-[var(--navy)]',
   REWARD: 'bg-[color-mix(in_srgb,var(--heat-1)_16%,var(--surface))] text-[#0f806d]',
@@ -52,8 +56,9 @@ const kindTone: Record<string, string> = {
   TAX_RECEIPT: 'bg-[color-mix(in_srgb,var(--heat-0)_14%,var(--surface))] text-[var(--heat-0)]'
 };
 
-export function LedgerExplorer({ ledger }: { ledger: LedgerData | null }) {
+export function LedgerExplorer({ ledger, isGovernment = true }: { ledger: LedgerData | null; isGovernment?: boolean }) {
   const [filter, setFilter] = useState('ALL');
+  const filters = getFilters(isGovernment);
 
   const rows = useMemo(() => {
     if (!ledger) return [];
@@ -96,7 +101,7 @@ export function LedgerExplorer({ ledger }: { ledger: LedgerData | null }) {
       </div>
 
       <div className="hscroll mt-4" style={{ padding: '2px 0' }}>
-        {FILTERS.map((item) => (
+        {filters.map((item) => (
           <button
             key={item.key}
             type="button"

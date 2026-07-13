@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { FiAward, FiCreditCard, FiFlag, FiHash } from 'react-icons/fi';
 import type { IconType } from 'react-icons';
+import { getTenantCopy } from '@/lib/tenant-copy';
 
 export function HeroSection({
   tenant,
@@ -8,17 +9,22 @@ export function HeroSection({
 }: {
   tenant: {
     slug: string;
+    orgType?: string | null;
     cityName: string;
     tagline: string;
     description: string;
   };
   categoriesCount: number;
 }) {
+  const copy = getTenantCopy(tenant.orgType);
+
   const quickActions: Array<{ label: string; href: string; Icon: IconType; text: string; tone: string }> = [
-    { label: 'Pay a fee', href: `/${tenant.slug}/payments`, Icon: FiCreditCard, text: 'Wallet + QR', tone: 'action-navy' },
+    { label: copy.payCta, href: `/${tenant.slug}/payments`, Icon: FiCreditCard, text: 'Wallet + QR', tone: 'action-navy' },
     { label: 'Public ledger', href: `/${tenant.slug}/ledger`, Icon: FiHash, text: 'Verify receipts', tone: 'action-teal' },
-    { label: 'Report issue', href: `/${tenant.slug}/report`, Icon: FiFlag, text: 'Track by reference', tone: 'action-ember' },
-    { label: 'Earn rewards', href: `/${tenant.slug}/civic-actions`, Icon: FiAward, text: 'Civic programs', tone: 'action-gold' }
+    ...(copy.isGovernment
+      ? [{ label: 'Report issue', href: `/${tenant.slug}/report`, Icon: FiFlag, text: 'Track by reference', tone: 'action-ember' }]
+      : [{ label: 'Volunteer', href: `/${tenant.slug}/civic-actions`, Icon: FiAward, text: 'Earn verified rewards', tone: 'action-ember' }]),
+    { label: 'Programs', href: `/${tenant.slug}/civic-actions`, Icon: FiAward, text: copy.programsLabel, tone: 'action-gold' }
   ];
 
   return (
@@ -32,7 +38,7 @@ export function HeroSection({
         <div className="home-hero-stats">
           <HeroStat value="SEP-7" label="Wallet payments" />
           <HeroStat value="Horizon" label="Verified on-chain" />
-          <HeroStat value={String(categoriesCount)} label="Services" />
+          <HeroStat value={String(categoriesCount)} label={copy.isGovernment ? 'Services' : 'Programs'} />
         </div>
       </div>
 

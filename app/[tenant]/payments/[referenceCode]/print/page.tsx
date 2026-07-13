@@ -25,6 +25,7 @@ export default async function PrintPaymentQrPage({
     <PrintablePaymentQr
       tenantName={tenant.name}
       serviceTitle={payment.service.title}
+      serviceKind={payment.service.serviceKind}
       amount={String(payment.amount)}
       assetCode={payment.assetCode}
       memo={payment.memo}

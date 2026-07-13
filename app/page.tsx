@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { FiArrowRight, FiFlag, FiHeart, FiShield, FiUsers } from 'react-icons/fi';
+import { orgTypeBadge } from '@/lib/tenant-copy';
 
 const tenantLinks = [
   {
@@ -11,34 +12,34 @@ const tenantLinks = [
   {
     href: '/liga-sports',
     name: 'Liga Sports Club',
-    orgType: 'Community',
+    orgType: 'COMMUNITY',
     description: 'League dues, prize pools, and verifiable payments.'
   },
   {
     href: '/freelancer-guild',
     name: 'Freelancer Guild',
-    orgType: 'Business',
+    orgType: 'BUSINESS',
     description: 'Client payment receipts as portable income proof.'
   },
   {
     href: '/metro-city',
     name: 'Metro City',
-    orgType: 'Government',
+    orgType: 'GOVERNMENT',
     description: 'Demo city — pay a fee, verify the receipt, explore the public ledger.'
   },
   {
     href: '/laguna-province',
     name: 'Laguna Province',
-    orgType: 'Government',
+    orgType: 'GOVERNMENT',
     description: 'Regional demo — service payments with on-chain proof.'
   }
-];
+] as const;
 
 const orgIcon = {
   NGO: FiHeart,
-  Community: FiUsers,
-  Business: FiShield,
-  Government: FiFlag
+  COMMUNITY: FiUsers,
+  BUSINESS: FiShield,
+  GOVERNMENT: FiFlag
 } as const;
 
 export default function RootPage() {
@@ -82,13 +83,14 @@ export default function RootPage() {
           <h2 className="marketing-section-title">Choose a demo organization</h2>
           <div className="marketing-city-grid">
             {tenantLinks.map((tenant) => {
-              const Icon = orgIcon[tenant.orgType as keyof typeof orgIcon] || FiFlag;
+              const Icon = orgIcon[tenant.orgType];
               return (
                 <Link key={tenant.href} href={tenant.href} className="marketing-city-card">
                   <span className="marketing-city-icon">
                     <Icon className="h-5 w-5" />
                   </span>
                   <span className="marketing-city-name">{tenant.name}</span>
+                  <span className="marketing-city-badge">{orgTypeBadge(tenant.orgType)}</span>
                   <span className="marketing-city-desc">{tenant.description}</span>
                   <FiArrowRight className="marketing-city-arrow h-4 w-4" />
                 </Link>

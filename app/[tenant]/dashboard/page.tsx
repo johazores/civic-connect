@@ -14,7 +14,7 @@ export default async function CitizenDashboardPage({ params }: { params: Promise
   return (
     <PublicShell tenant={tenant} title="My account" subtitle="Reports, updates, receipts">
       <main className="page-section pad-b">
-        <CitizenDashboard tenantSlug={tenant.slug} cityEmail={tenant.email} cityPhone={tenant.phone} />
+        <CitizenDashboard tenantSlug={tenant.slug} orgType={tenant.orgType} cityEmail={tenant.email} cityPhone={tenant.phone} />
       </main>
     </PublicShell>
   );

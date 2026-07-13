@@ -7,6 +7,8 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 
+import { getTenantCopy, serviceAmountLabel } from '@/lib/tenant-copy';
+
 export type PaidServiceOption = {
   id: string;
   title: string;
@@ -14,6 +16,7 @@ export type PaidServiceOption = {
   department: string | null;
   feeAmount: string;
   feeAssetCode: string;
+  serviceKind?: string | null;
 };
 
 type CitizenProfile = {
@@ -22,7 +25,18 @@ type CitizenProfile = {
   phone: string | null;
 };
 
-export function PaymentIntentForm({ tenantSlug, services, initialServiceId }: { tenantSlug: string; services: PaidServiceOption[]; initialServiceId?: string }) {
+export function PaymentIntentForm({
+  tenantSlug,
+  services,
+  initialServiceId,
+  orgType
+}: {
+  tenantSlug: string;
+  services: PaidServiceOption[];
+  initialServiceId?: string;
+  orgType?: string | null;
+}) {
+  const copy = getTenantCopy(orgType);
   const [serviceId, setServiceId] = useState(initialServiceId && services.some((service) => service.id === initialServiceId) ? initialServiceId : services[0]?.id || '');
   const [payerName, setPayerName] = useState('');
   const [payerEmail, setPayerEmail] = useState('');
@@ -79,7 +93,7 @@ export function PaymentIntentForm({ tenantSlug, services, initialServiceId }: { 
             <FiCreditCard aria-hidden="true" className="h-10 w-10" />
           </div>
           <h3 className="font-display text-[var(--ink)]">No payable services</h3>
-          <p>No payable services are currently configured. Check the services directory or contact the service desk.</p>
+          <p>No payable services are currently configured. Check the services directory or {copy.contactEmail.toLowerCase()}.</p>
         </div>
       </Card>
     );
@@ -106,7 +120,9 @@ export function PaymentIntentForm({ tenantSlug, services, initialServiceId }: { 
 
         {selectedService ? (
           <div className="mb-4 rounded-[14px] bg-[var(--surface-2)] p-4">
-            <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">Service fee</p>
+            <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">
+              {serviceAmountLabel(selectedService.serviceKind)}
+            </p>
             <p className="mt-1 break-words font-display text-[20px] font-bold text-[var(--ink)]">
               {selectedService.feeAmount} {selectedService.feeAssetCode}
             </p>

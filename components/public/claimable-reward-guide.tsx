@@ -57,7 +57,7 @@ export function ClaimableRewardGuide({
 
   if (isLoading) {
     return (
-      <Card className="p-6">
+      <Card>
         <p className="text-sm font-semibold text-[var(--muted)]">Loading reward status...</p>
       </Card>
     );
@@ -65,7 +65,7 @@ export function ClaimableRewardGuide({
 
   if (error || !status) {
     return (
-      <Card className="p-6">
+      <Card>
         <p className="text-sm font-semibold text-[var(--ember-600)]">{error || 'Reward not found.'}</p>
       </Card>
     );
@@ -114,7 +114,7 @@ export function ClaimableRewardGuide({
               <p className="mt-1 break-all font-mono text-xs font-semibold text-[var(--ink)]">{status.claimableBalanceId}</p>
             </div>
             {balanceUrl ? (
-              <a href={balanceUrl} target="_blank" rel="noreferrer" className="app-btn btn-outline">
+              <a href={balanceUrl} target="_blank" rel="noreferrer" className="app-btn btn-outline btn-block">
                 <FiExternalLink aria-hidden="true" className="h-4 w-4" /> View on explorer
               </a>
             ) : null}

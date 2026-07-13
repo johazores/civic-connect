@@ -18,12 +18,7 @@ export type ServiceItem = {
   campaignContributorCount?: number;
 };
 
-function paymentLabel(service: ServiceItem) {
-  if (service.serviceKind === 'CAMPAIGN') return 'Donate';
-  if (service.serviceKind === 'DONATION') return 'Give';
-  if (service.serviceKind === 'MEMBERSHIP') return 'Pay dues';
-  return 'Pay fee';
-}
+import { serviceAmountLabel, servicePayLabel } from '@/lib/tenant-copy';
 
 export function ServicesGrid({ services, tenantSlug }: { services: ServiceItem[]; tenantSlug?: string }) {
   if (services.length === 0) {
@@ -40,7 +35,7 @@ export function ServicesGrid({ services, tenantSlug }: { services: ServiceItem[]
         const hasFee = Boolean(service.paymentRequired && Number(service.feeAmount || 0) > 0);
 
         return (
-          <Card key={service.id} className="card-hover p-4">
+          <Card key={service.id} className="card-hover">
             <div className="flex items-start justify-between gap-3">
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] bg-[var(--surface-2)] text-[var(--navy)] ring-1 ring-[var(--line)]">
                 <FiGrid aria-hidden="true" className="h-5 w-5" />
@@ -74,7 +69,7 @@ export function ServicesGrid({ services, tenantSlug }: { services: ServiceItem[]
               <div className="mt-3 flex items-center justify-between gap-3 border-t border-[var(--line)] pt-3">
                 <div className="min-w-0">
                   <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[var(--muted)]">
-                    {service.serviceKind === 'CAMPAIGN' ? 'Suggested gift' : service.serviceKind === 'MEMBERSHIP' ? 'Dues' : 'Amount'}
+                    {serviceAmountLabel(service.serviceKind)}
                   </p>
                   <p className="font-display text-[15px] font-bold text-[var(--ink)]">
                     {String(service.feeAmount)} {service.feeAssetCode || 'XLM'}
@@ -82,7 +77,7 @@ export function ServicesGrid({ services, tenantSlug }: { services: ServiceItem[]
                 </div>
                 {tenantSlug ? (
                   <Link href={`/${tenantSlug}/payments?serviceId=${service.id}`} className="app-btn btn-primary btn-compact shrink-0 px-4">
-                    <FiCreditCard aria-hidden="true" className="h-4 w-4" /> {paymentLabel(service)}
+                    <FiCreditCard aria-hidden="true" className="h-4 w-4" /> {servicePayLabel(service.serviceKind)}
                   </Link>
                 ) : null}
               </div>

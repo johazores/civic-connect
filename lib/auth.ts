@@ -10,6 +10,7 @@ export const safeTenantSelect = {
   id: true,
   slug: true,
   name: true,
+  orgType: true,
   cityName: true,
   tagline: true,
   description: true,

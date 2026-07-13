@@ -24,7 +24,8 @@ function serializePayment(payment: NonNullable<Awaited<ReturnType<typeof getPaym
     verifiedAt: payment.verifiedAt?.toISOString() || null,
     service: {
       title: payment.service.title,
-      description: payment.service.description
+      description: payment.service.description,
+      serviceKind: payment.service.serviceKind
     }
   };
 }

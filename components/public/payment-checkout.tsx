@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { formatDate, formatStatus } from '@/lib/format';
+import { paymentRequestLabel } from '@/lib/tenant-copy';
 
 type PaymentIntent = {
   referenceCode: string;
@@ -25,7 +26,7 @@ type PaymentIntent = {
   createdAt: string;
   paidAt: string | null;
   verifiedAt: string | null;
-  service: { title: string; description: string };
+  service: { title: string; description: string; serviceKind?: string | null };
 };
 
 export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: string; initialPayment: PaymentIntent }) {
@@ -78,7 +79,9 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
     <div className="payment-checkout">
       <Card>
         <div className="flex items-center justify-between gap-3">
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">Payment request</p>
+          <p className="text-[11px] font-extrabold uppercase tracking-[0.13em] text-[var(--muted)]">
+            {paymentRequestLabel(payment.service.serviceKind)}
+          </p>
           <span className={`status-pill shrink-0 ${statusClass}`}>{formatStatus(payment.status)}</span>
         </div>
         <h2 className="mt-2 font-display text-[17px] font-bold text-[var(--ink)]">{payment.service.title}</h2>
@@ -159,7 +162,7 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
       </Card>
 
       {isVerified ? (
-        <div className="rounded-[22px] bg-[color-mix(in_srgb,var(--heat-1)_14%,var(--surface))] p-5 shadow-sm">
+        <Card className="border-[color-mix(in_srgb,var(--heat-1)_24%,var(--line))] bg-[color-mix(in_srgb,var(--heat-1)_10%,var(--surface))]">
           <p className="text-[15px] font-bold text-[#0f806d]">Payment confirmed</p>
           <p className="mt-1 text-[13px] font-medium leading-5 text-[#0f806d]">
             This receipt now includes a permanent public payment ID.
@@ -176,7 +179,7 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
               <FiCheckCircle aria-hidden="true" className="h-4 w-4" /> View public receipt
             </a>
           </div>
-        </div>
+        </Card>
       ) : (
         <Card>
           <h3 className="font-display text-[17px] font-bold text-[var(--ink)]">Check your payment</h3>
@@ -209,14 +212,15 @@ export function PaymentCheckout({ tenantSlug, initialPayment }: { tenantSlug: st
                 <FiCheckCircle aria-hidden="true" className="h-4 w-4" />
                 {isVerifying ? 'Checking payment...' : 'Check payment ID'}
               </Button>
-              <button
+              <Button
                 type="button"
+                variant="secondary"
+                className="btn-block"
                 disabled={isVerifying}
                 onClick={() => verifyPayment(undefined, 'scan')}
-                className="app-btn btn-outline disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <FiSearch aria-hidden="true" className="h-4 w-4" /> Search by receipt note
-              </button>
+              </Button>
             </div>
           </form>
         </Card>

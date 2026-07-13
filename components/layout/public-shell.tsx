@@ -1,9 +1,12 @@
+'use client';
+
 import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
 import { FiArrowLeft, FiUser } from 'react-icons/fi';
 import { DesktopSidebar } from '@/components/layout/desktop-sidebar';
 import { MobileMenu, Tabbar, type NavGroup, type NavItem } from '@/components/layout/mobile-menu';
 import { KeepWarm } from '@/components/layout/keep-warm';
+import { getTenantCopy } from '@/lib/tenant-copy';
 
 function initials(value: string) {
   return (
@@ -28,6 +31,7 @@ export function PublicShell({
   tenant: {
     slug: string;
     name: string;
+    orgType?: string | null;
     cityName: string;
     tagline: string;
     email?: string | null;
@@ -41,6 +45,7 @@ export function PublicShell({
   children: ReactNode;
 }) {
   const base = `/${tenant.slug}`;
+  const copy = getTenantCopy(tenant.orgType);
   const pageTitle = title || tenant.cityName;
   const pageSubtitle = subtitle || tenant.tagline;
 
@@ -48,7 +53,7 @@ export function PublicShell({
     {
       label: 'Pay & prove',
       items: [
-        { href: `${base}/payments`, label: 'Pay or donate', icon: 'payments' },
+        { href: `${base}/payments`, label: copy.payNav, icon: 'payments' },
         { href: `${base}/ledger`, label: 'Public ledger', icon: 'transparency' }
       ]
     },
@@ -56,8 +61,12 @@ export function PublicShell({
       label: 'Organization',
       items: [
         { href: `${base}/services`, label: 'Services', icon: 'services' },
-        { href: `${base}/report`, label: 'Submit request', icon: 'report' },
-        { href: `${base}/track`, label: 'Track request', icon: 'track' },
+        ...(copy.isGovernment
+          ? [
+              { href: `${base}/report`, label: copy.reportLabel, icon: 'report' as const },
+              { href: `${base}/track`, label: 'Track request', icon: 'track' as const }
+            ]
+          : [{ href: `${base}/track`, label: 'Track activity', icon: 'track' as const }]),
         { href: `${base}/dashboard`, label: 'My account', icon: 'account' }
       ]
     },
@@ -65,7 +74,7 @@ export function PublicShell({
       label: 'Programs',
       items: [
         { href: `${base}/civic-actions`, label: 'Volunteer & rewards', icon: 'rewards' },
-        { href: `${base}/wallet`, label: 'Your wallet', icon: 'account' },
+        { href: `${base}/wallet`, label: 'Your wallet', icon: 'payments' },
         { href: `${base}/transparency`, label: 'Fund transparency', icon: 'transparency' }
       ]
     },
@@ -78,10 +87,14 @@ export function PublicShell({
     }
   ];
 
+  const centerTab: NavItem = copy.isGovernment
+    ? { href: `${base}/report`, label: copy.reportNav, icon: 'report', center: true }
+    : { href: `${base}/civic-actions`, label: 'Rewards', icon: 'rewards', center: true };
+
   const tabs: NavItem[] = [
     { href: base, label: 'Home', icon: 'home', exact: true },
-    { href: `${base}/payments`, label: 'Pay', icon: 'payments' },
-    { href: `${base}/report`, label: 'Report', icon: 'report', center: true },
+    { href: `${base}/payments`, label: copy.payNav.split(' ')[0], icon: 'payments' },
+    centerTab,
     { href: `${base}/ledger`, label: 'Ledger', icon: 'transparency' },
     { href: `${base}/dashboard`, label: 'Me', icon: 'account' }
   ];
@@ -134,7 +147,7 @@ export function PublicShell({
             {!flow ? (
               <div className="app-topbar-actions">
                 <Link href={`${base}/payments`} className="app-btn btn-primary btn-compact desktop-only">
-                  Pay a fee
+                  {copy.payCta}
                 </Link>
                 <Link href={`${base}/login`} className="app-topbar-action desktop-only">
                   Sign in

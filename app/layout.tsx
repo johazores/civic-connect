@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     default: 'CivicTrust',
     template: '%s | CivicTrust'
   },
-  description: 'Mobile-first civic services, public receipts, and Stellar Testnet payment proof.',
+  description: 'Verifiable payments for NGOs, communities, freelancers, and organizations.',
   manifest: '/manifest.webmanifest',
   appleWebApp: {
     capable: true,

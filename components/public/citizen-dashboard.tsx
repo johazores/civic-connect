@@ -19,6 +19,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { StatCard } from '@/components/ui/stat-card';
 import { formatDate, formatStatus } from '@/lib/format';
+import { getTenantCopy } from '@/lib/tenant-copy';
 
 const statusSteps = ['SUBMITTED', 'REVIEWING', 'ASSIGNED', 'IN_PROGRESS', 'RESOLVED'];
 
@@ -104,16 +105,22 @@ function DashboardSkeleton() {
   );
 }
 
-function EmptyReports({ tenantSlug }: { tenantSlug: string }) {
+function EmptyReports({ tenantSlug, orgType }: { tenantSlug: string; orgType?: string | null }) {
+  const copy = getTenantCopy(orgType);
+
   return (
     <div className="empty">
       <div className="eart">
         <FiFileText aria-hidden="true" className="h-8 w-8" />
       </div>
-      <h3>No reports yet</h3>
-      <p>Submit your first city concern and track status, updates, and receipts right here.</p>
-      <Link href={`/${tenantSlug}/report`} className="app-btn btn-ember mt-5 px-6">
-        <FiPlus aria-hidden="true" className="h-4 w-4" /> Submit first report
+      <h3>No requests yet</h3>
+      <p>
+        {copy.isGovernment
+          ? 'Submit your first city concern and track status, updates, and receipts right here.'
+          : 'Your submitted requests and activity records will appear here.'}
+      </p>
+      <Link href={`/${tenantSlug}/${copy.isGovernment ? 'report' : 'civic-actions'}`} className="app-btn btn-ember mt-5 px-6">
+        <FiPlus aria-hidden="true" className="h-4 w-4" /> {copy.isGovernment ? 'Submit first report' : 'View programs'}
       </Link>
     </div>
   );
@@ -171,13 +178,16 @@ function ReportCard({ report, tenantSlug }: { report: CitizenReport; tenantSlug:
 
 export function CitizenDashboard({
   tenantSlug,
+  orgType,
   cityEmail = null,
   cityPhone = null
 }: {
   tenantSlug: string;
+  orgType?: string | null;
   cityEmail?: string | null;
   cityPhone?: string | null;
 }) {
+  const copy = getTenantCopy(orgType);
   const [data, setData] = useState<DashboardPayload | null>(null);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -250,22 +260,35 @@ export function CitizenDashboard({
         <h3>Quick actions</h3>
       </div>
       <nav className="menu-group">
-        <Link href={`/${tenantSlug}/report`} className="menu-item">
-          <span className="mi-ic">
-            <FiPlus aria-hidden="true" className="h-4 w-4" />
-          </span>
-          <span className="mi-tx">
-            <b>New report</b>
-            <span>Submit a concern with location and photo</span>
-          </span>
-          <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
-        </Link>
+        {copy.isGovernment ? (
+          <Link href={`/${tenantSlug}/report`} className="menu-item">
+            <span className="mi-ic">
+              <FiPlus aria-hidden="true" className="h-4 w-4" />
+            </span>
+            <span className="mi-tx">
+              <b>New report</b>
+              <span>Submit a concern with location and photo</span>
+            </span>
+            <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
+          </Link>
+        ) : (
+          <Link href={`/${tenantSlug}/civic-actions`} className="menu-item">
+            <span className="mi-ic">
+              <FiPlus aria-hidden="true" className="h-4 w-4" />
+            </span>
+            <span className="mi-tx">
+              <b>Volunteer & rewards</b>
+              <span>Submit activity and earn verified rewards</span>
+            </span>
+            <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
+          </Link>
+        )}
         <Link href={`/${tenantSlug}/payments`} className="menu-item">
           <span className="mi-ic">
             <FiShield aria-hidden="true" className="h-4 w-4" />
           </span>
           <span className="mi-tx">
-            <b>Payments & donations</b>
+            <b>{copy.payNav}</b>
             <span>Receipts with public proof</span>
           </span>
           <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
@@ -293,11 +316,11 @@ export function CitizenDashboard({
       </nav>
 
       <div className="section-head">
-        <h3>My reports</h3>
-        <Link href={`/${tenantSlug}/report`}>New report</Link>
+        <h3>{copy.isGovernment ? 'My reports' : 'My activity'}</h3>
+        {copy.isGovernment ? <Link href={`/${tenantSlug}/report`}>New report</Link> : <Link href={`/${tenantSlug}/civic-actions`}>Programs</Link>}
       </div>
       {data.reports.length === 0 ? (
-        <EmptyReports tenantSlug={tenantSlug} />
+        <EmptyReports tenantSlug={tenantSlug} orgType={orgType} />
       ) : (
         <div className="grid gap-3">
           {data.reports.map((report) => (
@@ -340,7 +363,7 @@ export function CitizenDashboard({
 
       {cityEmail || cityPhone ? (
         <>
-          <p className="group-label">City contact</p>
+          <p className="group-label">{copy.contactSection}</p>
           <div className="menu-group">
             {cityEmail ? (
               <a href={`mailto:${cityEmail}`} className="menu-item">
@@ -348,7 +371,7 @@ export function CitizenDashboard({
                   <FiMail aria-hidden="true" className="h-4 w-4" />
                 </span>
                 <span className="mi-tx">
-                  <b>Email the city</b>
+                  <b>{copy.contactEmail}</b>
                   <span className="break-all">{cityEmail}</span>
                 </span>
                 <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
@@ -360,7 +383,7 @@ export function CitizenDashboard({
                   <FiPhone aria-hidden="true" className="h-4 w-4" />
                 </span>
                 <span className="mi-tx">
-                  <b>Call the city</b>
+                  <b>{copy.isGovernment ? 'Call the city' : 'Call us'}</b>
                   <span>{cityPhone}</span>
                 </span>
                 <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />

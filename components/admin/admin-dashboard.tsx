@@ -143,10 +143,10 @@ const contentConfig: Record<ContentTab, { label: string; endpoint: string; listU
       { name: 'department', label: 'Department label' },
       { name: 'linkUrl', label: 'Link URL' },
       { name: 'sortOrder', label: 'Sort order', type: 'number' },
-      { name: 'serviceKind', label: 'Service kind (STANDARD, DONATION, MEMBERSHIP, CAMPAIGN)' },
+      { name: 'serviceKind', label: 'Service kind', type: 'select', options: ['STANDARD', 'DONATION', 'MEMBERSHIP', 'CAMPAIGN'] },
       { name: 'campaignGoalAmount', label: 'Campaign goal amount', type: 'number' },
       { name: 'paymentRequired', label: 'Collect online payment', type: 'checkbox' },
-      { name: 'feeAmount', label: 'Service fee amount', type: 'number' },
+      { name: 'feeAmount', label: 'Payment amount', type: 'number' },
       { name: 'feeAssetCode', label: 'Payment currency (XLM or USDC)' },
       { name: 'feeAssetIssuer', label: 'Token issuer address' },
       { name: 'receivingPublicKey', label: 'Where this service payment goes' },
@@ -1571,7 +1571,7 @@ function StellarWalletPanel({ tenantSlug }: { tenantSlug: string }) {
 
   return (
     <div>
-      <p className="group-label">LGU wallet</p>
+      <p className="group-label">Organization wallet</p>
       <Card className="mb-4">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
@@ -1843,7 +1843,7 @@ function ApprovalPolicyPanel({ tenantSlug }: { tenantSlug: string }) {
           <div className="min-w-0">
             <h3 className="font-display text-[15px] font-bold text-[var(--ink)]">Majority approval</h3>
             <p className="mt-1 text-xs font-medium leading-5 text-[var(--muted)]">
-              Rewards and public releases wait for enough staff approvals before money leaves the LGU wallet.
+              Rewards and public releases wait for enough staff approvals before money leaves the organization wallet.
             </p>
           </div>
           <span className={`status-pill shrink-0 ${enabled ? 'bg-[color-mix(in_srgb,var(--heat-1)_14%,var(--surface))] text-[#0f806d]' : 'bg-[var(--surface-2)] text-[var(--ink-2)]'}`}>
@@ -1898,7 +1898,7 @@ function ApprovalPolicyPanel({ tenantSlug }: { tenantSlug: string }) {
             id="approval-note"
             value={note}
             onChange={(event) => setNote(event.target.value)}
-            placeholder="Example: Six staff members must approve before the LGU wallet sends money."
+            placeholder="Example: Six staff members must approve before the organization wallet sends money."
           />
         </div>
 
@@ -1990,7 +1990,7 @@ function TenantSettingsPanel({
           </span>
           <span className="mi-tx">
             <b>Public site</b>
-            <span>Open the citizen-facing app</span>
+            <span>Open the public portal</span>
           </span>
           <FiChevronRight aria-hidden="true" className="mi-chev h-4 w-4" />
         </a>
@@ -2007,7 +2007,7 @@ function TenantSettingsPanel({
             <Input id="settings-name" required value={form.name} onChange={(event) => updateForm('name', event.target.value)} />
           </div>
           <div className="field">
-            <label className="input-label" htmlFor="settings-city">City name</label>
+            <label className="input-label" htmlFor="settings-city">Display name / region</label>
             <Input id="settings-city" required value={form.cityName} onChange={(event) => updateForm('cityName', event.target.value)} />
           </div>
           <div className="field">

@@ -6,6 +6,7 @@ import { StellarProof } from '@/components/stellar/stellar-proof';
 import { Card } from '@/components/ui/card';
 import { StatCard } from '@/components/ui/stat-card';
 import { formatDate } from '@/lib/format';
+import { getTenantCopy } from '@/lib/tenant-copy';
 import { listTransparencyEntries } from '@/services/transparency';
 import { getTenantBySlug } from '@/services/tenant-service';
 
@@ -17,12 +18,13 @@ export default async function TransparencyPage({ params }: { params: Promise<{ t
     notFound();
   }
 
+  const copy = getTenantCopy(tenant.orgType);
   const entries = await listTransparencyEntries(tenant.slug, false);
   const total = entries.reduce((sum: number, entry: any) => sum + Number(entry.amount), 0);
   const verified = entries.filter((entry: any) => entry.transactionHash).length;
 
   return (
-    <PublicShell tenant={tenant} title="Transparency" subtitle="Public spending with proof" backHref={`/${tenant.slug}`}>
+    <PublicShell tenant={tenant} title="Transparency" subtitle={copy.isGovernment ? 'Public spending with proof' : 'Fund releases with public proof'} backHref={`/${tenant.slug}`}>
       <main className="page-section pb-6">
         <Link href={`/${tenant.slug}/ledger`} className="app-btn btn-primary mb-4 w-full">
           View all public records
@@ -47,7 +49,11 @@ export default async function TransparencyPage({ params }: { params: Promise<{ t
               <FiFileText aria-hidden="true" className="h-8 w-8 text-[var(--muted)]" />
             </div>
             <h3 className="font-display text-[var(--ink)]">No records yet</h3>
-            <p>Budget allocations, disbursements, and grants will appear here once published.</p>
+            <p>
+              {copy.isGovernment
+                ? 'Budget allocations, disbursements, and grants will appear here once published.'
+                : 'Aid disbursements, prize payouts, and program grants will appear here once published.'}
+            </p>
           </div>
         ) : (
           <div className="grid gap-3">

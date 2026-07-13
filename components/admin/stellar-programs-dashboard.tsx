@@ -920,7 +920,7 @@ export function StellarProgramsDashboard({ tenantSlug }: { tenantSlug: string })
                 ))}
               </div>
               <p className="mt-2 text-xs font-medium leading-4 text-[var(--muted)]">
-                Reward is reserved until the citizen claims it. Good when they are still setting up a wallet.
+                Reward is reserved until the participant claims it. Good when they are still setting up a wallet.
               </p>
             </div>
             <div className="field">

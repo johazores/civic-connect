@@ -622,6 +622,19 @@ h3,
   color: var(--ink);
 }
 
+.marketing-city-badge {
+  display: inline-flex;
+  margin-top: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--navy) 8%, var(--surface));
+  color: var(--navy);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .marketing-city-desc {
   font-size: 0.875rem;
   color: var(--muted);
@@ -2280,5 +2293,27 @@ h3,
   .reveal-ready .reveal {
     opacity: 1;
     transform: none;
+  }
+}
+
+@media print {
+  .app-topbar,
+  .tabbar,
+  .desktop-sidebar,
+  .marketing-header,
+  .marketing-header-nav {
+    display: none !important;
+  }
+
+  .app-main,
+  .app-main-inner,
+  .page-section {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .print-sheet {
+    max-width: 100%;
+    padding: 0;
   }
 }

@@ -97,7 +97,7 @@ export function CivicActionForm({ tenantSlug }: { tenantSlug: string }) {
 
   if (created) {
     return (
-      <Card className="fade-up p-6">
+      <Card>
         <div className="grid h-14 w-14 place-items-center rounded-[18px] bg-[color-mix(in_srgb,var(--heat-1)_14%,var(--surface))] text-[#0f806d]">
           <FiCheckCircle aria-hidden="true" className="h-7 w-7" />
         </div>
@@ -125,6 +125,9 @@ export function CivicActionForm({ tenantSlug }: { tenantSlug: string }) {
         ) : null}
 
         <div className="mt-5 grid gap-2.5">
+          <Link href={`/${tenantSlug}/civic-actions/${created.id}/credential`} className="app-btn btn-primary">
+            View activity credential
+          </Link>
           <button type="button" onClick={() => setCreated(null)} className="app-btn btn-outline">
             Submit another action
           </button>
