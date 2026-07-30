@@ -1,67 +1,130 @@
-# CivicTrust Multitenant Platform
+# CivicTrust
 
-CivicTrust is a production-focused city services platform for LGUs, barangays, municipalities, and provincial teams. It provides a modern public portal for citizens and a structured staff workspace for operations teams.
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/status-active%20prototype-orange.svg)](docs/roadmap.md)
+[![PWA](https://img.shields.io/badge/mobile-PWA-informational.svg)](docs/pwa-setup-guide.md)
+[![Stellar](https://img.shields.io/badge/Stellar-testnet-7D00FF.svg)](docs/stellar-architecture.md)
 
-The current build focuses on usability, clean information architecture, PostgreSQL deployment readiness, consistent CRUD workflows, and a real Stellar Testnet proof-of-payment module for civic service fees.
+CivicTrust is a multi-tenant civic services platform for cities, municipalities, provinces, barangays, and local-government teams.
 
-## Core Product
+It provides a mobile-friendly public portal for citizens, a structured staff workspace for operations, and a Stellar testnet proof-of-payment module for verifiable civic service receipts.
 
-### Public Portal
+> **Status:** Active prototype. Stellar modules use testnet and seeded credentials are for local demonstration only. Production government deployment requires security, privacy, accessibility, operational, and legal review.
 
-- City landing page with clear service access
-- Citizen report submission
-- Photo upload for reports
-- Auto-generated tracking/reference number
-- Public request tracker
-- Citizen account registration and login
-- Citizen dashboard with report history
+## Core product
+
+### Citizen portal
+
+- Tenant landing pages
 - Services directory
+- Citizen report submission with photo upload
+- Auto-generated report reference numbers
+- Public request tracking
+- Citizen registration and account dashboard
 - News and announcements
-- Emergency hotlines with one-tap call links
-- Fully responsive hamburger navigation with grouped desktop submenus and mobile bottom tabs
+- Emergency hotlines with one-tap calls
+- Responsive mobile navigation and installable PWA shell
 
-### Staff Portal
+### Staff portal
 
-- Staff login
+- Staff authentication
 - Operations dashboard
-- Report queue with search and filters
+- Searchable and filterable report queue
 - Department assignment
-- Status and priority updates
+- Status and priority management
 - Public and internal notes
 - Uploaded photo review
 - CSV export
-- Services CRUD
-- Hotlines CRUD
-- News CRUD
-- Report categories CRUD
-- Departments CRUD
-- Staff user CRUD
-- Organization settings
+- Services, hotlines, news, categories, departments, and staff management
+- Tenant organization settings
+- Stellar payment and civic-program administration
 
-### Technical Foundation
+### Platform administration
 
-- Next.js App Router for rendered pages
-- `pages/api` for backend API routes
-- PostgreSQL with Prisma
-- Tailwind CSS
-- Tenant-scoped data model
-- Cookie-based staff and citizen sessions
-- Vercel-ready build scripts
+- Multi-tenant configuration
+- Database-managed runtime settings
+- Separate privileged platform interface
+- Tenant wallet and payment configuration
+- Shared CRUD and UI foundations
 
-## Local Setup
+## Stellar proof of payment
 
-Create your environment file:
+The implemented payment module demonstrates how civic service payments can produce verifiable public receipts.
+
+1. Staff configure a service fee and tenant Stellar testnet receiving wallet.
+2. A citizen creates a payment intent.
+3. CivicTrust generates a SEP-7 payment URI and QR code.
+4. The citizen pays from a compatible testnet wallet.
+5. CivicTrust verifies the transaction through Horizon.
+6. The transaction hash is stored and displayed on a permanent public receipt page.
+
+Implemented capabilities include:
+
+- tenant testnet wallet generation and funding;
+- encrypted wallet-secret storage;
+- service fees and payment intents;
+- SEP-7 payment URIs and QR codes;
+- Horizon transaction verification;
+- duplicate-payment protection;
+- staff payment records and CSV export;
+- public transaction receipts;
+- civic participation, environmental, transparency, and tax-receipt prototypes.
+
+> Testnet transaction proof does not mean the platform is approved to process real government payments.
+
+Read [Stellar architecture](docs/stellar-architecture.md), [payment implementation](docs/stellar-payment-implementation.md), and [security policy](docs/security.md).
+
+## Technology
+
+- Next.js 16 App Router for rendered pages
+- Pages Router API routes under `pages/api`
+- React 19 and TypeScript
+- Tailwind CSS 4
+- PostgreSQL and Prisma 6
+- Custom cookie and JWT sessions
+- Stellar SDK and QR generation
+- PWA manifest, service worker, and offline fallback
+
+## Architecture
+
+```text
+app/                  public, citizen, staff, and platform pages
+components/           shared UI, public, layout, and admin components
+components/ui/        standardized interface primitives
+pages/api/            REST API routes
+services/             business and data-access services
+lib/                  auth, database, request, formatting, tenant, and Stellar helpers
+prisma/               PostgreSQL schema and seed data
+scripts/              setup, build, and validation utilities
+docs/                 product, deployment, payment, roadmap, and community docs
+public/                manifest, icons, service worker, and static assets
+```
+
+Tenant-owned data must be scoped using trusted route and authentication context. UI visibility is not a replacement for server-side authorization.
+
+## Requirements
+
+- Node.js compatible with Next.js 16
+- PostgreSQL database
+- Strong authentication and encryption secrets
+- Optional Stellar testnet access for payment demonstrations
+
+## Installation
 
 ```bash
 cp .env.example .env
+npm install
+npm run db:push
+npm run db:seed
+npm run dev
 ```
 
-Set a PostgreSQL database URL:
+Minimum bootstrap configuration:
 
 ```env
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require"
-ADMIN_JWT_SECRET="replace-this-with-a-long-secure-random-value"
-STELLAR_WALLET_ENCRYPTION_KEY="replace-this-with-another-long-secure-random-value"
+ADMIN_JWT_SECRET="replace-with-a-long-random-secret"
+STELLAR_WALLET_ENCRYPTION_KEY="replace-with-another-long-random-secret"
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
 NEXT_PUBLIC_AUTH_PROVIDER="custom"
 STELLAR_NETWORK="TESTNET"
@@ -70,78 +133,51 @@ STELLAR_FRIENDBOT_URL="https://friendbot.stellar.org"
 STELLAR_NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
 ```
 
-Install and prepare the database:
-
-```bash
-npm install
-npm run db:push
-npm run db:seed
-npm run dev
-```
-
-Open:
+Open a seeded tenant:
 
 ```text
 http://localhost:3000/metro-city
 http://localhost:3000/laguna-province
 ```
 
-## Starter Access
+Development credentials and the recommended walkthrough are documented in [demo guide](docs/demo.md). Replace seeded passwords before any shared deployment.
 
-Metro City staff:
+## Runtime configuration
 
-```text
-http://localhost:3000/metro-city/admin/login
-admin@metrocity.local
-admin12345
-```
+Some administrator-managed values can be stored in PostgreSQL through the platform interface at `/root`.
 
-Metro City citizen:
+Database-managed settings include public application URLs, authentication-provider selection, and non-secret Stellar network configuration.
 
-```text
-http://localhost:3000/metro-city/login
-sofia.cruz@metrocity.local
-citizen12345
-```
+Bootstrap secrets must stay in the deployment environment because the application needs them before it can safely read the database:
 
-Laguna Province staff:
+- `DATABASE_URL`
+- `ADMIN_JWT_SECRET`
+- `STELLAR_WALLET_ENCRYPTION_KEY`
 
-```text
-http://localhost:3000/laguna-province/admin/login
-admin@laguna.local
-admin12345
-```
+## PWA and mobile
 
-Laguna Province citizen:
+CivicTrust includes:
 
-```text
-http://localhost:3000/laguna-province/login
-ana.reyes@laguna.local
-citizen12345
-```
+- web application manifest;
+- app icons;
+- production service worker;
+- offline fallback;
+- safe-area metadata;
+- mobile app shell and bottom navigation.
 
-Replace all starter passwords before using the app with real users.
+The recommended product direction is PWA-first. Consider a Capacitor or native wrapper only when app-store distribution, offline behavior, push notifications, or native device APIs justify the added maintenance.
 
+Read [PWA setup](docs/pwa-setup-guide.md) and [native mobile roadmap](docs/native-mobile-roadmap.md).
 
-## Stellar Testnet Setup for Beginners
+## Authentication status
 
-For normal Stellar testing, do **not** manually type values into the receiving public key or secret key fields.
+Custom cookie and JWT authentication remains active for staff and citizens.
 
-Use this flow:
+Clerk is not currently installed as the active authentication provider. The optional `User.clerkUserId` field and migration documentation are preparation only.
 
-```text
-Admin → Settings → Real Stellar Testnet wallet → Generate Testnet Wallet
-```
+Read [Clerk migration plan](docs/clerk-migration-plan.md) before changing authentication architecture.
 
-After generation, the app should display a `G...` receiving public key automatically. The `S...` secret key field is only for importing an existing Testnet wallet, so it should usually stay blank.
-
-Read these first if you are new to Stellar:
-
-- `docs/stellar-beginner-wallet-guide.md`
-- `docs/stellar-testnet-setup.md`
-- `docs/stellar-payment-implementation.md`
-
-## Verification
+## Validation
 
 ```bash
 npm run lint
@@ -150,277 +186,64 @@ npm run build
 npm run verify
 ```
 
-`npm run verify` runs lint, TypeScript, and production build together.
-
-## Vercel Deployment
-
-1. Create a hosted PostgreSQL database.
-2. Set `DATABASE_URL` in Vercel.
-3. Set `ADMIN_JWT_SECRET` in Vercel.
-4. Set `STELLAR_WALLET_ENCRYPTION_KEY` in Vercel.
-5. Set `NEXT_PUBLIC_APP_URL` to your deployed URL.
-6. Set `NEXT_PUBLIC_AUTH_PROVIDER="custom"` unless a Clerk migration is actively being tested.
-7. Keep Stellar Testnet variables enabled while testing.
-8. Deploy the project.
-9. Run database setup from your local terminal or deployment workflow:
+Stellar testnet validation is separate because it may create network transactions:
 
 ```bash
-npm run db:push
-npm run db:seed
+npm run validate:stellar
 ```
 
-The app is PostgreSQL-first and no longer uses SQLite.
+## Deployment
 
-## Database-Managed Runtime Settings
+1. Provision PostgreSQL.
+2. Configure strong bootstrap secrets.
+3. Set the deployed application URL.
+4. Keep the authentication provider set to the implemented option.
+5. Use Stellar testnet while validating payment flows.
+6. Run database setup through a reviewed operational process.
+7. Replace all seeded accounts and passwords.
+8. Verify tenant isolation, uploads, public tracking, staff permissions, and payment receipts.
 
-Some env-like values can be managed from PostgreSQL after deployment. Open:
+See [deployment guide](docs/deployment-guide.md).
 
-```text
-/root
-```
+## Production limitations
 
-Sign in as the platform admin and use **Runtime settings**.
+Before real civic or payment use, complete:
 
-Database-managed keys:
-
-```text
-NEXT_PUBLIC_APP_URL
-NEXT_PUBLIC_AUTH_PROVIDER
-STELLAR_NETWORK
-STELLAR_HORIZON_URL
-STELLAR_FRIENDBOT_URL
-STELLAR_NETWORK_PASSPHRASE
-```
-
-Protected API:
-
-```text
-GET   /api/platform/settings
-PATCH /api/platform/settings
-```
-
-Bootstrap secrets must stay in Vercel environment variables because the app needs them before it can safely read the database:
-
-```text
-DATABASE_URL
-ADMIN_JWT_SECRET
-STELLAR_WALLET_ENCRYPTION_KEY
-```
-
-## PWA and Mobile Demo Readiness
-
-CivicTrust is configured as an installable PWA for mobile-browser demos:
-
-- Web app manifest: `public/manifest.webmanifest`
-- App icons: `public/icons/`
-- Production service worker: `public/sw.js`
-- Offline fallback: `/offline`
-- Mobile viewport and iOS safe-area metadata in `app/layout.tsx`
-- Mobile app shell and bottom tabs already built into the UI
-
-For a phone demo, open the deployed Vercel URL on iPhone Safari or Android Chrome, then start with:
-
-```text
-/metro-city
-/metro-city/payments
-/about
-```
-
-Read:
-
-```text
-docs/demo-guide.md
-docs/pwa-setup-guide.md
-```
-
-## Installing as a PWA
-
-iPhone Safari:
-
-1. Open the deployed URL.
-2. Tap Share.
-3. Tap **Add to Home Screen**.
-4. Launch CivicTrust from the new icon.
-
-Android Chrome:
-
-1. Open the deployed URL.
-2. Tap the browser menu.
-3. Tap **Install app** or **Add to Home screen**.
-4. Launch CivicTrust from the launcher.
-
-The PWA is still the Next.js app. Server logic stays in `pages/api`, Prisma stays on the backend, and Stellar integrations continue to use hosted APIs.
-
-## Clerk Migration Status
-
-Clerk is not installed and does not replace current auth.
-
-Current status:
-
-- Custom cookie/JWT auth remains active.
-- `NEXT_PUBLIC_AUTH_PROVIDER` defaults to `custom`.
-- `User.clerkUserId` is optional preparation only.
-- No current admin or citizen session behavior has changed.
-
-Because `User.clerkUserId` is an additive Prisma schema field, run `npm run db:push` against the deployed PostgreSQL database before deploying this updated schema.
-
-Read the phased plan before adding Clerk:
-
-```text
-docs/clerk-migration-plan.md
-```
-
-## Native App Roadmap
-
-The recommended path is PWA-first. A Capacitor wrapper can be considered later if app store distribution or native device APIs become necessary.
-
-Read:
-
-```text
-docs/native-mobile-roadmap.md
-```
-
-## Project Structure
-
-```text
-app/                  App Router pages
-components/           Reusable UI, public, layout, and admin components
-components/ui/        Standardized buttons, cards, inputs, selects, badges, stats
-pages/api/            REST API routes
-services/             Business/data access services
-lib/                  Shared auth, db, format, request, reference, and Stellar helpers
-prisma/               Prisma schema and starter data
-scripts/              Build/setup helper scripts
-docs/                 Product, user, admin, deployment, and roadmap docs
-```
-
-## Product Direction
-
-The platform is designed to evolve into a Stellar-powered civic trust product. The strongest Stellar direction is proof-of-payment for government services, where service payments generate permanent transaction hashes and public receipts.
-
-Implemented Stellar module:
-
-- Service fee management
-- Tenant Stellar Testnet receiving wallet management
-- Real Testnet keypair generation
-- Friendbot funding
-- Payment intent records
-- SEP-7 payment URI and QR generation
-- Horizon transaction verification
-- Permanent public receipt pages
-- Staff payment dashboard
-
-Future Stellar modules:
-
-- Civic participation rewards
-- Environmental cleanup incentives
-- Municipal budget transparency
-- Digital property tax receipts
-
-
-
-## Stellar demo flow
-
-The product story is intentionally simple:
-
-1. **Citizens pay** from their own wallet (Freighter, etc.) via SEP-7 QR
-2. **The app verifies** the payment on Horizon and stores the transaction hash
-3. **Anyone can check** the receipt in the public ledger
-
-Practice wallet (testnet only): `/metro-city/wallet`
-
-Read:
-
-```text
-docs/demo-guide.md
-docs/stellar-architecture.md
-```
+- tenant isolation integration testing;
+- role and permission review;
+- privacy and data-retention assessment;
+- upload security and storage policy;
+- accessibility testing;
+- backups and disaster-recovery validation;
+- operational monitoring and incident response;
+- regulated payment or asset partnerships;
+- signer, treasury, reconciliation, refund, and dispute procedures;
+- independent security review.
 
 ## Documentation
 
-- `docs/dashboard-ui-ux-audit.md` - Admin and citizen dashboard design audit and redesign notes.
+- [Documentation index](docs/index.md)
+- [User guide](docs/user-guide.md)
+- [Admin guide](docs/admin-guide.md)
+- [Developer guide](docs/developer-guide.md)
+- [Deployment guide](docs/deployment-guide.md)
+- [Demo guide](docs/demo.md)
+- [Product review](docs/product-review.md)
+- [Stellar architecture](docs/stellar-architecture.md)
+- [Payment implementation](docs/stellar-payment-implementation.md)
+- [Stellar civic programs](docs/stellar-civic-programs.md)
+- [PWA setup](docs/pwa-setup-guide.md)
+- [Roadmap](docs/roadmap.md)
+- [Changelog](docs/changelog.md)
+- [Contributing](docs/contributing.md)
+- [Security policy](docs/security.md)
+- [Code of conduct](docs/code-of-conduct.md)
+- [Repository metadata](docs/repository-metadata.md)
 
+## License
 
-- `docs/ui-ux-research-redesign.md` - Research-led UI/UX redesign direction and implementation notes.
+MIT. See [LICENSE](LICENSE).
 
-Start with:
+## Author
 
-- `docs/user-guide.md`
-- `docs/admin-guide.md`
-- `docs/developer-guide.md`
-- `docs/deployment-guide.md`
-- `docs/demo-day-real-world-examples.md`
-- `docs/product-review.md`
-- `docs/stellarx-fit-review.md`
-- `docs/stellarx-implementation-plan.md`
-- `docs/ui-navigation-redesign.md`
-
-
-## StellarX Direction Implemented
-
-The project now includes the first StellarX-aligned module: **Proof-of-Payment for Government Services**.
-
-Implemented payment routes:
-
-```text
-/[tenant]/payments
-/[tenant]/payments/[referenceCode]
-/[tenant]/receipts/[referenceCode]
-```
-
-Implemented payment APIs:
-
-```text
-POST /api/tenant/[tenantSlug]/payments
-GET  /api/tenant/[tenantSlug]/payments
-GET  /api/tenant/[tenantSlug]/payments/[referenceCode]
-GET  /api/tenant/[tenantSlug]/payments/[referenceCode]/qr
-POST /api/tenant/[tenantSlug]/payments/[referenceCode]/verify
-GET  /api/tenant/[tenantSlug]/payments/export
-GET  /api/tenant/[tenantSlug]/stellar/wallet
-PATCH /api/tenant/[tenantSlug]/stellar/wallet
-POST /api/tenant/[tenantSlug]/stellar/wallet/generate
-POST /api/tenant/[tenantSlug]/stellar/wallet/fund
-POST /api/tenant/[tenantSlug]/stellar/wallet/check
-```
-
-Staff can generate/fund/check real Testnet tenant wallets under **Admin → Settings**, manage service fees under **Admin → Content → Services**, and review verified payment records under **Admin → Payments**.
-
-See `docs/stellar-payment-implementation.md` for the full implementation guide.
-
-## Stellar Civic Programs
-
-The platform now includes additional StellarX-aligned civic modules:
-
-- Civic Participation Rewards
-- Environmental Cleanup Rewards
-- Municipal Budget Transparency
-- Digital Property Tax Receipts
-
-Start from `docs/stellar-civic-programs.md` after configuring the tenant Testnet wallet in `Admin → Settings`. The civic platform remains the core product; Stellar is used only for verifiable payment receipts, reward payout proof, public fund records, and receipt hashes.
-
-New public routes:
-
-```text
-/[tenant]/civic-actions
-/[tenant]/transparency
-/[tenant]/tax-receipts
-```
-
-Admin route:
-
-```text
-/[tenant]/admin → Stellar Programs
-```
-
-
-## Latest UI Direction
-
-- `docs/mobile-menu-fix.md` - Navigation overlay fix for the mobile-first app shell.
-- `docs/mobile-reference-redesign.md` - explains the mobile-first redesign inspired by the uploaded HTML reference.
-
-## Latest UI Shell Fix
-
-The mobile app navigation has been refactored to follow the uploaded app-shell reference more closely. See:
-
-- `docs/reference-app-shell-fix.md`
+Created and maintained by [Johanssen Azores](https://github.com/johazores).
