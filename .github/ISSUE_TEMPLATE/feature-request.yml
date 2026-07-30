@@ -1,0 +1,22 @@
+name: Feature request
+description: Propose a focused CivicTrust platform improvement
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Civic service or staff workflow problem
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: boundaries
+    attributes:
+      label: Tenant, privacy, accessibility, payment, or operational considerations
