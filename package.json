@@ -1,7 +1,13 @@
 {
-  "name": "civic-connect-multitenant",
+  "name": "civictrust",
   "version": "0.1.0",
   "private": true,
+  "description": "Multi-tenant civic services platform with citizen reporting, staff workflows, public records, and Stellar testnet receipts",
+  "author": {
+    "name": "Johanssen Azores",
+    "url": "https://github.com/johazores"
+  },
+  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
