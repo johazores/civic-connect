@@ -1,0 +1,30 @@
+name: Bug report
+description: Report a reproducible CivicTrust problem
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: input
+    id: tenant
+    attributes:
+      label: Tenant and feature area
+      placeholder: metro-city report queue
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Safe reproduction
+      description: Remove citizen data, credentials, uploaded evidence, wallet secrets, and private tenant details.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Tenant, permission, privacy, accessibility, or payment impact
